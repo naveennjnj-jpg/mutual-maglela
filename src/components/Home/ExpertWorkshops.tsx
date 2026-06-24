@@ -1,73 +1,86 @@
 import React from "react";
-
-// Import your image (adjust path as needed)
-import tabletScreen from "@/assets/home/tablet-screen.png";
+import { Link } from "react-router-dom";
+import { ArrowRight, MessageSquare, Briefcase, BookOpen } from "lucide-react";
 
 const ExpertWorkshops = () => {
-  return (
-    <section className="relative py-20 lg:py-28 bg-[rgba(26,43,172,0.04)]">
-      <div className="max-w-[1520px] mx-auto px-[89px]">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left Content */}
-          <div className="max-w-[660px]">
-            {/* Badge */}
-            <div className="flex items-center gap-[2px] mb-[11px]">
-              <svg
-                width="38"
-                height="2"
-                viewBox="0 0 38 2"
-                fill="none"
-                className="shrink-0"
-              >
-                <path
-                  d="M1 1H37"
-                  stroke="#C85A32"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <p className="font-['Roboto'] font-medium text-[14px] text-[#C85A32] uppercase tracking-[0.05em]">
-                Expert-Led Workshops
-              </p>
-            </div>
+  // Workshop items data
+  const workshops = [
+    {
+      id: 1,
+      icon: MessageSquare,
+      title: "Media Training Workshop",
+      description: "Executive media readiness program",
+    },
+    {
+      id: 2,
+      icon: Briefcase,
+      title: "Strategic Communication Planning",
+      description: "Institutional communication frameworks",
+    },
+    {
+      id: 3,
+      icon: BookOpen,
+      title: "Crisis Communication",
+      description: "Rapid response protocols and messaging",
+    },
+  ];
 
+  return (
+    <section className="py-20 lg:py-24 bg-[#0F2D63]">
+      <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-14 items-center">
+          {/* Left Content */}
+          <div>
             {/* Heading */}
-            <h2 className="font-['Roboto'] font-normal text-[42px] leading-[52px] text-[#111] mb-[16px]">
-              Expert-Led Communication Workshops: Upskill Your Team for Maximum
-              Impact.
+            <h2 className="text-3xl lg:text-[40px] font-['Roboto'] text-white leading-tight mb-5">
+              Expert-Led Communication Workshops:
+              <br />
+              Upskill Your Team for Maximum Impact
             </h2>
 
             {/* Description */}
-            <p className="font-['Roboto'] font-normal text-base leading-[28px] text-[#666] max-w-[600px] mb-[24px]">
-              In today's fast-paced landscape, clear communication is your
-              ultimate competitive advantage. Our expert-led communication
-              workshops are designed to upskill your team, transforming complex
-              industry knowledge into compelling, audience-ready narratives.
-              Whether you are stepping in front of the press or presenting
-              highly technical data to stakeholders, our interactive sessions
-              provide the practical tools you need to communicate with
-              confidence and clarity.
+            <p className="text-white/70 text-base leading-relaxed mb-8">
+              Build institutional capacity through specialized training programs
+              — from media relations to executive messaging. Our workshops
+              combine practical frameworks with hands-on coaching to transform
+              how your team communicates.
             </p>
+
+            {/* CTA Button */}
+            <Link
+              to="/onboarding"
+              className="inline-flex items-center gap-2 bg-[#C85A32] hover:bg-[#a8472a] text-white px-7 py-3.5 rounded-xl font-semibold text-sm transition-colors shadow-lg shadow-[#C85A32]/30"
+            >
+              Create Account
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
 
-          {/* Right Content - Tablet Mockup */}
+          {/* Right Content - Workshop Cards */}
           <div className="relative">
-            <div className="w-full scale-125 origin-center aspect-[635/416]">
-              <div className="relative w-full h-full flex items-center justify-center">
-                {/* Tablet Frame */}
-                <div className="relative w-full h-full bg-[#2D2D2D] rounded-[24px] shadow-2xl p-[16px] flex items-center justify-center">
-                  {/* Tablet Screen */}
-                  <div className="relative w-full h-full bg-white rounded-[12px] overflow-hidden shadow-inner">
-                    <img
-                      src={tabletScreen}
-                      alt="Tablet screen content"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  {/* Camera Dot */}
-                  <div className="absolute top-[8px] left-1/2 -translate-x-1/2 w-[8px] h-[8px] bg-[#1a1a1a] rounded-full border border-gray-700"></div>
-                </div>
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 shadow-2xl">
+              <div className="space-y-4">
+                {workshops.map((workshop) => {
+                  const IconComponent = workshop.icon;
+                  return (
+                    <div
+                      key={workshop.id}
+                      className="bg-white/5 border border-white/10 rounded-xl p-4"
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-8 h-8 rounded-lg bg-[#C85A32] flex items-center justify-center">
+                          <IconComponent className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="text-white font-semibold text-sm">
+                          {workshop.title}
+                        </span>
+                      </div>
+                      <p className="text-white/60 text-xs">
+                        {workshop.description}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

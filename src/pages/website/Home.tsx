@@ -8,7 +8,7 @@ import ExpertWorkshops from "@/components/Home/ExpertWorkshops";
 import TrainingPrograms from "@/components/Home/TrainingPrograms";
 import HowWeWork from "@/components/Home/HowWeWork";
 import WhyChooseMagalela from "@/components/Home/WhyChooseMagalela";
-import Testimonials from "@/components/Home/WhyChooseMagalela";
+import Testimonials from "@/components/Home/Testimonials";
 import CTASection from "@/components/Home/CTASection";
 
 
@@ -19,7 +19,6 @@ const Home = () => {
 
   return (
     <>
-
       <HeroSection />
       <TrustedPartners />
       <WhyMagalelaWorks />

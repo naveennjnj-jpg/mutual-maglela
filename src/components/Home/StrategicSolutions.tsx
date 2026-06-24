@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const StrategicSolutions = () => {
   // Solutions data array
@@ -16,6 +16,7 @@ const StrategicSolutions = () => {
         "Elevate Executive Comms: Support chancellors and deans with authoritative leadership messaging.",
         "Strengthen Brand Identity: Maintain a clear, recognisable voice that attracts prospective students and faculty.",
       ],
+      link: "/solutions/higher-education",
     },
     {
       id: 2,
@@ -28,6 +29,7 @@ const StrategicSolutions = () => {
         "Foster Cross-Discipline Collaboration: Create unified, cohesive narratives for multi-disciplinary research teams.",
         "Drive Real-World Impact: Position your insights to secure vital funding and influence public policy.",
       ],
+      link: "/solutions/academics-research",
     },
     {
       id: 3,
@@ -40,6 +42,7 @@ const StrategicSolutions = () => {
         "Boost Donor Engagement: Deepen relationships and secure ongoing funding from key stakeholders.",
         "Influence Policymakers: Strengthen your advocacy with authoritative, policy-level communications.",
       ],
+      link: "/solutions/global-development",
     },
     {
       id: 4,
@@ -52,34 +55,19 @@ const StrategicSolutions = () => {
         "Align Vision and Messaging: Ensure your public communications perfectly reflect your strategic corporate goals.",
         "Communicate with Confidence: Share your expertise and insights with absolute clarity and authority.",
       ],
+      link: "/solutions/executive-leaders",
     },
   ];
 
   return (
-    <section className="relative py-20 lg:py-28 bg-[#FAFAF8]">
-      <div className="max-w-[1520px] mx-auto px-[89px]">
+    <section className="py-20 lg:py-24 bg-white">
+      <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
         {/* Header Section */}
-        <div className="text-center mb-[40px]">
-          <div className="flex items-center justify-center gap-[2px] mb-[11px]">
-            <svg
-              width="38"
-              height="2"
-              viewBox="0 0 38 2"
-              fill="none"
-              className="shrink-0"
-            >
-              <path
-                d="M1 1H37"
-                stroke="#C85A32"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-            <p className="font-['Roboto'] font-medium text-[14px] text-[#C85A32] uppercase tracking-[0.05em]">
-              Tailored for every communication need
-            </p>
-          </div>
-          <h2 className="font-['Roboto'] font-normal text-[42px] leading-[52px] text-[#111]">
+        <div className="text-center mb-12">
+          <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-3">
+            Tailored for Every Communication Need
+          </p>
+          <h2 className="text-3xl lg:text-[40px] font-['Roboto'] text-[#0F2D63] leading-tight">
             Strategic Communication Solutions
             <br />
             Tailored to Your Sector
@@ -87,58 +75,40 @@ const StrategicSolutions = () => {
         </div>
 
         {/* Solutions Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-[30px]">
+        <div className="grid md:grid-cols-2 gap-6">
           {solutions.map((solution) => (
             <div
               key={solution.id}
-              className="bg-white rounded-[4px] overflow-hidden flex flex-col"
+              className="bg-[#F9F7F4] rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
             >
               {/* Title */}
-              <h3 className="font-['Roboto'] font-semibold text-base tracking-[0.164px] text-[#1C1C1C] px-[17px] pt-[29px] leading-normal">
+              <h3 className="font-semibold text-[#1C1C1C] text-lg mb-3">
                 {solution.title}
               </h3>
 
               {/* Description */}
-              <p className="font-['Roboto'] font-normal text-[14px] leading-[22px] text-[#6B7280] px-[17px] pt-[9px] pr-[33px]">
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">
                 {solution.description}
               </p>
 
               {/* Benefits List */}
-              <ul className="space-y-[12px] px-[17px] pt-[16px]">
+              <ul className="space-y-2 mb-5">
                 {solution.benefits.map((benefit, index) => (
-                  <li key={index} className="flex items-start gap-[4px]">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      className="shrink-0"
-                    >
-                      <path
-                        d="M0.75 8.2502C0.75 8.2502 2.25 8.2502 4.25 11.7502C4.25 11.7502 9.809 2.5832 14.75 0.750204"
-                        stroke="#006A42"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span className="font-['Roboto'] font-normal text-[14px] text-[#6B7280] leading-normal pt-[2.4px]">
-                      {benefit}
-                    </span>
+                  <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-circle-check-big w-4 h-4 text-[#C85A32] shrink-0 mt-0.5"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>
+                    <span>{benefit}</span>
                   </li>
                 ))}
               </ul>
 
               {/* Read More Link */}
-              <div className="px-[17px] pt-[20px] pb-[24px] mt-auto">
-                <Link
-                  to="/services"
-                  className="inline-flex items-center gap-1.5 font-['Roboto'] font-semibold text-[14px] text-[#1A2B4C] hover:text-[#C85A32] transition-colors group"
-                >
-                  Read more
-                  <ArrowRight className="w-[14px] h-[14px] transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              </div>
+              <Link
+                to={solution.link}
+                className="inline-flex items-center gap-1 text-[#C85A32] font-semibold text-sm hover:gap-2 transition-all"
+              >
+                Read more
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           ))}
         </div>

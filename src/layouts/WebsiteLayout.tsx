@@ -6,8 +6,8 @@ const WebsiteLayout = () => {
   return (
     <>
       <Header />
-      <main className="flex-1">
-        <div className="bg-[#F8F9FB]">
+      <main className="flex-1 pt-0">
+        <div className="bg-white">
           <Outlet />
         </div>
       </main>

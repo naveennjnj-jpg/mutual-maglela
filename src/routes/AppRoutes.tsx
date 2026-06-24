@@ -11,11 +11,10 @@ import AdminLayout from "@/layouts/AdminLayout";
 // Website Pages
 import Home from "@/pages/website/Home";
 import AboutUs from "@/pages/website/AboutUs/AboutUs";
-import ContactUs from "@/pages/website/ContactUs/ContactUs";
-
 // Auth Pages
 import Login from "@/pages/auth/Login";
 import CreateAccount from "@/pages/auth/CreateAccount";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
 
 // User Pages
 import UserDashboard from "@/pages/user/Dashboard";
@@ -34,14 +33,14 @@ const AppRoutes = () => {
       {/* WEBSITE */}
       <Route path="/" element={<WebsiteLayout />}>
         <Route index element={<Home />} />
-        <Route path="about-us" element={<AboutUs />} />
-        <Route path="contact-us" element={<ContactUs />} />
+         <Route path="about" element={<AboutUs />} />
       </Route>
 
       {/* AUTH */}
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/create-account" element={<CreateAccount />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Route>
 
       {/* USER */}
