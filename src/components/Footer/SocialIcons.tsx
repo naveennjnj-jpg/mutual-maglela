@@ -16,7 +16,7 @@ const socials = [
   {
     id: 2,
     icon: Instagram,
-    link: "https://www.instagram.com/vcareprojectmanagement/",
+    link: "https://www.instagram.com/_magalelamedia/",
   },
     {
     id: 3,
@@ -26,7 +26,7 @@ const socials = [
   {
     id: 4,
     icon: X,
-    link: "https://x.com/vCare_official",
+    link: "https://x.com/_magalelamedia/",
   },
     {
     id: 5,
@@ -45,6 +45,7 @@ const SocialIcons = () => {
   return (
     <div className="flex items-center gap-1">
       {socials.map(({ id, icon: Icon, link }) => (
+  
         <a
           key={id}
           href={link}
