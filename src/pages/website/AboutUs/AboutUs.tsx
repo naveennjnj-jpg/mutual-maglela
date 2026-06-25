@@ -20,15 +20,15 @@ const Home = () => {
     <>
 <HeroSection
   badge="Partnerships"
-  title="Build Partnerships That Drive Real-World Change"
-  description="We partner with universities, research networks, NGOs, foundations, and corporate teams to build communications infrastructure that amplifies mission, builds trust, and drives lasting impact across Africa and beyond."
+  title="Strategic Communication Rooted in Journalism and Scholarship"
+  description="Magalela Media is Africa's leading academic and institutional communications agency — founded by journalists and scholars to bridge the gap between expertise and public impact."
   primaryButton={{
-    text: "Start Your Partnership",
-    link: "/#partnerships"
+    text: "Start a Conversation",
+    link: "/contact"
   }}
   secondaryButton={{
-    text: "View Case Studies",
-    link: "/case-studies"
+    text: "Our Partnerships",
+    link: "/partnerships"
   }}
   image={HeroBanner}
 />
