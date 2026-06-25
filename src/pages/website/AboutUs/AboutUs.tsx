@@ -19,7 +19,7 @@ const Home = () => {
   return (
     <>
 <HeroSection
-  badge="Partnerships"
+  badge="About Us"
   title="Strategic Communication Rooted in Journalism and Scholarship"
   description="Magalela Media is Africa's leading academic and institutional communications agency — founded by journalists and scholars to bridge the gap between expertise and public impact."
   primaryButton={{
