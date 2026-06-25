@@ -6,6 +6,7 @@ import AboutCTA from "@/components/Partnerships/AboutCTA";
 import { useNavigate } from "react-router-dom";
 import ContactForm from "@/components/Contact/ContactForm";
 import GeneralFAQ from "@/components/Contact/GeneralFAQ";
+import bannercontact from "@/assets/contact/contact.jpeg";
 
 
 
@@ -26,7 +27,7 @@ const Home = () => {
                     text: "View FAQs",
                     link: "/#faq"
                 }}
-                image="https://images.unsplash.com/photo-1638262052640-82e94d64664a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1400&q=80"
+                image={bannercontact}
             />
 
 

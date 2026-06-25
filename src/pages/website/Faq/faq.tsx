@@ -4,7 +4,7 @@ import HeroSection from "@/components/Common/HeroSection";
 import FAQSection from "@/components/Faq/FAQSection";
 import { useNavigate } from "react-router-dom";
 import StillHaveQuestions from "@/components/Faq/StillHaveQuestions";
-
+import bannerfaq from "@/assets/faq/faq.jpeg";
 
 const Home = () => {
     const navigate = useNavigate();
@@ -19,7 +19,7 @@ const Home = () => {
                     text: "Contact Us",
                     link: "/contact"
                 }}
-                image="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1400&q=80"
+                image={bannerfaq}
             />
 
             <FAQSection />

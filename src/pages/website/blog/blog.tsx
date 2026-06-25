@@ -1,5 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import bannerblog from "@/assets/blog/blog-banner.jpeg";
+import blog1 from "@/assets/blog/blog1.jpeg";
+import blog2 from "@/assets/blog/blog2.jpeg";
+import blog3 from "@/assets/blog/blog3.jpeg";
+import blog4 from "@/assets/blog/blog4.jpeg";
+import blog5 from "@/assets/blog/blog5.jpeg";
+import blog6 from "@/assets/blog/blog6.jpeg";
 import { Search, Calendar, ArrowRight } from "lucide-react";
 
 interface BlogPost {
@@ -36,8 +43,7 @@ const Home = () => {
       category: "Higher Education",
       date: "Feb 20, 2026",
       readTime: "5 min read",
-      image:
-        "https://images.unsplash.com/photo-1648301033733-44554c74ec50?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=600&q=80",
+      image:blog1,
       slug: "why-african-universities-need-strategic-communication-partners",
     },
     {
@@ -49,7 +55,7 @@ const Home = () => {
       date: "Feb 15, 2026",
       readTime: "7 min read",
       image:
-        "https://images.unsplash.com/photo-1652265540589-46f91535337b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=600&q=80",
+        blog2,
       slug: "beyond-greenwashing-authentic-impact-storytelling",
     },
     {
@@ -61,7 +67,7 @@ const Home = () => {
       date: "Feb 10, 2026",
       readTime: "6 min read",
       image:
-        "https://images.unsplash.com/photo-1763739528307-ad10867048b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=600&q=80",
+        blog3,
       slug: "the-art-of-executive-speechwriting-structure-and-substance",
     },
     {
@@ -73,7 +79,7 @@ const Home = () => {
       date: "Feb 5, 2026",
       readTime: "8 min read",
       image:
-        "https://images.unsplash.com/photo-1737160397143-77c6845daf99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=600&q=80",
+        blog4,
       slug: "translating-research-for-policy-impact",
     },
     {
@@ -85,7 +91,7 @@ const Home = () => {
       date: "Jan 28, 2026",
       readTime: "5 min read",
       image:
-        "https://images.unsplash.com/photo-1758876022295-00ec1f0e39f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=600&q=80",
+        blog5,
       slug: "building-internal-communications-capacity",
     },
     {
@@ -97,7 +103,7 @@ const Home = () => {
       date: "Jan 20, 2026",
       readTime: "6 min read",
       image:
-        "https://images.unsplash.com/photo-1648301033733-44554c74ec50?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=600&q=80",
+        blog6,
       slug: "ip-protection-in-academic-communications",
     },
   ];
@@ -114,7 +120,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative h-[560px] overflow-hidden -mt-20">
         <img
-          src="https://images.unsplash.com/photo-1638342863994-ae4eee256688?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1400&q=80"
+          src={bannerblog}
           alt="Insights"
           className="absolute inset-0 w-full h-full object-cover"
         />

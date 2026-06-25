@@ -1,37 +1,43 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import Team1 from "@/assets/about/team1.jpeg";
+import team2 from "@/assets/about/team2.jpeg";
+import team3 from "@/assets/about/team3.jpeg";
+import team4 from "@/assets/about/team4.jpeg";
+import team5 from "@/assets/about/team5.jpeg";
+import team6 from "@/assets/about/team6.jpeg";
 
 const AboutCTA = () => {
   const images = [
     {
       id: 1,
-      src: "https://images.unsplash.com/photo-1609436132311-e4b0c9370469?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&q=80",
+      src: Team1,
       alt: "Team member",
     },
     {
       id: 2,
-      src: "https://images.unsplash.com/photo-1573496130141-209d200cebd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&q=80",
+      src: team2,
       alt: "Team member",
     },
     {
       id: 3,
-      src: "https://images.unsplash.com/photo-1609371497456-3a55a205d5eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&q=80",
+      src: team3,
       alt: "Team member",
     },
     {
       id: 4,
-      src: "https://images.unsplash.com/photo-1573164574572-cb89e39749b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&q=80",
+      src: team4,
       alt: "Team member",
     },
     {
       id: 5,
-      src: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&q=80",
+      src: team5,
       alt: "Team member",
     },
     {
       id: 6,
-      src: "https://images.unsplash.com/photo-1568992688065-536aad8a12f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=300&q=80",
+      src: team6,
       alt: "Team member",
     },
   ];
