@@ -76,15 +76,15 @@ const UserSidebar = ({
     resources: sidebarItems.filter(item => 
       ["/user/store"].includes(item.path)
     ),
-    finance: sidebarItems.filter(item => 
-      ["/user/invoices"].includes(item.path)
-    ),
-    communication: sidebarItems.filter(item => 
-      ["/user/quotes"].includes(item.path)
-    ),
-    account: sidebarItems.filter(item => 
-      ["/user/plans", "/user/settings"].includes(item.path)
-    ),
+    // finance: sidebarItems.filter(item => 
+    //   ["/user/invoices"].includes(item.path)
+    // ),
+    // communication: sidebarItems.filter(item => 
+    //   ["/user/quotes"].includes(item.path)
+    // ),
+    // account: sidebarItems.filter(item => 
+    //   ["/user/plans", "/user/settings"].includes(item.path)
+    // ),
   };
 
   const categoryLabels: Record<string, string> = {
@@ -92,8 +92,8 @@ const UserSidebar = ({
     projects: "Services",
     tools: "AI Tools",
     resources: "Resources",
-    finance: "Invoice Management",
-    communication: "Quote Management",
+    // finance: "Invoice Management",
+    // communication: "Quote Management",
     account: "Account",
   };
 
@@ -102,8 +102,8 @@ const UserSidebar = ({
     projects: Briefcase,
     tools: Sparkles,
     resources: Layers,
-    finance: CreditCard,
-    communication: MessageSquare,
+    // finance: CreditCard,
+    // communication: MessageSquare,
     account: User,
   };
 
@@ -119,9 +119,9 @@ const UserSidebar = ({
       "/user/store": ShoppingBag,
       "/user/templates": Layers,
       "/user/case-studies": BookOpen,
-      "/user/invoices": ChartColumn,
-      "/user/quotes": CreditCard,
-      "/user/plans": CreditCard,
+      // "/user/invoices": ChartColumn,
+      // "/user/quotes": CreditCard,
+      // "/user/plans": CreditCard,
       "/user/messages": MessageSquare,
       "/user/notifications": Bell,
       "/user/calendar": Calendar,
