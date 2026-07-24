@@ -58,6 +58,9 @@ import CreateExpert from "@/pages/admin/Manageexperts/AddEditExpert";
 import AdminWorkshopList from "@/pages/admin/Workshop/AdminWorkshopList";
 import AdminWorkshopEdit from '@/pages/admin/Workshop/AdminWorkshopEdit';
 import AdminSettings from "@/pages/admin/Settings";
+import AdminProjects from "@/pages/admin/projects/projects";
+import ProjectDetail from "@/pages/admin/projects/ProjectDetail";
+import ProjectSubmit from "@/pages/admin/projects/ProjectSubmit";
 
 const AppRoutes = () => {
   return (
@@ -128,6 +131,9 @@ const AppRoutes = () => {
         <Route path="workshop-requests" element={<AdminWorkshopList />} />
         <Route path="/admin/workshops/:id" element={<AdminWorkshopEdit />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
+        <Route path="/admin/projects" element={<AdminProjects />} />
+        <Route path="/admin/projects/:id" element={<ProjectDetail />} />
+        <Route path="/admin/projects/:id/submit" element={<ProjectSubmit />} />
       </Route>
     </Routes>
   );
