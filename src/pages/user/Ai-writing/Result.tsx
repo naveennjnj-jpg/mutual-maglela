@@ -1,7 +1,7 @@
 // pages/user/Ai-writing/Result.tsx
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
+import {
   ArrowLeft,
   Copy,
   Download,
@@ -88,7 +88,7 @@ const Result = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <button 
+            <button
               onClick={handleBack}
               className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-[#0F2D63] dark:hover:text-white transition-colors"
             >
@@ -157,19 +157,40 @@ const Result = () => {
 
         {/* Content Display */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+
           {/* Outline */}
-          {resultData.outline && resultData.outline.length > 0 && (
+          {resultData.outline && (
             <div className="p-6 border-b border-gray-100 dark:border-gray-700">
               <h3 className="text-sm font-semibold text-[#0F2D63] dark:text-white mb-3">Outline</h3>
               <div className="flex flex-wrap gap-2">
-                {resultData.outline.map((item: string, index: number) => (
-                  <span 
-                    key={index} 
-                    className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-full"
-                  >
-                    {index + 1}. {item}
-                  </span>
-                ))}
+                {/* Handle both string and array formats */}
+                {typeof resultData.outline === 'string' ? (
+                  // If outline is a string, split by newlines or numbers
+                  resultData.outline.split(/\n(?=\d+\.)/).map((item: string, index: number) => {
+                    const cleanItem = item.replace(/^\d+\.\s*/, '').trim();
+                    if (cleanItem) {
+                      return (
+                        <span
+                          key={index}
+                          className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-full"
+                        >
+                          {cleanItem}
+                        </span>
+                      );
+                    }
+                    return null;
+                  }).filter(Boolean)
+                ) : Array.isArray(resultData.outline) ? (
+                  // If outline is an array, map it directly
+                  resultData.outline.map((item: string, index: number) => (
+                    <span
+                      key={index}
+                      className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-full"
+                    >
+                      {index + 1}. {item}
+                    </span>
+                  ))
+                ) : null}
               </div>
             </div>
           )}

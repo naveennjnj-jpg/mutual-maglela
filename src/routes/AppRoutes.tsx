@@ -110,10 +110,10 @@ const AppRoutes = () => {
         <Route path="workshops" element={<Workshop />} />
         <Route path="narrative-engine" element={<AIWriting />} />
         <Route path="narrative-engine/create" element={<CreateAIWritingModal />} />
-        <Route path="narrative-engine/result" element={<AIWritingResult />} />
+        <Route path="ai-writing/result" element={<AIWritingResult />} />
         <Route path="voice-calibrator" element={<AISpeech />} />
         <Route path="voice-calibrator/create" element={<CreateAISpeech />} />
-        <Route path="voice-calibrator/result" element={<AISpeechResult />} />
+        <Route path="ai-speech/result" element={<AISpeechResult />} />
         <Route path="store" element={<DigitalToolkit />} />
       </Route>
 

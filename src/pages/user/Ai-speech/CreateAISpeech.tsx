@@ -27,20 +27,44 @@ interface ApiResponse {
   data?: any;
 }
 
+
+interface CostData {
+  usd: number;
+  zar: number;
+}
+
+interface AnalysisData {
+  authority: number;
+  clarity: number;
+  academicRigor: number;
+  accessibility: number;
+  narrativeDepth: number;
+}
+
+interface MetadataData {
+  title: string;
+  generatedAt: string;
+}
+
 interface SpeechData {
-  name: string;
-  content: string;
-  parameters: {
-    authority: number;
-    clarity: number;
-    academicRigor: number;
-    accessibility: number;
-    narrativeDepth: number;
+  audioUrl: string;
+  duration: number;
+  format: string;
+  size: number;
+  provider: string;
+  model: string;
+  charCount: number;
+  text: string;
+  cost: CostData;
+  analysis: AnalysisData;
+  metadata: MetadataData;
+  file?: {
+    name: string;
+    size: number;
+    mimetype: string;
   };
-  duration: string;
-  avgScore: number;
-  created: string;
-  author: string;
+  audio?: string;
+  recordingDuration?: number;
 }
 
 const CreateAISpeech = () => {
@@ -262,120 +286,209 @@ const CreateAISpeech = () => {
   };
 
   // ============================================
-  // GENERATE FUNCTION WITH BACKEND INTEGRATION
+  // SWITCH INPUT METHOD (Clear previous data)
   // ============================================
 
-  const handleGenerate = async () => {
-    // Validation
-    if (!name.trim()) {
-      setError('Please enter a speech name');
-      return;
-    }
-
-    if (!content.trim() && !file && !audioBlob) {
-      setError('Please add content, upload a file, or record your voice');
-      return;
-    }
-
-    setError(null);
-    setIsSubmitting(true);
-    setCurrentStep('processing');
-    setProcessingStep(0);
-
-    try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        setError('Authentication required');
-        setIsSubmitting(false);
-        setCurrentStep('create');
-        return;
+  const switchInputMethod = (method: 'paste' | 'upload' | 'record') => {
+    // Clear previous input data when switching
+    if (method !== 'upload') {
+      setFile(null);
+      setFileName('');
+      setFileSize('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
+    }
 
-      // Step 1: Analysing your content
-      setProcessingStep(0);
-      await new Promise(resolve => setTimeout(resolve, 600));
+    if (method !== 'paste') {
+      setContent('');
+    }
 
-      // Prepare form data for backend
-      const formData = new FormData();
-      formData.append('name', name);
-      formData.append('content', content || '');
-      formData.append('authority', String(parameters.authority));
-      formData.append('clarity', String(parameters.clarity));
-      formData.append('academicRigor', String(parameters.academicRigor));
-      formData.append('accessibility', String(parameters.accessibility));
-      formData.append('narrativeDepth', String(parameters.narrativeDepth));
-      formData.append('inputMethod', inputMethod);
+    if (method !== 'record') {
+      // Cancel recording if switching away
+      if (isRecording || audioBlob) {
+        cancelRecording();
+      }
+      setAudioBlob(null);
+      setAudioURL(null);
+      setRecordingTime(0);
+      setRecordingName('');
+      setRecordingSize('');
+    }
 
-      // Append file if uploaded
+    setInputMethod(method);
+    setError(null);
+  };
+
+  // ============================================
+  // GENERATE FUNCTION
+  // ============================================
+
+// pages/user/Ai-speech/CreateAISpeech.tsx
+
+// ============================================
+// ✅ ADD THESE TYPES AT THE TOP (After imports)
+// ============================================
+
+
+// ============================================
+// ✅ REPLACE YOUR EXISTING handleGenerate WITH THIS
+// ============================================
+
+const handleGenerate = async () => {
+  // Validation
+  if (!name.trim()) {
+    setError('Please enter a speech name');
+    return;
+  }
+
+  // Check if ANY content is provided based on input method
+  if (inputMethod === 'paste' && !content.trim()) {
+    setError('Please paste your content');
+    return;
+  }
+
+  if (inputMethod === 'upload' && !file) {
+    setError('Please upload a file');
+    return;
+  }
+
+  if (inputMethod === 'record' && !audioBlob) {
+    setError('Please record your voice');
+    return;
+  }
+
+  setError(null);
+  setIsSubmitting(true);
+  setCurrentStep('processing');
+  setProcessingStep(0);
+
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setError('Authentication required');
+      setIsSubmitting(false);
+      setCurrentStep('create');
+      return;
+    }
+
+    // Step 1: Analysing your content
+    setProcessingStep(0);
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    // Prepare form data - ONLY ONE INPUT METHOD AT A TIME
+    const formData = new FormData();
+    formData.append('title', name);
+    formData.append('authority', String(parameters.authority));
+    formData.append('clarity', String(parameters.clarity));
+    formData.append('academicRigor', String(parameters.academicRigor));
+    formData.append('accessibility', String(parameters.accessibility));
+    formData.append('narrativeDepth', String(parameters.narrativeDepth));
+    formData.append('inputMethod', inputMethod);
+
+    // ✅ ONLY send data based on current input method
+    if (inputMethod === 'paste') {
+      formData.append('content', content);
+    } else if (inputMethod === 'upload') {
       if (file) {
         formData.append('file', file);
       }
-
-      // Append audio recording if recorded
+    } else if (inputMethod === 'record') {
       if (audioBlob) {
-        const audioFile = new File([audioBlob], `${recordingName || 'recording'}.wav`, { type: 'audio/wav' });
+        const audioFile = new File(
+          [audioBlob], 
+          `${recordingName || 'recording'}.wav`, 
+          { type: 'audio/wav' }
+        );
         formData.append('audio', audioFile);
         formData.append('recordingDuration', formatTime(recordingTime));
       }
-
-      // Step 2: Calibrating voice tone parameters
-      setProcessingStep(1);
-      await new Promise(resolve => setTimeout(resolve, 600));
-
-      // Send to backend
-      const response = await axios.post<ApiResponse>(
-        `${API_URL}/api/ai-speech/generate`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // Step 3: Generating speech output
-      setProcessingStep(2);
-      await new Promise(resolve => setTimeout(resolve, 600));
-
-      if (response.data.success) {
-        // Prepare data for result page
-        const resultData: SpeechData = {
-          name: name,
-          content: response.data.data?.content || content || 'Generated speech content',
-          parameters: parameters,
-          duration: response.data.data?.duration || formatTime(recordingTime || 0),
-          avgScore: response.data.data?.avgScore || Math.floor(
-            (parameters.authority + parameters.clarity + parameters.academicRigor + 
-             parameters.accessibility + parameters.narrativeDepth) / 5
-          ),
-          created: new Date().toLocaleDateString('en-US', { 
-            day: 'numeric', 
-            month: 'short', 
-            year: 'numeric' 
-          }),
-          author: user?.name || 'AI Assistant'
-        };
-
-        // Step 4: Finalising your speech
-        setProcessingStep(3);
-        await new Promise(resolve => setTimeout(resolve, 400));
-
-        // Navigate to result page
-        navigate('/user/ai-speech/result', { state: { data: resultData } });
-      } else {
-        setError(response.data.message || 'Failed to generate speech');
-        setCurrentStep('create');
-      }
-    } catch (err: any) {
-      console.error('Error generating speech:', err);
-      setError(err.response?.data?.message || 'Failed to generate speech. Please try again.');
-      setCurrentStep('create');
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+
+    // Step 2: Calibrating voice tone parameters
+    setProcessingStep(1);
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    // Send to backend
+    const response = await axios.post<ApiResponse>(
+      `${API_URL}/api/ai-speech/generate`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // Step 3: Generating speech output
+    setProcessingStep(2);
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    if (response.data.success) {
+      // ✅ FIXED: Use backend response data directly
+      const backendData = response.data.data;
+      
+      // ✅ Create result data that matches Result.tsx expected structure
+      const resultData: SpeechData = {
+        // Audio data
+        audioUrl: backendData?.audioUrl || '',
+        duration: backendData?.duration || 0,
+        format: backendData?.format || 'mp3',
+        size: backendData?.size || 0,
+        
+        // Provider info
+        provider: backendData?.provider || 'openai',
+        model: backendData?.model || 'tts-1',
+        
+        // Content
+        charCount: backendData?.charCount || 0,
+        text: backendData?.text || content || 'Generated speech content',
+        
+        // Cost
+        cost: backendData?.cost || { usd: 0, zar: 0 },
+        
+        // Analysis - Use backend data if available, otherwise use local parameters
+        analysis: backendData?.analysis || {
+          authority: parameters.authority,
+          clarity: parameters.clarity,
+          academicRigor: parameters.academicRigor,
+          accessibility: parameters.accessibility,
+          narrativeDepth: parameters.narrativeDepth,
+        },
+        
+        // Metadata
+        metadata: {
+          title: backendData?.metadata?.title || name,
+          generatedAt: backendData?.metadata?.generatedAt || new Date().toISOString(),
+        },
+        
+        // Optional fields
+        ...(backendData?.file && { file: backendData.file }),
+        ...(backendData?.audio && { audio: backendData.audio }),
+        ...(backendData?.recordingDuration && { recordingDuration: backendData.recordingDuration }),
+      };
+
+      // Step 4: Finalising your speech
+      setProcessingStep(3);
+      await new Promise(resolve => setTimeout(resolve, 400));
+
+      // Navigate to result page with proper data
+      navigate('/user/ai-speech/result', { state: { data: resultData } });
+      
+    } else {
+      setError(response.data.message || 'Failed to generate speech');
+      setCurrentStep('create');
+    }
+  } catch (err: any) {
+    console.error('Error generating speech:', err);
+    setError(err.response?.data?.message || 'Failed to generate speech. Please try again.');
+    setCurrentStep('create');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleBack = () => {
     navigate('/user/ai-speech');
@@ -510,7 +623,7 @@ const CreateAISpeech = () => {
             </div>
           </div>
 
-          {/* Step 3: Add Content */}
+          {/* Step 3: Add Content - Only ONE option at a time */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
             <div className="px-5 pt-5 pb-0">
               <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
@@ -519,10 +632,7 @@ const CreateAISpeech = () => {
               </p>
               <div className="flex gap-1 bg-[#f4f6fb] dark:bg-gray-700 rounded-xl p-1">
                 <button
-                  onClick={() => {
-                    setInputMethod('upload');
-                    if (isRecording) cancelRecording();
-                  }}
+                  onClick={() => switchInputMethod('upload')}
                   className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
                     inputMethod === 'upload' ? 'bg-white dark:bg-gray-600 text-[#0F2D63] dark:text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'
                   }`}
@@ -530,10 +640,7 @@ const CreateAISpeech = () => {
                   Upload File
                 </button>
                 <button
-                  onClick={() => {
-                    setInputMethod('paste');
-                    if (isRecording) cancelRecording();
-                  }}
+                  onClick={() => switchInputMethod('paste')}
                   className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
                     inputMethod === 'paste' ? 'bg-white dark:bg-gray-600 text-[#0F2D63] dark:text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'
                   }`}
@@ -541,9 +648,7 @@ const CreateAISpeech = () => {
                   Paste Content
                 </button>
                 <button
-                  onClick={() => {
-                    setInputMethod('record');
-                  }}
+                  onClick={() => switchInputMethod('record')}
                   className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
                     inputMethod === 'record' ? 'bg-white dark:bg-gray-600 text-[#0F2D63] dark:text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'
                   }`}
