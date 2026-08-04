@@ -49,6 +49,8 @@ import AISpeechResult from '@/pages/user/Ai-speech/Result';
 import DigitalToolkit from '@/pages/user/DigitalToolkits';
 import PaymentSuccess from '@/pages/website/PaymentSuccess';
 import PaymentCancelled from '@/pages/website/PaymentCancelled';
+import AISpeechDetail from '@/pages/user/Ai-speech/AISpeechDetail';
+import AIWritingDetail from '@/pages/user/Ai-writing/AIWritingDetail';
 
 // Admin Pages
 import AdminDashboard from "@/pages/admin/Dashboard";
@@ -115,6 +117,9 @@ const AppRoutes = () => {
         <Route path="voice-calibrator/create" element={<CreateAISpeech />} />
         <Route path="ai-speech/result" element={<AISpeechResult />} />
         <Route path="store" element={<DigitalToolkit />} />
+        <Route path="voice-calibrator/view" element={<AISpeechDetail />} />
+        <Route path="narrative-engine/view" element={<AIWritingDetail />} />
+
       </Route>
 
       {/* ADMIN - Protected (Admin Only) */}
