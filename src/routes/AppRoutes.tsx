@@ -16,6 +16,9 @@ import Partnerships from "@/pages/website/Partnerships/Partnerships";
 import Solutionsacedemics from "@/pages/website/solutions/academics-research";
 import SolutionsHigherEducation from "@/pages/website/solutions/higher-education";
 import Solutionsuniversity from "@/pages/website/solutions/university-communications";
+import Globaldevelopment from "@/pages/website/solutions/global-development";
+import Corporatesocial from "@/pages/website/solutions/corporate-social-impact";
+import Executiveleaders from "@/pages/website/solutions/executive-leaders";
 import Pricing from "@/pages/website/Pricing/Pricing";
 import Faq from "@/pages/website/Faq/faq";
 import Blog from "@/pages/website/blog/blog";
@@ -24,7 +27,7 @@ import Terms from "@/pages/website/terms/terms";
 import RefundPolicy from "@/pages/website/RefundPolicy/RefundPolicy";
 import Careers from "@/pages/website/Careers/Careers";
 import DigitalToolkitweb from "@/pages/website/DigitalToolkit/DigitalToolkit";
-
+import Workshops from "@/pages/website/Workshops/workshops";
 
 // Auth Pages
 import Login from "@/pages/auth/Login";
@@ -73,10 +76,14 @@ const AppRoutes = () => {
         <Route path="about" element={<AboutUs />} />
         <Route path="partnerships" element={<Partnerships />} />
         <Route path="contact" element={<Contact />} />
-        <Route path="solutions/academics-research" element={<Solutionsacedemics />} />
+         <Route path="solutions/academics-research" element={<Solutionsacedemics />} />
         <Route path="solutions/higher-education" element={<SolutionsHigherEducation />} />
         <Route path="solutions/university-communications" element={<Solutionsuniversity />} />
+        <Route path="solutions/global-development" element={<Globaldevelopment />} />
+        <Route path="solutions/corporate-social-impact" element={<Corporatesocial />} />
+        <Route path="solutions/executive-leaders" element={<Executiveleaders />} />
         <Route path="pricing" element={<Pricing />} />
+          <Route path="workshops" element={<Workshops />} />
         <Route path="faqs" element={<Faq />} />
         <Route path="blog" element={<Blog />} />
         <Route path="privacy" element={<Privacy />} />

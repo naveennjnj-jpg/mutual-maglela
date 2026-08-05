@@ -46,18 +46,31 @@ const DigitalToolkit: React.FC = () => {
     const [showCheckout, setShowCheckout] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    // Track which products have been added to cart for button state
+    const [addedToCart, setAddedToCart] = useState<Set<number>>(new Set());
 
     // Load cart from localStorage on mount
     useEffect(() => {
         const savedCart = localStorage.getItem('cart');
         if (savedCart) {
-            setCartItems(JSON.parse(savedCart));
+            try {
+                const parsedCart: CartItem[] = JSON.parse(savedCart); // ✅ Type assertion added
+                setCartItems(parsedCart);
+                // Update addedToCart set with products in cart
+                const addedSet = new Set(parsedCart.map((item: CartItem) => item.product.id)); // ✅ Explicitly typed
+                setAddedToCart(addedSet);
+            } catch (error) {
+                console.error('Error loading cart:', error);
+            }
         }
     }, []);
 
     // Save cart to localStorage whenever it changes
     useEffect(() => {
         localStorage.setItem('cart', JSON.stringify(cartItems));
+        // Update addedToCart set when cart changes
+        const addedSet = new Set(cartItems.map(item => item.product.id));
+        setAddedToCart(addedSet);
     }, [cartItems]);
 
     const categories = ['All', 'Strategy', 'Templates', 'Branding', 'Content'];
@@ -304,50 +317,68 @@ const DigitalToolkit: React.FC = () => {
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                            {filteredProducts.map((product) => (
-                                <div
-                                    key={product.id}
-                                    className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col"
-                                >
-                                    <div className="aspect-[4/3] overflow-hidden">
-                                        <img
-                                            src={product.image}
-                                            alt={product.title}
-                                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                                        />
-                                    </div>
+                            {filteredProducts.map((product) => {
+                                const isInCart = addedToCart.has(product.id);
+                                
+                                return (
+                                    <div
+                                        key={product.id}
+                                        className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col"
+                                    >
+                                        <div className="aspect-[4/3] overflow-hidden">
+                                            <img
+                                                src={product.image}
+                                                alt={product.title}
+                                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                            />
+                                        </div>
 
-                                    <div className="p-4 flex flex-col flex-1">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <div className="flex gap-0.5">
-                                                {renderStars(product.rating)}
+                                        <div className="p-4 flex flex-col flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="flex gap-0.5">
+                                                    {renderStars(product.rating)}
+                                                </div>
+                                                <span className="text-gray-400 text-xs">({product.reviews})</span>
                                             </div>
-                                            <span className="text-gray-400 text-xs">({product.reviews})</span>
-                                        </div>
 
-                                        <h3 className="font-['Roboto'] font-bold text-[#1C1C1C] text-sm mb-1 leading-snug">
-                                            {product.title}
-                                        </h3>
+                                            <h3 className="font-['Roboto'] font-bold text-[#1C1C1C] text-sm mb-1 leading-snug">
+                                                {product.title}
+                                            </h3>
 
-                                        <p className="text-gray-400 text-xs leading-relaxed flex-1 mb-3">
-                                            {product.description}
-                                        </p>
+                                            <p className="text-gray-400 text-xs leading-relaxed flex-1 mb-3">
+                                                {product.description}
+                                            </p>
 
-                                        <div className="flex items-center justify-between mt-auto">
-                                            <span className="text-[#0F2D63] font-bold text-lg">
-                                                R{product.price}
-                                            </span>
-                                            <button
-                                                onClick={() => addToCart(product)}
-                                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-[#C85A32] hover:bg-[#a8472a] text-white"
-                                            >
-                                                <ShoppingCart className="w-3.5 h-3.5" />
-                                                Add to Cart
-                                            </button>
+                                            <div className="flex items-center justify-between mt-auto">
+                                                <span className="text-[#0F2D63] font-bold text-lg">
+                                                    R{product.price}
+                                                </span>
+                                                <button
+                                                    onClick={() => addToCart(product)}
+                                                    disabled={isInCart}
+                                                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                                                        isInCart
+                                                            ? 'bg-green-600 hover:bg-green-700 text-white cursor-default'
+                                                            : 'bg-[#C85A32] hover:bg-[#a8472a] text-white'
+                                                    }`}
+                                                >
+                                                    {isInCart ? (
+                                                        <>
+                                                            <CheckCircle className="w-3.5 h-3.5" />
+                                                            Added to Cart
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <ShoppingCart className="w-3.5 h-3.5" />
+                                                            Add to Cart
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 </section>
@@ -793,7 +824,7 @@ const CartView: React.FC<CartViewProps> = ({
                     </div>
 
                     <div className="flex flex-col lg:flex-row gap-6 items-start">
-                        <div className="flex-1 flex flex-col gap-4">
+                        <div className="flex-1 flex-col gap-4">
                             {cartItems.length === 0 ? (
                                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
                                     <p className="text-gray-500">Your cart is empty</p>

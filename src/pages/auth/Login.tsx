@@ -123,7 +123,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   <span className="font-medium text-[#0F2D63] text-xs">User</span>
                   <span className="text-gray-400 text-xs">harish.backend.dev@gmail.com</span>
                 </button>
-                <button
+                {/* <button
                   onClick={() => {
                     setEmail('admin@gmail.com');
                      setPassword('V7#mQ9@Lp2!Xr8$Nz');
@@ -132,7 +132,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                 >
                   <span className="font-medium text-[#0F2D63] text-xs">Admin</span>
                   <span className="text-gray-400 text-xs">admin@demo.com</span>
-                </button>
+                </button> */}
               </div>
             </div>
           </div>

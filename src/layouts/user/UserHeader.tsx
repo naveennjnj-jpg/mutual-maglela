@@ -31,6 +31,9 @@ import axios from "axios";
 interface UserHeaderProps {
   onMenuClick?: () => void;
   isSidebarOpen?: boolean;
+  userName?: string;
+  userEmail?: string;
+  userInitials?: string;
 }
 
 interface UserData {
@@ -47,6 +50,10 @@ interface UserData {
 const UserHeader = ({
   onMenuClick,
   isSidebarOpen = true,
+   userName = "User",
+   userEmail = "user@email.com",
+  userInitials = "U"
+  
 }: UserHeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();

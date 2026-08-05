@@ -1,5 +1,5 @@
 // layouts/user/UserSidebar.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard,
@@ -25,7 +25,8 @@ import {
   Sparkles,
   Layers,
   BookOpen,
-  Briefcase
+  Briefcase,
+  X
 } from "lucide-react";
 import Logo from "@/assets/home/logo.png";
 import { userSidebar } from "@/constants/userSidebar";
@@ -56,13 +57,31 @@ const UserSidebar = ({
 }: UserSidebarProps) => {
   const location = useLocation();
 
+  // ✅ Auto-close on navigation (mobile only)
+  // useEffect(() => {
+  //   if (window.innerWidth < 1024 && onClose) {
+  //     onClose();
+  //   }
+  // }, [location.pathname, onClose]);
+
+  // ✅ Helper to close only on mobile
+  const handleCloseOnMobile = () => {
+    if (window.innerWidth < 1024 && onClose) {
+      onClose();
+    }
+  };
+
   const isActive = (path: string) => {
+    // Dashboard (/user) should only be active when exactly on /user
+    if (path === "/user") {
+      return location.pathname === "/user";
+    }
+    // For other paths, check exact match or children
     return location.pathname === path || location.pathname.startsWith(path + "/");
   };
 
   const sidebarItems = userSidebar as SidebarItem[];
 
-  // Group menu items by category
   const groupedItems = {
     overview: sidebarItems.filter(item => 
       ["/user"].includes(item.path)
@@ -76,15 +95,6 @@ const UserSidebar = ({
     resources: sidebarItems.filter(item => 
       ["/user/store"].includes(item.path)
     ),
-    finance: sidebarItems.filter(item => 
-      ["/user/invoices"].includes(item.path)
-    ),
-    communication: sidebarItems.filter(item => 
-      ["/user/quotes"].includes(item.path)
-    ),
-    account: sidebarItems.filter(item => 
-      ["/user/plans", "/user/settings"].includes(item.path)
-    ),
   };
 
   const categoryLabels: Record<string, string> = {
@@ -92,9 +102,6 @@ const UserSidebar = ({
     projects: "Services",
     tools: "AI Tools",
     resources: "Resources",
-    finance: "Invoice Management",
-    communication: "Quote Management",
-    account: "Account",
   };
 
   const categoryIcons: Record<string, any> = {
@@ -102,9 +109,6 @@ const UserSidebar = ({
     projects: Briefcase,
     tools: Sparkles,
     resources: Layers,
-    finance: CreditCard,
-    communication: MessageSquare,
-    account: User,
   };
 
   const getIcon = (path: string) => {
@@ -119,9 +123,6 @@ const UserSidebar = ({
       "/user/store": ShoppingBag,
       "/user/templates": Layers,
       "/user/case-studies": BookOpen,
-      "/user/invoices": ChartColumn,
-      "/user/quotes": CreditCard,
-      "/user/plans": CreditCard,
       "/user/messages": MessageSquare,
       "/user/notifications": Bell,
       "/user/calendar": Calendar,
@@ -135,12 +136,27 @@ const UserSidebar = ({
 
   return (
     <>
-      <aside className={`hidden lg:flex lg:flex-col fixed left-0 top-0 bottom-0 z-30 bg-[#0F2D63] transition-all duration-300 ${
-        isOpen ? 'w-[260px]' : 'w-[72px]'
-      }`}>
+      <aside 
+        className={`
+          fixed left-0 top-0 bottom-0 z-30 
+          bg-[#0F2D63] transition-all duration-300
+          flex flex-col
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${isOpen ? 'w-[260px]' : 'w-[72px]'}
+        `}
+      >
+        {/* Close button for mobile */}
+        <button
+          onClick={handleCloseOnMobile}
+          className="lg:hidden absolute right-3 top-3 p-2 text-white/60 hover:text-white transition-colors"
+          aria-label="Close sidebar"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
         {/* Logo */}
         <div className={`flex items-center ${isOpen ? 'justify-center' : 'justify-center'} h-20 flex-shrink-0 px-4 border-b border-white/10`}>
-          <Link to="/user">
+          <Link to="/user" onClick={handleCloseOnMobile}> {/* ✅ Changed to handleCloseOnMobile */}
             {isOpen ? (
               <img 
                 src={Logo} 
@@ -182,6 +198,7 @@ const UserSidebar = ({
                       <Link
                         key={item.path}
                         to={item.path}
+                        onClick={handleCloseOnMobile} // ✅ Changed to handleCloseOnMobile
                         className={`relative flex items-center ${isOpen ? 'gap-3 px-3' : 'gap-0 justify-center px-0'} h-11 rounded-xl transition-all group ${
                           active ? 'bg-white/10' : 'hover:bg-white/[0.06]'
                         }`}
@@ -231,7 +248,7 @@ const UserSidebar = ({
                   <LifeBuoy className="w-4 h-4 text-[#C85A32]" />
                 </div>
                 <p className="text-white font-semibold text-sm mb-3">Need Help?</p>
-                <Link to="/user/help">
+                <Link to="/user/help" onClick={handleCloseOnMobile}> {/* ✅ Changed to handleCloseOnMobile */}
                   <button className="w-full bg-[#C85A32] hover:bg-[#a8472a] text-white text-xs font-medium rounded-xl h-9 transition-colors">
                     Explore Help Center
                   </button>
@@ -263,14 +280,10 @@ const UserSidebar = ({
           )}
         </div>
 
-        {/* Toggle Button - Fixed position relative to sidebar */}
+        {/* Toggle Button - Desktop only */}
         <button 
           onClick={onToggle}
           className="hidden lg:flex absolute -right-4 top-[130px] items-center justify-center w-8 h-8 bg-[#C85A32] rounded-full shadow-lg hover:bg-[#a8472a] transition-all z-40"
-          style={{ 
-            transform: isOpen ? 'translateX(0)' : 'translateX(0)',
-            right: isOpen ? '-16px' : '-16px'
-          }}
         >
           {isOpen ? (
             <ChevronLeft className="w-3.5 h-3.5 text-white" />
@@ -283,8 +296,8 @@ const UserSidebar = ({
       {/* Mobile Overlay */}
       {isOpen && (
         <div 
-          className="lg:hidden fixed inset-0 z-20 bg-black/50 backdrop-blur-sm"
-          onClick={onClose}
+          className="lg:hidden fixed inset-0 z-20 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={handleCloseOnMobile}
         ></div>
       )}
     </>
