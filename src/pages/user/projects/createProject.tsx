@@ -68,10 +68,31 @@ const CreateProject = () => {
     proceedOption: "ai-writing",
   });
 
-  const [attachment, setAttachment] = useState<FileAttachment | null>(null); // Changed to single file
+  const [attachment, setAttachment] = useState<FileAttachment | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // ============================================
+  // VALIDATION STATE
+  // ============================================
+
+  const [validationErrors, setValidationErrors] = useState<{
+    title?: string;
+    type?: string;
+    deadline?: string;
+    attachment?: string;
+  }>({});
+
+  const [touched, setTouched] = useState<{
+    title: boolean;
+    type: boolean;
+    deadline: boolean;
+  }>({
+    title: false,
+    type: false,
+    deadline: false,
+  });
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -135,6 +156,62 @@ const CreateProject = () => {
   ];
 
   // ============================================
+  // VALIDATION FUNCTIONS
+  // ============================================
+
+  const validateField = (field: keyof typeof validationErrors) => {
+    const errors: typeof validationErrors = {};
+
+    switch (field) {
+      case 'title':
+        if (!formData.title.trim()) {
+          errors.title = 'Project title is required';
+        } else if (formData.title.length < 3) {
+          errors.title = 'Title must be at least 3 characters';
+        } else if (formData.title.length > 200) {
+          errors.title = 'Title must not exceed 200 characters';
+        }
+        break;
+
+      case 'type':
+        if (!formData.type) {
+          errors.type = 'Please select a project type';
+        }
+        break;
+
+      case 'deadline':
+        if (!formData.deadline) {
+          errors.deadline = 'Deadline is required';
+        } else {
+          const selectedDate = new Date(formData.deadline);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          if (selectedDate < today) {
+            errors.deadline = 'Deadline must be today or in the future';
+          }
+        }
+        break;
+    }
+
+    return errors;
+  };
+
+  const validateForm = (): boolean => {
+    const errors: typeof validationErrors = {};
+    
+    // Validate all fields
+    Object.keys(formData).forEach(key => {
+      if (key === 'priority' || key === 'proceedOption' || key === 'description') return;
+      const fieldErrors = validateField(key as keyof typeof validationErrors);
+      Object.assign(errors, fieldErrors);
+    });
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // ============================================
   // HANDLERS
   // ============================================
 
@@ -148,6 +225,14 @@ const CreateProject = () => {
       ...prev,
       [name]: value,
     }));
+
+    // Mark field as touched
+    if (name === 'title' || name === 'type' || name === 'deadline') {
+      setTouched(prev => ({ ...prev, [name]: true }));
+    }
+
+    // Clear validation error on change
+    setValidationErrors(prev => ({ ...prev, [name]: undefined }));
   };
 
   const handlePrioritySelect = (priority: "low" | "medium" | "high" | "critical") => {
@@ -166,6 +251,17 @@ const CreateProject = () => {
     }));
   };
 
+  const handleBlur = (
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name } = e.target;
+    if (name === 'title' || name === 'type' || name === 'deadline') {
+      setTouched(prev => ({ ...prev, [name]: true }));
+      const fieldErrors = validateField(name as keyof typeof validationErrors);
+      setValidationErrors(prev => ({ ...prev, ...fieldErrors }));
+    }
+  };
+
   // ============================================
   // FILE HANDLERS - SINGLE FILE ONLY
   // ============================================
@@ -174,7 +270,7 @@ const CreateProject = () => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const file = files[0]; // Get only the first file
+    const file = files[0];
 
     // Valid file types
     const validTypes = [
@@ -195,6 +291,7 @@ const CreateProject = () => {
     // Validate file type
     if (!validTypes.includes(file.type)) {
       setError(`Invalid file type: ${file.name}. Please upload PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, or ZIP files.`);
+      setValidationErrors(prev => ({ ...prev, attachment: 'Invalid file type' }));
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -204,6 +301,7 @@ const CreateProject = () => {
     // Validate file size
     if (file.size > maxSize) {
       setError(`File ${file.name} exceeds 10MB limit.`);
+      setValidationErrors(prev => ({ ...prev, attachment: 'File size exceeds 10MB' }));
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -220,6 +318,7 @@ const CreateProject = () => {
     });
 
     setError(null);
+    setValidationErrors(prev => ({ ...prev, attachment: undefined }));
 
     // Reset input
     if (fileInputRef.current) {
@@ -229,6 +328,7 @@ const CreateProject = () => {
 
   const removeAttachment = () => {
     setAttachment(null);
+    setValidationErrors(prev => ({ ...prev, attachment: undefined }));
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -244,31 +344,79 @@ const CreateProject = () => {
   // FORM SUBMISSION
   // ============================================
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  setLoading(true);
-  setError(null);
-  setSuccess(false);
+    // Mark all fields as touched
+    setTouched({
+      title: true,
+      type: true,
+      deadline: true,
+    });
 
-  try {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      setError("You must be logged in.");
+    // Validate form
+    if (!validateForm()) {
+      setError('Please fill all the fields');
+      
+      // Scroll to first error
+      const firstErrorField = document.querySelector('[data-error="true"]');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
 
-    let documentUrl = "";
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
 
-    // Upload document first
-    if (attachment?.file) {
-      const uploadFormData = new FormData();
-      uploadFormData.append("document", attachment.file);
+    try {
+      const token = localStorage.getItem("token");
 
-      const uploadResponse = await axios.post(
-        `${API_URL}/api/auth/upload-document`,
-        uploadFormData,
+      if (!token) {
+        setError("You must be logged in.");
+        return;
+      }
+
+      let documentUrl = "";
+
+      // Upload document first
+      if (attachment?.file) {
+        const uploadFormData = new FormData();
+        uploadFormData.append("document", attachment.file);
+
+        const uploadResponse = await axios.post(
+          `${API_URL}/api/auth/upload-document`,
+          uploadFormData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("Upload Response:", uploadResponse.data);
+
+        if (!uploadResponse.data.success) {
+          setError(uploadResponse.data.message || "Document upload failed");
+          return;
+        }
+
+        documentUrl = uploadResponse.data.data.fileUrl;
+      }
+
+      // Create project
+      const response = await axios.post(
+        `${API_URL}/api/auth/projects`,
+        {
+          title: formData.title.trim(),
+          type: formData.type,
+          description: formData.description.trim(),
+          priority: formData.priority,
+          deadline: formData.deadline,
+          proceedOption: formData.proceedOption,
+          attachments: documentUrl,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -276,55 +424,34 @@ const handleSubmit = async (e: React.FormEvent) => {
         }
       );
 
-      console.log("Upload Response:", uploadResponse.data);
+      if (response.data.success) {
+        setSuccess(true);
+        setError(null);
 
-      if (!uploadResponse.data.success) {
-        setError(uploadResponse.data.message || "Document upload failed");
-        return;
+        setTimeout(() => {
+          navigate("/user/projects");
+        }, 2000);
+      } else {
+        setError(response.data.message || "Failed to create project");
       }
-
-      // Get uploaded file URL
-      documentUrl = uploadResponse.data.data.fileUrl;
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to create project");
+    } finally {
+      setLoading(false);
     }
-
-    // Create project
-    const response = await axios.post(
-      `${API_URL}/api/auth/projects`,
-      {
-        title: formData.title,
-        type: formData.type,
-        description: formData.description,
-        priority: formData.priority,
-        deadline: formData.deadline,
-        proceedOption: formData.proceedOption,
-        attachments: documentUrl,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    if (response.data.success) {
-      setSuccess(true);
-
-      setTimeout(() => {
-        navigate("/user/projects");
-      }, 2000);
-    } else {
-      setError(response.data.message || "Failed to create project");
-    }
-  } catch (err: any) {
-    console.error(err);
-    setError(err.response?.data?.message || "Failed to create project");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleBack = () => {
     navigate("/user/projects");
+  };
+
+  // ============================================
+  // HELPER: Check if field has error
+  // ============================================
+
+  const hasError = (field: keyof typeof validationErrors) => {
+    return touched[field as keyof typeof touched] && validationErrors[field];
   };
 
   // ============================================
@@ -404,7 +531,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         {/* ==========================================
             FORM
             ========================================== */}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* ==========================================
                 LEFT COLUMN
@@ -436,10 +563,28 @@ const handleSubmit = async (e: React.FormEvent) => {
                       name="title"
                       value={formData.title}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       placeholder="e.g., Q1 Impact Assessment Report"
-                      className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-[#0F2D63] dark:focus:border-[#C85A32] focus:ring-2 focus:ring-[#0F2D63]/10 dark:focus:ring-[#C85A32]/10 transition-all bg-gray-50 dark:bg-gray-900 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white"
-                      required
+                      className={`w-full text-sm border ${
+                        hasError('title') 
+                          ? 'border-red-400 dark:border-red-500 focus:border-red-500' 
+                          : 'border-gray-200 dark:border-gray-700 focus:border-[#0F2D63] dark:focus:border-[#C85A32]'
+                      } rounded-xl px-4 py-3 focus:outline-none focus:ring-2 ${
+                        hasError('title')
+                          ? 'focus:ring-red-500/10'
+                          : 'focus:ring-[#0F2D63]/10 dark:focus:ring-[#C85A32]/10'
+                      } transition-all bg-gray-50 dark:bg-gray-900 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white`}
+                      data-error={hasError('title')}
                     />
+                    {hasError('title') && (
+                      <p className="mt-1.5 text-xs text-red-500 dark:text-red-400 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {validationErrors.title}
+                      </p>
+                    )}
+                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                      {formData.title.length}/200 characters
+                    </p>
                   </div>
 
                   {/* Project Type */}
@@ -452,8 +597,17 @@ const handleSubmit = async (e: React.FormEvent) => {
                         name="type"
                         value={formData.type}
                         onChange={handleChange}
-                        className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-[#0F2D63] dark:focus:border-[#C85A32] focus:ring-2 focus:ring-[#0F2D63]/10 dark:focus:ring-[#C85A32]/10 transition-all bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
-                        required
+                        onBlur={handleBlur}
+                        className={`w-full text-sm border ${
+                          hasError('type')
+                            ? 'border-red-400 dark:border-red-500 focus:border-red-500'
+                            : 'border-gray-200 dark:border-gray-700 focus:border-[#0F2D63] dark:focus:border-[#C85A32]'
+                        } rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:ring-2 ${
+                          hasError('type')
+                            ? 'focus:ring-red-500/10'
+                            : 'focus:ring-[#0F2D63]/10 dark:focus:ring-[#C85A32]/10'
+                        } transition-all bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white`}
+                        data-error={hasError('type')}
                       >
                         <option value="">Select project type</option>
                         {projectTypes.map((type) => (
@@ -464,6 +618,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                       </select>
                       <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 rotate-90 pointer-events-none" />
                     </div>
+                    {hasError('type') && (
+                      <p className="mt-1.5 text-xs text-red-500 dark:text-red-400 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {validationErrors.type}
+                      </p>
+                    )}
                   </div>
 
                   {/* Project Description */}
@@ -478,7 +638,11 @@ const handleSubmit = async (e: React.FormEvent) => {
                       rows={5}
                       placeholder="Describe your project requirements, objectives, and deliverables..."
                       className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 resize-none focus:outline-none focus:border-[#0F2D63] dark:focus:border-[#C85A32] focus:ring-2 focus:ring-[#0F2D63]/10 dark:focus:ring-[#C85A32]/10 transition-all bg-gray-50 dark:bg-gray-900 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white"
+                      maxLength={2000}
                     />
+                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500 text-right">
+                      {formData.description.length}/2000 characters
+                    </p>
                   </div>
                 </div>
               </div>
@@ -601,18 +765,40 @@ const handleSubmit = async (e: React.FormEvent) => {
                   {!attachment ? (
                     <div
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-full border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-[#0F2D63]/40 dark:hover:border-[#C85A32]/40 rounded-2xl py-10 flex flex-col items-center gap-3 cursor-pointer transition-all hover:bg-[#EEF2FA]/30 dark:hover:bg-gray-700/30 group"
+                      className={`w-full border-2 border-dashed ${
+                        validationErrors.attachment
+                          ? 'border-red-400 dark:border-red-500 bg-red-50/10'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-[#0F2D63]/40 dark:hover:border-[#C85A32]/40'
+                      } rounded-2xl py-10 flex flex-col items-center gap-3 cursor-pointer transition-all hover:bg-[#EEF2FA]/30 dark:hover:bg-gray-700/30 group`}
                     >
-                      <div className="w-14 h-14 bg-gray-100 dark:bg-gray-700 group-hover:bg-[#EEF2FA] dark:group-hover:bg-gray-600 rounded-2xl flex items-center justify-center transition-colors">
-                        <Upload className="w-6 h-6 text-gray-400 dark:text-gray-500 group-hover:text-[#0F2D63] dark:group-hover:text-[#C85A32] transition-colors" />
+                      <div className={`w-14 h-14 ${
+                        validationErrors.attachment
+                          ? 'bg-red-100 dark:bg-red-900/30'
+                          : 'bg-gray-100 dark:bg-gray-700 group-hover:bg-[#EEF2FA] dark:group-hover:bg-gray-600'
+                      } rounded-2xl flex items-center justify-center transition-colors`}>
+                        <Upload className={`w-6 h-6 ${
+                          validationErrors.attachment
+                            ? 'text-red-500 dark:text-red-400'
+                            : 'text-gray-400 dark:text-gray-500 group-hover:text-[#0F2D63] dark:group-hover:text-[#C85A32]'
+                        } transition-colors`} />
                       </div>
                       <div className="text-center">
-                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 group-hover:text-[#0F2D63] dark:group-hover:text-[#C85A32] transition-colors">
+                        <p className={`text-sm font-semibold ${
+                          validationErrors.attachment
+                            ? 'text-red-500 dark:text-red-400'
+                            : 'text-gray-700 dark:text-gray-300 group-hover:text-[#0F2D63] dark:group-hover:text-[#C85A32]'
+                        } transition-colors`}>
                           Click to upload or drag and drop
                         </p>
                         <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                           PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, ZIP — up to 10MB
                         </p>
+                        {validationErrors.attachment && (
+                          <p className="mt-2 text-xs text-red-500 dark:text-red-400 flex items-center justify-center gap-1">
+                            <AlertCircle className="w-3 h-3" />
+                            {validationErrors.attachment}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -724,10 +910,25 @@ const handleSubmit = async (e: React.FormEvent) => {
                       type="date"
                       value={formData.deadline}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       min={new Date().toISOString().split("T")[0]}
-                      className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#0F2D63] dark:focus:border-[#C85A32] transition-all bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
-                      required
+                      className={`w-full text-sm border ${
+                        hasError('deadline')
+                          ? 'border-red-400 dark:border-red-500 focus:border-red-500'
+                          : 'border-gray-200 dark:border-gray-700 focus:border-[#0F2D63] dark:focus:border-[#C85A32]'
+                      } rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 ${
+                        hasError('deadline')
+                          ? 'focus:ring-red-500/10'
+                          : 'focus:ring-[#0F2D63]/10 dark:focus:ring-[#C85A32]/10'
+                      } transition-all bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white`}
+                      data-error={hasError('deadline')}
                     />
+                    {hasError('deadline') && (
+                      <p className="mt-1.5 text-xs text-red-500 dark:text-red-400 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {validationErrors.deadline}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
