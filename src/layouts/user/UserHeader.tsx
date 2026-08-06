@@ -255,7 +255,7 @@ const UserHeader = ({
                 <span className="text-xs text-gray-400 hidden sm:block">credits</span>
               </div>
               <Link
-                to="/dashboard/add-credits"
+                to="/user/add-credits"
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-[#C85A32] hover:bg-[#a8472a] text-white text-xs font-semibold rounded-xl transition-colors"
               >
                 <Plus className="w-3 h-3" />

@@ -54,6 +54,11 @@ import PaymentSuccess from '@/pages/website/PaymentSuccess';
 import PaymentCancelled from '@/pages/website/PaymentCancelled';
 import AISpeechDetail from '@/pages/user/Ai-speech/AISpeechDetail';
 import AIWritingDetail from '@/pages/user/Ai-writing/AIWritingDetail';
+import HelpCenter from '@/pages/user/HelpCenter/HelpCenter';
+import AddCredits from "@/pages/user/AddCredits/AddCredits";
+import CreditPaymentSuccess from '@/pages/user/AddCredits/CreditPaymentSuccess';
+import CreditPaymentCancelled from '@/pages/user/AddCredits/CreditPaymentCancelled';
+
 
 // Admin Pages
 import AdminDashboard from "@/pages/admin/Dashboard";
@@ -76,14 +81,14 @@ const AppRoutes = () => {
         <Route path="about" element={<AboutUs />} />
         <Route path="partnerships" element={<Partnerships />} />
         <Route path="contact" element={<Contact />} />
-         <Route path="solutions/academics-research" element={<Solutionsacedemics />} />
+        <Route path="solutions/academics-research" element={<Solutionsacedemics />} />
         <Route path="solutions/higher-education" element={<SolutionsHigherEducation />} />
         <Route path="solutions/university-communications" element={<Solutionsuniversity />} />
         <Route path="solutions/global-development" element={<Globaldevelopment />} />
         <Route path="solutions/corporate-social-impact" element={<Corporatesocial />} />
         <Route path="solutions/executive-leaders" element={<Executiveleaders />} />
         <Route path="pricing" element={<Pricing />} />
-          <Route path="workshops" element={<Workshops />} />
+        <Route path="workshops" element={<Workshops />} />
         <Route path="faqs" element={<Faq />} />
         <Route path="blog" element={<Blog />} />
         <Route path="privacy" element={<Privacy />} />
@@ -126,6 +131,11 @@ const AppRoutes = () => {
         <Route path="store" element={<DigitalToolkit />} />
         <Route path="voice-calibrator/view" element={<AISpeechDetail />} />
         <Route path="narrative-engine/view" element={<AIWritingDetail />} />
+        <Route path="help-center" element={<HelpCenter />} />
+        <Route path="add-credits" element={<AddCredits />} />
+        <Route path="credit-success" element={<CreditPaymentSuccess />} />
+        <Route path="credit-cancelled" element={<CreditPaymentCancelled />} />
+
 
       </Route>
 

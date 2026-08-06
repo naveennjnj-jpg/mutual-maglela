@@ -476,22 +476,20 @@ const Projects = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
-                  isActive
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${isActive
                     ? "bg-[#0F2D63] text-white shadow-sm"
                     : "text-gray-500 hover:text-[#0F2D63]"
-                }`}
+                  }`}
               >
                 <span className={isActive ? "text-white" : iconColor}>
                   <Icon className="w-4 h-4" />
                 </span>
                 {tab.label}
                 <span
-                  className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
-                    isActive
+                  className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${isActive
                       ? "bg-white/20 text-white"
                       : "bg-gray-100 text-gray-500"
-                  }`}
+                    }`}
                 >
                   {count}
                 </span>
@@ -558,18 +556,25 @@ const Projects = () => {
                         <button
                           onClick={() => {
                             if (project.proceedOption === "ai-writing") {
-                              navigate(`/user/narrative-engine`);
+                              navigate("/user/narrative-engine");
                             } else if (project.proceedOption === "ai-speech") {
-                              navigate(`/user/voice-calibrator`);
+                              navigate("/user/voice-calibrator");
                             } else if (project.proceedOption === "hire-expert") {
-                              navigate(`/user/expert`);
+                              navigate("/user/hire-expert");
                             } else {
-                              navigate(`/user/projects`);
+                              navigate("/user/projects");
                             }
                           }}
                           className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-[#0F2D63] hover:bg-[#1a3d7a] text-white rounded-xl text-xs font-semibold transition-colors"
                         >
-                          <Sparkles className="w-3 h-3" /> Open
+                          <Sparkles className="w-3 h-3" />
+                          {project.proceedOption === "ai-writing"
+                            ? "Open in AI Writing"
+                            : project.proceedOption === "ai-speech"
+                              ? "Open in AI Speech"
+                              : project.proceedOption === "hire-expert"
+                                ? "View"
+                                : "Open"}
                         </button>
                       </div>
                     </div>

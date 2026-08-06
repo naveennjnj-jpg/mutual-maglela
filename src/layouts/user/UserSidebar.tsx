@@ -1,7 +1,7 @@
 // layouts/user/UserSidebar.tsx
-import React, { useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { 
+import React, { useState, useRef, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import {
   LayoutDashboard,
   FolderOpen,
   Presentation,
@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import Logo from "@/assets/home/logo.png";
 import { userSidebar } from "@/constants/userSidebar";
+import { useAuth } from "@/context/AuthContext";
+
 
 interface UserSidebarProps {
   isOpen?: boolean;
@@ -47,7 +49,7 @@ interface SidebarItem {
   badge?: string | number;
 }
 
-const UserSidebar = ({ 
+const UserSidebar = ({
   isOpen = true,
   onToggle,
   onClose,
@@ -56,19 +58,27 @@ const UserSidebar = ({
   userInitials = "U"
 }: UserSidebarProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // ✅ Auto-close on navigation (mobile only)
-  // useEffect(() => {
-  //   if (window.innerWidth < 1024 && onClose) {
-  //     onClose();
-  //   }
-  // }, [location.pathname, onClose]);
+  useEffect(() => {
+    if (window.innerWidth < 1024 && onClose) {
+      onClose();
+    }
+  }, [location.pathname, onClose]);
 
   // ✅ Helper to close only on mobile
   const handleCloseOnMobile = () => {
     if (window.innerWidth < 1024 && onClose) {
       onClose();
     }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
   };
 
   const isActive = (path: string) => {
@@ -83,16 +93,16 @@ const UserSidebar = ({
   const sidebarItems = userSidebar as SidebarItem[];
 
   const groupedItems = {
-    overview: sidebarItems.filter(item => 
+    overview: sidebarItems.filter(item =>
       ["/user"].includes(item.path)
     ),
-    projects: sidebarItems.filter(item => 
+    projects: sidebarItems.filter(item =>
       ["/user/projects", "/user/workshops", "/user/hire-expert"].includes(item.path)
     ),
-    tools: sidebarItems.filter(item => 
+    tools: sidebarItems.filter(item =>
       ["/user/narrative-engine", "/user/voice-calibrator"].includes(item.path)
     ),
-    resources: sidebarItems.filter(item => 
+    resources: sidebarItems.filter(item =>
       ["/user/store"].includes(item.path)
     ),
   };
@@ -136,7 +146,7 @@ const UserSidebar = ({
 
   return (
     <>
-      <aside 
+      <aside
         className={`
           fixed left-0 top-0 bottom-0 z-30 
           bg-[#0F2D63] transition-all duration-300
@@ -156,16 +166,16 @@ const UserSidebar = ({
 
         {/* Logo */}
         <div className={`flex items-center ${isOpen ? 'justify-center' : 'justify-center'} h-20 flex-shrink-0 px-4 border-b border-white/10`}>
-          <Link to="/user" onClick={handleCloseOnMobile}> {/* ✅ Changed to handleCloseOnMobile */}
+          <Link to="/user" onClick={handleCloseOnMobile}>
             {isOpen ? (
-              <img 
-                src={Logo} 
-                alt="Magalela Media" 
+              <img
+                src={Logo}
+                alt="Magalela Media"
                 className="h-10 w-auto object-contain brightness-0 invert"
               />
             ) : (
               <div className="w-8 h-8 bg-[#C85A32] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">U</span>
+                <span className="text-white font-bold text-sm">M</span>
               </div>
             )}
           </Link>
@@ -176,7 +186,7 @@ const UserSidebar = ({
           {Object.entries(groupedItems).map(([key, items]) => {
             if (items.length === 0) return null;
             const CategoryIcon = categoryIcons[key];
-            
+
             return (
               <div key={key} className="mt-4 first:mt-0">
                 {isOpen && (
@@ -193,36 +203,33 @@ const UserSidebar = ({
                   {items.map((item) => {
                     const active = isActive(item.path);
                     const Icon = getIcon(item.path) || item.icon;
-                    
+
                     return (
                       <Link
                         key={item.path}
                         to={item.path}
-                        onClick={handleCloseOnMobile} // ✅ Changed to handleCloseOnMobile
-                        className={`relative flex items-center ${isOpen ? 'gap-3 px-3' : 'gap-0 justify-center px-0'} h-11 rounded-xl transition-all group ${
-                          active ? 'bg-white/10' : 'hover:bg-white/[0.06]'
-                        }`}
+                        onClick={handleCloseOnMobile}
+                        className={`relative flex items-center ${isOpen ? 'gap-3 px-3' : 'gap-0 justify-center px-0'} h-11 rounded-xl transition-all group ${active ? 'bg-white/10' : 'hover:bg-white/[0.06]'
+                          }`}
                       >
                         {active && isOpen && (
                           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 bg-[#C85A32] rounded-r-full"></div>
                         )}
-                        
+
                         {Icon && (
-                          <Icon 
-                            className={`w-[18px] h-[18px] shrink-0 transition-colors ${
-                              active 
-                                ? 'text-[#C85A32]' 
+                          <Icon
+                            className={`w-[18px] h-[18px] shrink-0 transition-colors ${active
+                                ? 'text-[#C85A32]'
                                 : 'text-white/65 group-hover:text-white/90'
-                            }`}
+                              }`}
                           />
                         )}
-                        
+
                         {isOpen && (
-                          <span className={`flex-1 text-[14px] font-medium transition-colors ${
-                            active 
-                              ? 'text-white' 
+                          <span className={`flex-1 text-[14px] font-medium transition-colors ${active
+                              ? 'text-white'
                               : 'text-white/80 group-hover:text-white/95'
-                          }`}>
+                            }`}>
                             {item.title}
                           </span>
                         )}
@@ -248,7 +255,7 @@ const UserSidebar = ({
                   <LifeBuoy className="w-4 h-4 text-[#C85A32]" />
                 </div>
                 <p className="text-white font-semibold text-sm mb-3">Need Help?</p>
-                <Link to="/user/help" onClick={handleCloseOnMobile}> {/* ✅ Changed to handleCloseOnMobile */}
+                <Link to="/user/help-center" onClick={handleCloseOnMobile}>
                   <button className="w-full bg-[#C85A32] hover:bg-[#a8472a] text-white text-xs font-medium rounded-xl h-9 transition-colors">
                     Explore Help Center
                   </button>
@@ -269,19 +276,29 @@ const UserSidebar = ({
                 <p className="text-white text-sm font-medium truncate">{userName}</p>
                 <p className="text-white/50 text-xs truncate">{userEmail}</p>
               </div>
-              <button className="text-white/50 hover:text-white transition-colors">
+              {/* ✅ FIXED: Added onClick handler to open logout modal */}
+              <button 
+                onClick={() => setShowLogoutModal(true)}
+                className="text-white/50 hover:text-white transition-colors"
+                aria-label="Logout"
+              >
                 <LogOut className="w-4 h-4" />
               </button>
             </>
           ) : (
-            <div className="w-9 h-9 bg-[#C85A32] rounded-full flex items-center justify-center shrink-0">
-              <span className="text-white text-xs font-bold">{userInitials}</span>
-            </div>
+            // ✅ FIXED: Added onClick handler to open logout modal for collapsed state
+            <button 
+              onClick={() => setShowLogoutModal(true)}
+              className="w-9 h-9 bg-[#C85A32] rounded-full flex items-center justify-center shrink-0 hover:bg-[#a8472a] transition-colors"
+              aria-label="Logout"
+            >
+              <LogOut className="w-4 h-4 text-white" />
+            </button>
           )}
         </div>
 
         {/* Toggle Button - Desktop only */}
-        <button 
+        <button
           onClick={onToggle}
           className="hidden lg:flex absolute -right-4 top-[130px] items-center justify-center w-8 h-8 bg-[#C85A32] rounded-full shadow-lg hover:bg-[#a8472a] transition-all z-40"
         >
@@ -295,10 +312,41 @@ const UserSidebar = ({
 
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 z-20 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
           onClick={handleCloseOnMobile}
         ></div>
+      )}
+
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-7 w-full max-w-sm shadow-xl">
+            <h3 className="font-semibold text-[#0F2D63] text-lg mb-2">
+              Sign out?
+            </h3>
+            <p className="text-gray-500 text-sm mb-6">
+              You'll need to sign in again to access your workspace.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setShowLogoutModal(false);
+                  await handleLogout();
+                }}
+                className="flex-1 bg-[#C85A32] hover:bg-[#a8472a] text-white rounded-xl py-2.5 text-sm font-semibold transition-colors"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
