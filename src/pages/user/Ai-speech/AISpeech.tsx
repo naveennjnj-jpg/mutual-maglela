@@ -399,7 +399,7 @@ const AISpeech = () => {
   };
 
   const handleTopUp = () => {
-    navigate('/user/credits/topup');
+    navigate('/user/add-credits');
   };
 
   // ============================================
