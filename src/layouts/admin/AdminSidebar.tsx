@@ -144,7 +144,7 @@ const iconMap: Record<string, any> = {
               />
             ) : (
               <div className="w-8 h-8 bg-[#C85A32] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">A</span>
+                <span className="text-white font-bold text-sm">M</span>
               </div>
             )}
           </Link>

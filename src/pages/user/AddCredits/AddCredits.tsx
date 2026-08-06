@@ -76,7 +76,7 @@ interface UserData {
 const AddCredits = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   // ============================================
   // STATE MANAGEMENT
   // ============================================
@@ -98,7 +98,7 @@ const AddCredits = () => {
     const fetchUserBillingInfo = async () => {
       try {
         const token = localStorage.getItem("token");
-        
+
         if (!token) {
           setFetchingUser(false);
           return;
@@ -113,7 +113,7 @@ const AddCredits = () => {
 
         if (response.data.success) {
           const userData = response.data.data;
-          
+
           // Map the user data to billing info
           setUserBillingInfo({
             firstName: userData.firstName || userData.name?.split(' ')[0] || "",
@@ -126,7 +126,7 @@ const AddCredits = () => {
             postalCode: userData.postalCode || userData.zipCode || "",
             country: userData.country || "",
           });
-          
+
           // Also update current balance if available
           if (userData.credits !== undefined) {
             setCurrentBalance(userData.credits);
@@ -137,12 +137,19 @@ const AddCredits = () => {
         // If user info fetch fails, use auth context as fallback
         if (user) {
           // Try to get name from user object
-          const userName = (user as any).name || (user as any).displayName || "";
-          const nameParts = userName.split(' ');
-          
+          const userName = ((user as any).name || (user as any).displayName || "").trim();
+          const nameParts = userName.split(/\s+/);
+
+          const firstName = (user as any).firstName || nameParts[0] || "";
+          const lastName =
+            (user as any).lastName ||
+            (nameParts.length > 1
+              ? nameParts.slice(1).join(" ")
+              : firstName);
+
           setUserBillingInfo({
-            firstName: (user as any).firstName || nameParts[0] || "",
-            lastName: (user as any).lastName || nameParts.slice(1).join(' ') || "",
+            firstName,
+            lastName,
             email: (user as any).email || "",
             phone: (user as any).phone || (user as any).mobile || "",
             company: (user as any).company || (user as any).organization || "",
@@ -156,7 +163,7 @@ const AddCredits = () => {
     fetchUserBillingInfo();
   }, [user, API_URL]);
 
- // User state
+  // User state
   const [userData, setUserData] = useState<UserData>({
     id: '',
     name: 'User',
@@ -171,7 +178,7 @@ const AddCredits = () => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           setLoading(false);
           return;
@@ -185,7 +192,7 @@ const AddCredits = () => {
 
         if (response.data.success && response.data.data) {
           const data = response.data.data;
-          
+
           // Generate initials from name
           const nameParts = data.name?.split(' ') || ['U'];
           const initials = nameParts
@@ -217,7 +224,7 @@ const AddCredits = () => {
         const savedEmail = localStorage.getItem('userEmail') || 'user@email.com';
         const savedCredits = parseInt(localStorage.getItem('userCredits') || '0');
         const savedInitials = savedName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
-        
+
         setUserData(prev => ({
           ...prev,
           name: savedName,
@@ -560,21 +567,19 @@ const AddCredits = () => {
           <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
             <button
               onClick={() => handleBillingToggle("monthly")}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-all ${
-                billingCycle === "monthly"
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-all ${billingCycle === "monthly"
                   ? "bg-[#0F2D63] text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
-              }`}
+                }`}
             >
               Monthly
             </button>
             <button
               onClick={() => handleBillingToggle("yearly")}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-all ${
-                billingCycle === "yearly"
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-all ${billingCycle === "yearly"
                   ? "bg-[#0F2D63] text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
-              }`}
+                }`}
             >
               Yearly
             </button>
@@ -594,15 +599,14 @@ const AddCredits = () => {
             const isPro = plan.type === "pro";
             const currentBilling = getCurrentBilling(plan);
             const isYearly = billingCycle === "yearly";
-            
+
             return (
               <div
                 key={plan.id}
                 className={`relative bg-white rounded-2xl flex flex-col overflow-hidden transition-all duration-200 hover:shadow-lg
-                  ${
-                    isPro
-                      ? "border-2 border-[#C85A32] shadow-xl shadow-[#C85A32]/10"
-                      : "border border-gray-200 shadow-sm hover:border-gray-300"
+                  ${isPro
+                    ? "border-2 border-[#C85A32] shadow-xl shadow-[#C85A32]/10"
+                    : "border border-gray-200 shadow-sm hover:border-gray-300"
                   }`}
               >
                 {/* Popular Badge */}
@@ -686,11 +690,10 @@ const AddCredits = () => {
                   <button
                     onClick={() => handleGetStarted(plan.id)}
                     disabled={loading || !userBillingInfo}
-                    className={`w-full py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
-                      plan.buttonVariant === "primary"
+                    className={`w-full py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${plan.buttonVariant === "primary"
                         ? "bg-[#C85A32] hover:bg-[#a8472a] text-white"
                         : "border border-[#0F2D63] text-[#0F2D63] hover:bg-[#0F2D63] hover:text-white"
-                    } ${loading || !userBillingInfo ? "opacity-70 cursor-not-allowed" : ""}`}
+                      } ${loading || !userBillingInfo ? "opacity-70 cursor-not-allowed" : ""}`}
                   >
                     {loading ? (
                       <>
