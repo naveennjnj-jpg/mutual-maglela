@@ -20,7 +20,9 @@ import {
   Trash2,
   Copy,
   Download,
-  Clock
+  Clock,
+  CreditCard,
+  AlertTriangle
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
@@ -92,6 +94,17 @@ interface ApiResponse {
   data: WritingData[];
 }
 
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  avatar?: string;
+  theme?: string;
+  credits?: number;
+  initials?: string;
+}
+
 // ============================================
 // COMPONENT
 // ============================================
@@ -108,13 +121,102 @@ const AIWriting = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState<string | null>(null);
+  const [showNoCreditsModal, setShowNoCreditsModal] = useState(false);
   const fetchCalled = useRef(false);
+
+  // User state
+  const [userData, setUserData] = useState<UserData>({
+    id: '',
+    name: 'User',
+    email: 'user@email.com',
+    role: 'user',
+    credits: 0,
+    initials: 'U'
+  });
 
   useEffect(() => {
     if (!fetchCalled.current) {
       fetchCalled.current = true;
       fetchDocuments();
     }
+  }, []);
+
+  // Fetch user data on mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        const response = await axios.get(`${API_URL}/api/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.data.success && response.data.data) {
+          const data = response.data.data;
+          
+          // Generate initials from name
+          const nameParts = data.name?.split(' ') || ['U'];
+          const initials = nameParts
+            .map((part: string) => part.charAt(0).toUpperCase())
+            .join('')
+            .slice(0, 2);
+
+          const credits = data.credits || data.creditsBalance || 0;
+
+          setUserData({
+            id: data.id || data._id,
+            name: data.name || 'User',
+            email: data.email || 'user@email.com',
+            role: data.role || 'user',
+            avatar: data.avatar || data.profileImage,
+            theme: data.theme || 'light',
+            credits: credits,
+            initials: initials || 'U'
+          });
+
+          // ✅ CHECK CREDITS - If 0, show modal
+          if (credits === 0) {
+            setShowNoCreditsModal(true);
+          }
+
+          // Apply theme if needed
+          if (data.theme) {
+            localStorage.setItem('theme', data.theme);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        // Fallback to localStorage or default values
+        const savedName = localStorage.getItem('userName') || 'User';
+        const savedEmail = localStorage.getItem('userEmail') || 'user@email.com';
+        const savedCredits = parseInt(localStorage.getItem('userCredits') || '0');
+        const savedInitials = savedName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+        
+        setUserData(prev => ({
+          ...prev,
+          name: savedName,
+          email: savedEmail,
+          credits: savedCredits,
+          initials: savedInitials
+        }));
+
+        // ✅ CHECK CREDITS from localStorage
+        if (savedCredits === 0) {
+          setShowNoCreditsModal(true);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   // ============================================
@@ -316,6 +418,11 @@ const AIWriting = () => {
   // ============================================
 
   const handleCreate = () => {
+    // ✅ CHECK CREDITS BEFORE CREATING
+    if (userData.credits === 0) {
+      setShowNoCreditsModal(true);
+      return;
+    }
     navigate('/user/narrative-engine/create');
   };
 
@@ -328,6 +435,53 @@ const AIWriting = () => {
     setSuccessMessage('Content copied to clipboard!');
     setTimeout(() => setSuccessMessage(null), 3000);
   };
+
+  const handleTopUp = () => {
+    navigate('/user/credits/topup');
+  };
+
+  // ============================================
+  // ✅ NO CREDITS MODAL
+  // ============================================
+
+  const NoCreditsModal = () => (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-xl">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+          </div>
+          <h3 className="text-xl font-semibold text-[#0F2D63] dark:text-white mb-2">
+            No Credits Available
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+            You have <span className="font-bold text-red-500">0 credits</span>. Please top up your credits to create AI Writing documents.
+          </p>
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mb-6">
+            <p className="text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
+              <CreditCard className="w-4 h-4" />
+              Each AI Writing generation costs 1 credit
+            </p>
+          </div>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => setShowNoCreditsModal(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+            >
+              Close
+            </button>
+            <button
+              onClick={handleTopUp}
+              className="px-4 py-2 bg-[#C85A32] hover:bg-[#a8472a] text-white text-sm font-medium rounded-xl transition-colors flex items-center gap-2"
+            >
+              <CreditCard className="w-4 h-4" />
+              Top Up Credits
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   // ============================================
   // ✅ DELETE MODAL
@@ -389,6 +543,9 @@ const AIWriting = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[1500px] mx-auto">
+        {/* No Credits Modal */}
+        {showNoCreditsModal && <NoCreditsModal />}
+
         {/* Delete Modal */}
         {showDeleteModal && (
           <DeleteModal 
@@ -409,6 +566,23 @@ const AIWriting = () => {
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
               Generate and manage institutional communication narratives
             </p>
+            {/* ✅ CREDIT DISPLAY - Show credits */}
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                Credits:
+              </span>
+              <span className={`text-sm font-semibold ${userData.credits === 0 ? 'text-red-500' : 'text-[#0F2D63] dark:text-white'}`}>
+                {userData.credits}
+              </span>
+              {userData.credits === 0 && (
+                <button
+                  onClick={handleTopUp}
+                  className="text-xs text-[#C85A32] hover:underline font-medium"
+                >
+                  Top Up
+                </button>
+              )}
+            </div>
           </div>
           <button
             onClick={handleCreate}
@@ -418,6 +592,23 @@ const AIWriting = () => {
             Create AI Writing
           </button>
         </div>
+
+        {/* ✅ CREDIT WARNING BANNER - Show if credits are 0 */}
+        {userData.credits === 0 && (
+          <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 mb-4">
+            <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <p className="text-sm text-amber-700 dark:text-amber-300 flex-1">
+              <strong>No credits available.</strong> Please top up your credits to create new AI Writing documents.
+            </p>
+            <button
+              onClick={handleTopUp}
+              className="flex items-center gap-2 px-3 py-1.5 bg-[#C85A32] hover:bg-[#a8472a] text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
+            >
+              <CreditCard className="w-3.5 h-3.5" />
+              Top Up Now
+            </button>
+          </div>
+        )}
 
         {/* Search */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-5">

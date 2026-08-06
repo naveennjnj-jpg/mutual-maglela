@@ -58,6 +58,16 @@ interface UserBillingInfo {
   postalCode?: string;
   country?: string;
 }
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  avatar?: string;
+  theme?: string;
+  credits?: number;
+  initials?: string;
+}
 
 // ============================================
 // MAIN COMPONENT
@@ -145,6 +155,85 @@ const AddCredits = () => {
 
     fetchUserBillingInfo();
   }, [user, API_URL]);
+
+ // User state
+  const [userData, setUserData] = useState<UserData>({
+    id: '',
+    name: 'User',
+    email: 'user@email.com',
+    role: 'user',
+    credits: 0,
+    initials: 'U'
+  });
+
+  // Fetch user data on mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        const response = await axios.get(`${API_URL}/api/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.data.success && response.data.data) {
+          const data = response.data.data;
+          
+          // Generate initials from name
+          const nameParts = data.name?.split(' ') || ['U'];
+          const initials = nameParts
+            .map((part: string) => part.charAt(0).toUpperCase())
+            .join('')
+            .slice(0, 2);
+
+          setUserData({
+            id: data.id || data._id,
+            name: data.name || 'User',
+            email: data.email || 'user@email.com',
+            role: data.role || 'user',
+            avatar: data.avatar || data.profileImage,
+            theme: data.theme || 'light',
+            credits: data.credits || data.creditsBalance || 0,
+            initials: initials || 'U'
+          });
+
+          // Apply theme if needed
+          if (data.theme) {
+            localStorage.setItem('theme', data.theme);
+            // You can call a theme function here if you have one
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        // Fallback to localStorage or default values
+        const savedName = localStorage.getItem('userName') || 'User';
+        const savedEmail = localStorage.getItem('userEmail') || 'user@email.com';
+        const savedCredits = parseInt(localStorage.getItem('userCredits') || '0');
+        const savedInitials = savedName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+        
+        setUserData(prev => ({
+          ...prev,
+          name: savedName,
+          email: savedEmail,
+          credits: savedCredits,
+          initials: savedInitials
+        }));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+
 
   // ============================================
   // DATA
@@ -255,7 +344,7 @@ const AddCredits = () => {
   // ============================================
 
   const handleBack = () => {
-    navigate("/user/dashboard");
+    navigate("/user");
   };
 
   const handleBillingToggle = (cycle: "monthly" | "yearly") => {
@@ -460,7 +549,7 @@ const AddCredits = () => {
           </div>
           <div>
             <p className="text-xs text-gray-400 font-medium">Current Balance</p>
-            <p className="text-base font-bold text-[#0F2D63]">{currentBalance} credits</p>
+            <p className="text-base font-bold text-[#0F2D63]"> {loading ? '...' : userData.credits} credits</p>
           </div>
         </div>
 
