@@ -252,7 +252,7 @@ This strategic approach positions our organization to achieve meaningful impact 
   };
 
   const handleBack = () => {
-    navigate('/user/ai-writing');
+    navigate('/user/narrative-engine');
   };
 
   // Processing Screen

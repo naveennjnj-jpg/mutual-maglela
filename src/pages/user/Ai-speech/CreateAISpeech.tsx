@@ -491,7 +491,7 @@ const handleGenerate = async () => {
 };
 
   const handleBack = () => {
-    navigate('/user/ai-speech');
+    navigate('/user/voice-calibrator');
   };
 
   // Processing Screen

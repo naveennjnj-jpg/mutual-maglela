@@ -189,6 +189,14 @@ a:hover {
 a:hover .text-\[\#C85A32\] {
     color: #fff !important;
 }
+a.h-11 {
+    height: calc(var(--spacing) * 11);
+}
+aside.fixed.left-0.top-0.bottom-0.z-30.bg-\[\#0F2D63\].transition-all.duration-300.flex.flex-col.-translate-x-full.lg\:translate-x-0.w-\[72px\] a.h-11 {
+    height: calc(var(--spacing) * 11);
+    width: calc(var(--spacing) * 11);
+}
+
 button.hover\:bg-\[\#FFF8F5\]:hover .text-\[\#C85A32\] {
 color: white !important;
 }

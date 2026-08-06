@@ -1,7 +1,7 @@
 // pages/user/Ai-writing/AIWritingDetail.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
+import {
   ArrowLeft,
   Copy,
   Download,
@@ -504,7 +504,7 @@ const AIWritingDetail = () => {
                   const label = labels[key] || key;
                   const color = getParamColor(value);
                   const bgColor = getParamBgColor(value);
-                  
+
                   return (
                     <div key={key} className={`${bgColor} rounded-xl p-3 text-center`}>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -567,6 +567,18 @@ const AIWritingDetail = () => {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+        {/* Disclaimer */}
+        <div className="mt-6 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 flex items-start gap-3">
+          <span className="text-amber-500 text-lg flex-shrink-0 mt-0.5">⚠️</span>
+          <div>
+            <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1.5">
+              Disclaimer
+            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+              AI-generated content from Magalela Media Services may contain inaccuracies and is not intended for immediate publication. All outputs must be submitted to an editor for final review and approval.
+            </p>
           </div>
         </div>
       </div>

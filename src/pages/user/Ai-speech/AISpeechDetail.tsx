@@ -1,7 +1,7 @@
 // pages/user/Ai-speech/AISpeechDetail.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
+import {
   ArrowLeft,
   Copy,
   Download,
@@ -525,8 +525,8 @@ const AISpeechDetail = () => {
                   <div className="flex items-center gap-2">
                     <Volume2 className="w-4 h-4 text-gray-400" />
                     <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-[#C85A32] rounded-full transition-all duration-300" 
+                      <div
+                        className="h-full bg-[#C85A32] rounded-full transition-all duration-300"
                         style={{ width: `${audioProgress}%` }}
                       ></div>
                     </div>
@@ -572,13 +572,13 @@ const AISpeechDetail = () => {
                 const isHigh = value >= 70;
                 const isMid = value >= 50 && value < 70;
                 const isLow = value < 50;
-                const color = isHigh ? 'text-green-600 dark:text-green-400' : 
-                             isMid ? 'text-amber-600 dark:text-amber-400' : 
-                             'text-red-600 dark:text-red-400';
-                const bgColor = isHigh ? 'bg-green-50 dark:bg-green-900/20' : 
-                               isMid ? 'bg-amber-50 dark:bg-amber-900/20' : 
-                               'bg-red-50 dark:bg-red-900/20';
-                
+                const color = isHigh ? 'text-green-600 dark:text-green-400' :
+                  isMid ? 'text-amber-600 dark:text-amber-400' :
+                    'text-red-600 dark:text-red-400';
+                const bgColor = isHigh ? 'bg-green-50 dark:bg-green-900/20' :
+                  isMid ? 'bg-amber-50 dark:bg-amber-900/20' :
+                    'bg-red-50 dark:bg-red-900/20';
+
                 return (
                   <div key={key} className={`${bgColor} rounded-xl p-3 text-center`}>
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -621,6 +621,18 @@ const AISpeechDetail = () => {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+        {/* Disclaimer */}
+        <div className="mt-6 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 flex items-start gap-3">
+          <span className="text-amber-500 text-base flex-shrink-0 mt-0.5">⚠️</span>
+          <div>
+            <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1">
+              Disclaimer
+            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+              AI-generated content from Magalela Media Services may contain inaccuracies and is not intended for immediate publication. All outputs must be submitted to an editor for final review and approval.
+            </p>
           </div>
         </div>
       </div>
