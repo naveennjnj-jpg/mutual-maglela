@@ -1,10 +1,10 @@
 // pages/user/AISpeech.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Plus, 
-  Search, 
-  Eye, 
+import {
+  Plus,
+  Search,
+  Eye,
   MoreVertical,
   Mic,
   Calendar,
@@ -132,7 +132,7 @@ const AISpeech = () => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           setLoading(false);
           return;
@@ -146,7 +146,7 @@ const AISpeech = () => {
 
         if (response.data.success && response.data.data) {
           const data = response.data.data;
-          
+
           const nameParts = data.name?.split(' ') || ['U'];
           const initials = nameParts
             .map((part: string) => part.charAt(0).toUpperCase())
@@ -181,7 +181,7 @@ const AISpeech = () => {
         const savedEmail = localStorage.getItem('userEmail') || 'user@email.com';
         const savedCredits = parseInt(localStorage.getItem('userCredits') || '0');
         const savedInitials = savedName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
-        
+
         setUserData(prev => ({
           ...prev,
           name: savedName,
@@ -510,9 +510,9 @@ const AISpeech = () => {
 
         {/* Delete Modal */}
         {showDeleteModal && (
-          <DeleteModal 
-            id={showDeleteModal} 
-            title={speeches.find(s => s._id === showDeleteModal)?.title || ''} 
+          <DeleteModal
+            id={showDeleteModal}
+            title={speeches.find(s => s._id === showDeleteModal)?.title || ''}
           />
         )}
 
@@ -561,7 +561,11 @@ const AISpeech = () => {
             </div>
             <button
               onClick={handleCreate}
-              className="flex items-center gap-2 bg-[#C85A32] hover:bg-[#a8472a] text-white rounded-xl px-4 py-2 text-sm font-semibold transition-colors whitespace-nowrap"
+              disabled={(userData.credits ?? 10) <= 10}
+              className={`flex items-center gap-2 text-white rounded-xl px-4 py-2 text-sm font-semibold transition-colors whitespace-nowrap ${(userData.credits ?? 10) <= 10
+                  ? 'bg-gray-400 cursor-not-allowed opacity-50'
+                  : 'bg-[#C85A32] hover:bg-[#a8472a]'
+                }`}
             >
               <Plus className="w-4 h-4" />
               Create AI Speech
@@ -615,13 +619,12 @@ const AISpeech = () => {
           {filteredSpeeches.length > 0 ? (
             filteredSpeeches.map((speech, index) => {
               const topParams = getTopParameters(speech.parameters);
-              
+
               return (
                 <div
                   key={speech._id}
-                  className={`grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${
-                    index < filteredSpeeches.length - 1 ? 'border-b border-gray-50 dark:border-gray-700/50' : ''
-                  }`}
+                  className={`grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${index < filteredSpeeches.length - 1 ? 'border-b border-gray-50 dark:border-gray-700/50' : ''
+                    }`}
                   onClick={() => handleView(speech)}
                 >
                   <div className="col-span-3 flex items-center gap-3 min-w-0">
@@ -651,11 +654,10 @@ const AISpeech = () => {
 
                   <div className="col-span-2 flex items-center justify-center">
                     <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1">
-                      <span className={`text-sm font-bold ${
-                        speech.avgScore >= 70 ? 'text-green-600 dark:text-green-400' :
-                        speech.avgScore >= 50 ? 'text-amber-600 dark:text-amber-400' :
-                        'text-red-600 dark:text-red-400'
-                      }`}>
+                      <span className={`text-sm font-bold ${speech.avgScore >= 70 ? 'text-green-600 dark:text-green-400' :
+                          speech.avgScore >= 50 ? 'text-amber-600 dark:text-amber-400' :
+                            'text-red-600 dark:text-red-400'
+                        }`}>
                         {speech.avgScore}
                       </span>
                       <span className="text-xs text-gray-400 dark:text-gray-500">/ 100</span>

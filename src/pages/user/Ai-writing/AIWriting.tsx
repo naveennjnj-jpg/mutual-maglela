@@ -1,10 +1,10 @@
 // pages/user/AIWriting.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Plus, 
-  Search, 
-  Eye, 
+import {
+  Plus,
+  Search,
+  Eye,
   MoreVertical,
   Megaphone,
   Lightbulb,
@@ -146,7 +146,7 @@ const AIWriting = () => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           setLoading(false);
           return;
@@ -160,7 +160,7 @@ const AIWriting = () => {
 
         if (response.data.success && response.data.data) {
           const data = response.data.data;
-          
+
           // Generate initials from name
           const nameParts = data.name?.split(' ') || ['U'];
           const initials = nameParts
@@ -198,7 +198,7 @@ const AIWriting = () => {
         const savedEmail = localStorage.getItem('userEmail') || 'user@email.com';
         const savedCredits = parseInt(localStorage.getItem('userCredits') || '0');
         const savedInitials = savedName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
-        
+
         setUserData(prev => ({
           ...prev,
           name: savedName,
@@ -548,9 +548,9 @@ const AIWriting = () => {
 
         {/* Delete Modal */}
         {showDeleteModal && (
-          <DeleteModal 
-            id={showDeleteModal} 
-            title={documents.find(d => d._id === showDeleteModal)?.title || ''} 
+          <DeleteModal
+            id={showDeleteModal}
+            title={documents.find(d => d._id === showDeleteModal)?.title || ''}
           />
         )}
 
@@ -586,7 +586,11 @@ const AIWriting = () => {
           </div>
           <button
             onClick={handleCreate}
-            className="flex items-center gap-2 bg-[#C85A32] hover:bg-[#a8472a] text-white rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors"
+            disabled={(userData.credits ?? 10) <= 10}
+            className={`flex items-center gap-2 text-white rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${(userData.credits ?? 10) <= 10
+                ? 'bg-gray-400 cursor-not-allowed opacity-50'
+                : 'bg-[#C85A32] hover:bg-[#a8472a]'
+              }`}
           >
             <Plus className="w-4 h-4" />
             Create AI Writing
@@ -666,9 +670,8 @@ const AIWriting = () => {
             filteredDocuments.map((doc, index) => (
               <div
                 key={doc._id}
-                className={`grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${
-                  index < filteredDocuments.length - 1 ? 'border-b border-gray-50 dark:border-gray-700/50' : ''
-                }`}
+                className={`grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${index < filteredDocuments.length - 1 ? 'border-b border-gray-50 dark:border-gray-700/50' : ''
+                  }`}
                 onClick={() => handleView(doc)}
               >
                 {/* Title */}
