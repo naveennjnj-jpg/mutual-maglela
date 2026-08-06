@@ -7,6 +7,7 @@ import StrategicCommunication from "@/components/Common/StrategicCommunication";
 import MeasurableOutcomes from "@/components/Common/MeasurableOutcomes";
 import TestimonialQuote from "@/components/Common/TestimonialQuote";
 import ResearchCTA from "@/components/Solutions/Academics/ResearchCTA";
+import education from "@/assets/solutions/education.png";
 import {
     Megaphone,
     MessageSquare,
@@ -41,7 +42,7 @@ const Home = () => {
                     text: "View Pricing",
                     link: "/pricing"
                 }}
-                image="https://images.unsplash.com/photo-1758270704602-9d4103704ad4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw2fHx1bml2ZXJzaXR5JTIwbGVjdHVyZSUyMGhhbGwlMjBhdWRpdG9yaXVtfGVufDF8fHx8MTc4MTM1MzUwMHww&ixlib=rb-4.1.0&q=80&w=1400"
+                image={education}
             />
 
 
@@ -50,7 +51,7 @@ const Home = () => {
                     { id: 1, number: "40+", label: "Clients Served" },
                     { id: 2, number: "15+", label: "Years of Experience" },
                     { id: 3, number: "2M+", label: "People Reached" },
-                    { id: 4, number: "90%", label: "Client Retention Rate" },
+                    { id: 4, number: "100%", label: "Client Retention Rate" },
                 ]}
             />
             <Challenge

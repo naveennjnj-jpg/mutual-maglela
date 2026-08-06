@@ -1,13 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-
+import homehero from "@/assets/home/homehero.png";
 const HeroSection = () => {
   return (
     <section className="relative h-[780px] overflow-hidden -mt-20">
       {/* Background Image */}
       <img
-        src="https://images.unsplash.com/photo-1577948000111-9c970dfe3743?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1400&q=80"
+        src={homehero}
         alt="Johannesburg"
         className="absolute inset-0 w-full h-full object-cover"
       />
@@ -88,15 +88,15 @@ const HeroSection = () => {
           {/* Stats */}
           <div className="flex flex-wrap gap-6">
             <div>
-              <p className="text-white font-bold text-base leading-none">130+</p>
+              <p className="text-white font-bold text-base leading-none">100+</p>
               <p className="text-white/50 text-xs mt-0.5">Projects</p>
             </div>
             <div>
-              <p className="text-white font-bold text-base leading-none">500+</p>
+              <p className="text-white font-bold text-base leading-none">50+</p>
               <p className="text-white/50 text-xs mt-0.5">Clients</p>
             </div>
             <div>
-              <p className="text-white font-bold text-base leading-none">98%</p>
+              <p className="text-white font-bold text-base leading-none">100%</p>
               <p className="text-white/50 text-xs mt-0.5">Success Rate</p>
             </div>
           </div>

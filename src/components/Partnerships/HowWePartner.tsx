@@ -1,4 +1,6 @@
 import React from "react";
+import partnerhero from "@/assets/partnership/partner1.png"
+import partner2 from "@/assets/partnership/partner2.png"
 
 interface HowWePartnerProps {
   title?: string;
@@ -24,7 +26,7 @@ const HowWePartner = ({
     {
       id: 1,
       image:
-        "https://images.unsplash.com/photo-1766297247924-6638d54e7c89?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800&q=80",
+        partnerhero,
       imageAlt: "Scientists working in university laboratory",
       badge: "Academics & Researchers",
       title: "Partnering with Academics and Researchers",
@@ -166,7 +168,7 @@ const HowWePartner = ({
     {
       id: 6,
       image:
-        "https://images.unsplash.com/photo-1758518731706-be5d5230e5a5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800&q=80",
+        partner2,
       imageAlt: "Executive team in boardroom meeting",
       badge: "Executive Leaders & Founders",
       title: "Partnering with Executive Leaders and Founders",

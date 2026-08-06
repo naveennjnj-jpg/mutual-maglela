@@ -47,7 +47,7 @@ const Home = () => {
 
             <StatsSection
                 stats={[
-                    { id: 1, number: "25+", label: "Years of Combined Comms Expertise" },
+                    { id: 1, number: "15+", label: "Years of Combined Comms Expertise" },
                     { id: 2, number: "44h", label: "Average Crisis Response Deployment Time" },
                     { id: 3, number: "60%", label: "Reduction in Reactive Communications" },
                     { id: 4, number: "100%", label: "Of Partner Institutions Report Enhanced Reputation" },

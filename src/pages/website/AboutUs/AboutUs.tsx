@@ -19,7 +19,7 @@ const Home = () => {
   return (
     <>
 <HeroSection
-  badge="Partnerships"
+  badge="About Us"
   title="Build Partnerships That Drive Real-World Change"
   description="We partner with universities, research networks, NGOs, foundations, and corporate teams to build communications infrastructure that amplifies mission, builds trust, and drives lasting impact across Africa and beyond."
   primaryButton={{

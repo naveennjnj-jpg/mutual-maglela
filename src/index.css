@@ -183,7 +183,15 @@
   }
 
 }
-
+a:hover {
+    background: initial !important;
+}
+a:hover .text-\[\#C85A32\] {
+    color: #fff !important;
+}
+button.hover\:bg-\[\#FFF8F5\]:hover .text-\[\#C85A32\] {
+color: white !important;
+}
 /* ============================================
    UTILITY CLASSES
    ============================================ */

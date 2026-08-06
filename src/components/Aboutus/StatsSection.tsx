@@ -4,12 +4,12 @@ const StatsSection = () => {
   const stats = [
     {
       id: 1,
-      number: "150+",
+      number: "15+",
       label: "Institutional partners",
     },
     {
       id: 2,
-      number: "500+",
+      number: "70+",
       label: "Projects delivered",
     },
     {
@@ -19,7 +19,7 @@ const StatsSection = () => {
     },
     {
       id: 4,
-      number: "98%",
+      number: "100%",
       label: "Client satisfaction rate",
     },
   ];
