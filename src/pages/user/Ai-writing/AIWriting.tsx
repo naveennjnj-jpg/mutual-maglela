@@ -583,6 +583,17 @@ const AIWriting = () => {
                 </button>
               )}
             </div>
+                  {/* ✅ WARNING TEXT - Show when credits less than 10 */}
+      {(userData.credits ?? 0) < 10 && (
+        <div className="flex items-center gap-1.5 mt-1">
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+          <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+            {userData.credits === 0 
+              ? 'No credits available. Please top up to create AI Speech.' 
+              : `Low credits (${userData.credits}/10). Please top up to continue.`}
+          </span>
+        </div>
+      )}
           </div>
           <button
             onClick={handleCreate}
