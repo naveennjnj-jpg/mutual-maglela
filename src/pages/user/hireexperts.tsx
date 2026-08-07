@@ -323,14 +323,14 @@ const HireExperts = () => {
                     {expert.title && (
                       <p className="text-xs text-gray-500 dark:text-gray-400">{expert.title}</p>
                     )}
-                    <div className="flex items-center gap-2 mt-1">
+                    {/* <div className="flex items-center gap-2 mt-1">
                       {expert.hourlyRate && expert.hourlyRate > 0 && (
                         <span className="text-xs font-semibold text-[#C85A32]">
                           R{expert.hourlyRate}/hr
                         </span>
                       )}
                       {getAvailabilityBadge(expert.availability)}
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
