@@ -495,51 +495,56 @@ const UserDashboard = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-3 w-full lg:w-[340px] shrink-0">
-              <div className="bg-white/8 hover:bg-white/14 border border-white/15 rounded-2xl p-4 transition-all cursor-pointer">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-7 h-7 bg-white/15 rounded-lg flex items-center justify-center">
-                    <FileText className="w-3.5 h-3.5 text-white" />
+              <Link to="/user/narrative-engine" className="block">
+                <div className="bg-white/8 hover:bg-white/14 border border-white/15 rounded-2xl p-4 transition-all cursor-pointer">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-7 h-7 bg-white/15 rounded-lg flex items-center justify-center">
+                      <FileText className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <p className="text-white/65 text-xs">AI Writing</p>
                   </div>
-                  <p className="text-white/65 text-xs">AI Writing</p>
+                  <p className="text-white font-bold text-2xl leading-none mb-1">{stats.totalWritings}</p>
+                  <p className="text-white/45 text-xs">Generated</p>
                 </div>
-                <p className="text-white font-bold text-2xl leading-none mb-1">{stats.totalWritings}</p>
-                <p className="text-white/45 text-xs">Generated</p>
-              </div>
-
-              <div className="bg-white/8 hover:bg-white/14 border border-white/15 rounded-2xl p-4 transition-all cursor-pointer">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-7 h-7 bg-white/15 rounded-lg flex items-center justify-center">
-                    <Mic className="w-3.5 h-3.5 text-white" />
+              </Link>
+              <Link to="/user/voice-calibrator" className="block">
+                <div className="bg-white/8 hover:bg-white/14 border border-white/15 rounded-2xl p-4 transition-all cursor-pointer">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-7 h-7 bg-white/15 rounded-lg flex items-center justify-center">
+                      <Mic className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <p className="text-white/65 text-xs">AI Speech</p>
                   </div>
-                  <p className="text-white/65 text-xs">AI Speech</p>
+                  <p className="text-white font-bold text-2xl leading-none mb-1">{stats.totalSpeeches}</p>
+                  <p className="text-white/45 text-xs">Recordings</p>
                 </div>
-                <p className="text-white font-bold text-2xl leading-none mb-1">{stats.totalSpeeches}</p>
-                <p className="text-white/45 text-xs">Recordings</p>
-              </div>
-
-              <div className="bg-white/8 hover:bg-white/14 border border-white/15 rounded-2xl p-4 transition-all cursor-pointer">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-7 h-7 bg-white/15 rounded-lg flex items-center justify-center">
-                    <Briefcase className="w-3.5 h-3.5 text-white" />
+              </Link>
+              <Link to="/user/projects" className="block">
+                <div className="bg-white/8 hover:bg-white/14 border border-white/15 rounded-2xl p-4 transition-all cursor-pointer">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-7 h-7 bg-white/15 rounded-lg flex items-center justify-center">
+                      <Briefcase className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <p className="text-white/65 text-xs">Projects</p>
                   </div>
-                  <p className="text-white/65 text-xs">Projects</p>
+                  <p className="text-white font-bold text-2xl leading-none mb-1">{stats.totalProjects}</p>
+                  <p className="text-white/45 text-xs">
+                    {stats.completedProjects} completed
+                  </p>
                 </div>
-                <p className="text-white font-bold text-2xl leading-none mb-1">{stats.totalProjects}</p>
-                <p className="text-white/45 text-xs">
-                  {stats.completedProjects} completed
-                </p>
-              </div>
-
-              <div className="bg-white/8 hover:bg-white/14 border border-white/15 rounded-2xl p-4 transition-all cursor-pointer">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-7 h-7 bg-white/15 rounded-lg flex items-center justify-center">
-                    <BookOpen className="w-3.5 h-3.5 text-white" />
+              </Link>
+              <Link to="/user/workshops" className="block">
+                <div className="bg-white/8 hover:bg-white/14 border border-white/15 rounded-2xl p-4 transition-all cursor-pointer">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-7 h-7 bg-white/15 rounded-lg flex items-center justify-center">
+                      <BookOpen className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <p className="text-white/65 text-xs">Workshops</p>
                   </div>
-                  <p className="text-white/65 text-xs">Workshops</p>
+                  <p className="text-white font-bold text-2xl leading-none mb-1">{stats.totalWorkshops}</p>
+                  <p className="text-white/45 text-xs">Available</p>
                 </div>
-                <p className="text-white font-bold text-2xl leading-none mb-1">{stats.totalWorkshops}</p>
-                <p className="text-white/45 text-xs">Available</p>
-              </div>
+              </Link>
             </div>
           </div>
         </div>

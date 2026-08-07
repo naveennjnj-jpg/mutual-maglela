@@ -1,6 +1,7 @@
 // pages/user/Ai-writing/Result.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import {
   ArrowLeft,
   Copy,
@@ -12,7 +13,9 @@ import {
   Calendar,
   User,
   Sparkles,
-  Clock
+  Clock,
+  Save,
+  X
 } from 'lucide-react';
 
 interface ResultData {
@@ -20,7 +23,7 @@ interface ResultData {
   type: string;
   tone: string;
   content: string;
-  outline: string[];
+  outline: string[] | string;
   wordCount: number;
   createdAt: string;
   author: string;
@@ -29,12 +32,19 @@ interface ResultData {
 const Result = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const resultData = location.state?.data as ResultData || getMockResult();
+  const [resultData, setResultData] = useState<ResultData>(
+    location.state?.data as ResultData || getMockResult()
+  );
+  
+  // Edit mode states
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(resultData.title);
+  const [editContent, setEditContent] = useState(resultData.content);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleCopyContent = () => {
     if (resultData?.content) {
       navigator.clipboard.writeText(resultData.content);
-      // You can add toast notification here
       alert('Content copied to clipboard!');
     }
   };
@@ -53,17 +63,83 @@ const Result = () => {
     }
   };
 
-  const handleEdit = () => {
-    // Navigate to edit page or open editor
-    navigate('/user/ai-writing/edit', { state: { data: resultData } });
+  const handleEditToggle = () => {
+    if (isEditing) {
+      setEditTitle(resultData.title);
+      setEditContent(resultData.content);
+      setIsEditing(false);
+    } else {
+      setEditTitle(resultData.title);
+      setEditContent(resultData.content);
+      setIsEditing(true);
+    }
+  };
+
+  const handleSaveChanges = () => {
+    setIsSaving(true);
+    setTimeout(() => {
+      setResultData({
+        ...resultData,
+        title: editTitle.trim() || resultData.title,
+        content: editContent.trim() || resultData.content,
+        wordCount: editContent.trim().split(/\s+/).length || 0,
+      });
+      setIsEditing(false);
+      setIsSaving(false);
+      alert('Changes saved successfully!');
+    }, 500);
   };
 
   const handleBack = () => {
-    navigate('/user/ai-writing');
+    navigate('/user/narrative-engine');
   };
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const getWordCount = (text: string) => {
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
+  // ✅ Convert outline to markdown string
+  const getOutlineMarkdown = () => {
+    const outline = resultData.outline;
+    if (!outline) return null;
+
+    let items: string[] = [];
+
+    if (typeof outline === 'string') {
+      // If outline is already a string with markdown
+      if (outline.includes('**') || outline.includes('#')) {
+        return outline;
+      }
+      // If outline is plain text with numbers
+      items = outline.split(/\n(?=\d+\.)/).map((item: string) => {
+        return item.replace(/^\d+\.\s*/, '').trim();
+      }).filter(Boolean);
+    } else if (Array.isArray(outline)) {
+      items = outline;
+    }
+
+    if (items.length === 0) return null;
+
+    // Convert to markdown numbered list
+    return items.map((item, index) => `${index + 1}. ${item}`).join('\n');
+  };
+
+  // ✅ Combined content with outline + main content
+  const getFullMarkdownContent = () => {
+    let fullContent = '';
+    
+    // Add outline if exists
+    const outlineMarkdown = getOutlineMarkdown();
+    if (outlineMarkdown) {
+      fullContent += `## Outline\n\n${outlineMarkdown}\n\n---\n\n`;
+    }
+
+    // Add main content
+    if (resultData.content) {
+      fullContent += resultData.content;
+    }
+
+    return fullContent;
   };
 
   if (!resultData) {
@@ -71,16 +147,15 @@ const Result = () => {
       <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 flex items-center justify-center p-6">
         <div className="text-center">
           <p className="text-gray-500 dark:text-gray-400">No content found</p>
-          <button
-            onClick={handleBack}
-            className="mt-4 text-[#C85A32] hover:underline"
-          >
+          <button onClick={handleBack} className="mt-4 text-[#C85A32] hover:underline">
             Go back
           </button>
         </div>
       </div>
     );
   }
+
+  const fullMarkdownContent = getFullMarkdownContent();
 
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
@@ -111,13 +186,33 @@ const Result = () => {
               <Download className="w-4 h-4" />
               Download
             </button>
-            <button
-              onClick={handleEdit}
-              className="flex items-center gap-2 px-4 py-2 bg-[#C85A32] hover:bg-[#a8472a] text-white rounded-xl text-sm font-medium transition-colors"
-            >
-              <Edit className="w-4 h-4" />
-              Edit
-            </button>
+            {!isEditing ? (
+              <button
+                onClick={handleEditToggle}
+                className="flex items-center gap-2 px-4 py-2 bg-[#C85A32] hover:bg-[#a8472a] text-white rounded-xl text-sm font-medium transition-colors"
+              >
+                <Edit className="w-4 h-4" />
+                Edit
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleEditToggle}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl text-sm font-medium transition-colors text-gray-600 dark:text-gray-300"
+                >
+                  <X className="w-4 h-4" />
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveChanges}
+                  disabled={isSaving}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save className="w-4 h-4" />
+                  {isSaving ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -125,9 +220,20 @@ const Result = () => {
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 mb-6">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-[#0F2D63] dark:text-white">
-                {resultData.title}
-              </h1>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="text-2xl font-bold text-[#0F2D63] dark:text-white bg-transparent border-b-2 border-[#C85A32] focus:outline-none w-full pb-1"
+                  placeholder="Enter title..."
+                  autoFocus
+                />
+              ) : (
+                <h1 className="text-2xl font-bold text-[#0F2D63] dark:text-white">
+                  {resultData.title}
+                </h1>
+              )}
               <div className="flex flex-wrap items-center gap-3 mt-3">
                 <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full">
                   {resultData.type}
@@ -138,7 +244,7 @@ const Result = () => {
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                   <FileText className="w-3 h-3" />
-                  {resultData.wordCount} words
+                  {isEditing ? getWordCount(editContent) : resultData.wordCount} words
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                   <Clock className="w-3 h-3" />
@@ -155,78 +261,88 @@ const Result = () => {
           </div>
         </div>
 
-        {/* Content Display */}
+        {/* ✅ Full Content with Markdown Rendering (Outline + Content) */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-
-          {/* Outline */}
-          {resultData.outline && (
-            <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-              <h3 className="text-sm font-semibold text-[#0F2D63] dark:text-white mb-3">Outline</h3>
-              <div className="flex flex-wrap gap-2">
-                {/* Handle both string and array formats */}
-                {typeof resultData.outline === 'string' ? (
-                  // If outline is a string, split by newlines or numbers
-                  resultData.outline.split(/\n(?=\d+\.)/).map((item: string, index: number) => {
-                    const cleanItem = item.replace(/^\d+\.\s*/, '').trim();
-                    if (cleanItem) {
-                      return (
-                        <span
-                          key={index}
-                          className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-full"
-                        >
-                          {cleanItem}
-                        </span>
-                      );
-                    }
-                    return null;
-                  }).filter(Boolean)
-                ) : Array.isArray(resultData.outline) ? (
-                  // If outline is an array, map it directly
-                  resultData.outline.map((item: string, index: number) => (
-                    <span
-                      key={index}
-                      className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-full"
-                    >
-                      {index + 1}. {item}
-                    </span>
-                  ))
-                ) : null}
-              </div>
-            </div>
-          )}
-
-          {/* Content */}
           <div className="p-6">
             <div className="prose prose-sm max-w-none dark:prose-invert">
-              {resultData.content ? (
-                <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
-                  {resultData.content}
-                </div>
+              {isEditing ? (
+                <textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  className="w-full min-h-[400px] p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 leading-relaxed text-sm focus:outline-none focus:ring-2 focus:ring-[#C85A32] focus:border-transparent resize-y font-mono"
+                  placeholder="Enter your content here..."
+                />
               ) : (
-                <p className="text-gray-400 dark:text-gray-500 text-center py-8">
-                  No content available
-                </p>
+                <>
+                  {fullMarkdownContent ? (
+                    <ReactMarkdown
+                      components={{
+                        h1: ({ children }) => <h1 className="text-2xl font-bold text-[#0F2D63] dark:text-white mt-6 mb-4">{children}</h1>,
+                        h2: ({ children }) => <h2 className="text-xl font-semibold text-[#0F2D63] dark:text-white mt-5 mb-3">{children}</h2>,
+                        h3: ({ children }) => <h3 className="text-lg font-semibold text-[#0F2D63] dark:text-white mt-4 mb-2">{children}</h3>,
+                        h4: ({ children }) => <h4 className="text-base font-semibold text-[#0F2D63] dark:text-white mt-3 mb-2">{children}</h4>,
+                        p: ({ children }) => <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-3">{children}</p>,
+                        strong: ({ children }) => <strong className="font-semibold text-[#0F2D63] dark:text-white">{children}</strong>,
+                        ul: ({ children }) => <ul className="list-disc pl-6 mb-3 space-y-1">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal pl-6 mb-3 space-y-1">{children}</ol>,
+                        li: ({ children }) => <li className="text-gray-700 dark:text-gray-300">{children}</li>,
+                        blockquote: ({ children }) => <blockquote className="border-l-4 border-[#C85A32] pl-4 py-1 my-3 text-gray-600 dark:text-gray-400 italic">{children}</blockquote>,
+                        code: ({ children }) => <code className="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-sm font-mono text-[#C85A32]">{children}</code>,
+                        pre: ({ children }) => <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl overflow-x-auto my-3 text-sm">{children}</pre>,
+                        hr: () => <hr className="my-6 border-gray-200 dark:border-gray-700" />,
+                      }}
+                    >
+                      {fullMarkdownContent}
+                    </ReactMarkdown>
+                  ) : (
+                    <p className="text-gray-400 dark:text-gray-500 text-center py-8">
+                      No content available
+                    </p>
+                  )}
+                </>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Disclaimer */}
+        <div className="mt-6 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 flex items-start gap-3">
+          <span className="text-amber-500 text-lg flex-shrink-0 mt-0.5">⚠️</span>
+          <div>
+            <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1.5">Disclaimer</p>
+            <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+              AI-generated content from Magalela Media Services may contain inaccuracies and is not intended for immediate publication. All outputs must be submitted to an editor for final review and approval.
+            </p>
           </div>
         </div>
 
         {/* Bottom Actions */}
         <div className="flex gap-3 mt-6">
           <button
-            onClick={() => navigate('/user/ai-writing')}
+            onClick={() => navigate('/user/narrative-engine')}
             className="flex-1 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl py-3 text-sm font-semibold transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to AI Writing
           </button>
-          <button
-            onClick={handleEdit}
-            className="flex-1 flex items-center justify-center gap-2 bg-[#C85A32] hover:bg-[#a8472a] text-white rounded-xl py-3 text-sm font-semibold transition-colors"
-          >
-            <Edit className="w-4 h-4" />
-            Edit Document
-          </button>
+          {!isEditing ? (
+            <button
+              onClick={handleEditToggle}
+              className="flex-1 flex items-center justify-center gap-2 bg-[#C85A32] hover:bg-[#a8472a] text-white rounded-xl py-3 text-sm font-semibold transition-colors"
+            >
+              <Edit className="w-4 h-4" />
+              Edit Document
+            </button>
+          ) : (
+            <button
+              onClick={handleSaveChanges}
+              disabled={isSaving}
+              className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white rounded-xl py-3 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Save className="w-4 h-4" />
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </button>
+          )}
         </div>
       </div>
     </div>
