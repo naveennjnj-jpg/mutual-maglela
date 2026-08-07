@@ -14,7 +14,7 @@ type MenuItem = {
 };
 
 const menuItems: MenuItem[] = [
-  // ... (Keep your existing menuItems array exactly as it is)
+  // ... (Your existing menuItems array goes here. Keep it exactly as is)
 ];
 
 interface NavigationProps {
@@ -22,6 +22,7 @@ interface NavigationProps {
   onItemClick?: () => void;
 }
 
+// Helper to handle external/internal links
 const LinkOrAnchor = ({
   href,
   className,
@@ -53,31 +54,33 @@ const Navigation: React.FC<NavigationProps> = ({
     setOpenDropdown(openDropdown === label ? null : label);
   };
 
-  // ✅ MOBILE NAVIGATION - COMPLETELY REWRITTEN FOR STABILITY
+  // ==========================================
+  // ✅ MOBILE NAVIGATION (Completely isolated)
+  // ==========================================
   if (isMobile) {
     return (
-      <nav className="flex flex-col">
+      <nav className="flex flex-col w-full">
         {menuItems.map((item, index) => (
-          <div key={item.label} className="border-b border-gray-100 last:border-0">
+          <div key={item.label} className="w-full">
             
-            {/* 1. Items WITHOUT dropdown */}
+            {/* 1. Items without dropdown */}
             {!item.dropdown && item.href && (
               <LinkOrAnchor
                 href={item.href}
-                className="block px-6 py-4 text-paragraph text-sm hover:text-primary_heading transition-colors"
+                className="block w-full px-6 py-4 text-paragraph text-sm hover:text-primary_heading transition-colors"
                 onClick={onItemClick}
               >
                 {item.label}
               </LinkOrAnchor>
             )}
 
-            {/* 2. Items WITH dropdown */}
+            {/* 2. Items with dropdown */}
             {item.dropdown && (
-              <div>
+              <div className="w-full">
                 {/* Header Row */}
-                <div className="flex items-center justify-between px-6 py-4 text-paragraph text-sm">
+                <div className="flex items-center justify-between w-full px-6 py-4 text-paragraph text-sm">
                   
-                  {/* Left side: The Label or Link */}
+                  {/* Left: Clicking text navigates */}
                   {item.href ? (
                     <LinkOrAnchor
                       href={item.href}
@@ -90,15 +93,15 @@ const Navigation: React.FC<NavigationProps> = ({
                     <span className="flex-1">{item.label}</span>
                   )}
 
-                  {/* Right side: Toggle Dropdown Button */}
+                  {/* Right: Clicking chevron opens/closes dropdown */}
                   <button
                     type="button"
                     aria-label={`Toggle ${item.label} menu`}
                     onClick={(e) => {
-                      e.stopPropagation(); // Prevent accidental clicks
+                      e.stopPropagation(); // Prevent any bubbling
                       toggleDropdown(item.label);
                     }}
-                    className="p-1 hover:text-primary_heading transition-colors"
+                    className="p-1 hover:text-primary_heading transition-colors ml-2"
                   >
                     <ChevronDown
                       size={18}
@@ -109,11 +112,11 @@ const Navigation: React.FC<NavigationProps> = ({
                   </button>
                 </div>
 
-                {/* Dropdown Content - Simple and clean for mobile */}
+                {/* Dropdown Content (Pure Mobile Version) */}
                 <div
-                  className={`overflow-hidden transition-all duration-300 bg-light-blue/50 ${
+                  className={`overflow-hidden transition-all duration-300 bg-light-blue/30 ${
                     openDropdown === item.label
-                      ? "max-h-96 opacity-100"
+                      ? "max-h-[500px] opacity-100"
                       : "max-h-0 opacity-0"
                   }`}
                 >
@@ -122,8 +125,8 @@ const Navigation: React.FC<NavigationProps> = ({
                       <LinkOrAnchor
                         key={sub.label}
                         href={sub.href}
-                        className="block px-10 py-2 text-paragraph text-xs hover:text-primary_heading transition-colors"
-                        onClick={onItemClick} // ✅ This correctly closes the entire mobile menu now
+                        className="block w-full px-10 py-3 text-paragraph text-xs hover:text-primary_heading transition-colors border-b border-gray-100/50 last:border-0"
+                        onClick={onItemClick} // ✅ CLOSES THE ENTIRE MOBILE MENU
                       >
                         {sub.label}
                       </LinkOrAnchor>
@@ -132,13 +135,20 @@ const Navigation: React.FC<NavigationProps> = ({
                 </div>
               </div>
             )}
+
+            {/* Divider between main items */}
+            {index < menuItems.length - 1 && (
+              <div className="border-b border-gray-100 w-full" />
+            )}
           </div>
         ))}
       </nav>
     );
   }
 
-  // ✅ DESKTOP NAVIGATION (Unchanged, keep as is)
+  // ==========================================
+  // ✅ DESKTOP NAVIGATION (Completely isolated)
+  // ==========================================
   return (
     <nav className="flex-wrap flex gap-3 xl:gap-7 px-4 justify-center items-center border-[1px] border-primary_blue rounded-[20px] bg-white">
       {menuItems.map((item) => (
@@ -169,6 +179,7 @@ const Navigation: React.FC<NavigationProps> = ({
                 </button>
               )}
 
+              {/* Desktop Dropdown */}
               <div className="absolute left-0 top-full bg-white shadow-lg rounded-md py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 min-w-[200px] z-50">
                 {item.dropdown.map((sub) =>
                   isExternalUrl(sub.href) ? (
