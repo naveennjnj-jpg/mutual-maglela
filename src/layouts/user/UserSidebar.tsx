@@ -32,7 +32,6 @@ import Logo from "@/assets/home/logo.png";
 import { userSidebar } from "@/constants/userSidebar";
 import { useAuth } from "@/context/AuthContext";
 
-
 interface UserSidebarProps {
   isOpen?: boolean;
   onToggle?: () => void;
@@ -62,12 +61,16 @@ const UserSidebar = ({
   const { logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  // ✅ Auto-close on navigation (mobile only)
+  // ✅ FIXED: Auto-close on navigation only for mobile, BUT only if it was manually opened
+  // We do NOT force it closed on initial load
   useEffect(() => {
-    if (window.innerWidth < 1024 && onClose) {
+    // Only close if we are on mobile AND sidebar is currently open
+    if (window.innerWidth < 1024 && isOpen && onClose) {
       onClose();
     }
-  }, [location.pathname, onClose]);
+    // We remove the dependency on 'isOpen' to prevent it closing on load
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   // ✅ Helper to close only on mobile
   const handleCloseOnMobile = () => {
@@ -82,29 +85,19 @@ const UserSidebar = ({
   };
 
   const isActive = (path: string) => {
-    // Dashboard (/user) should only be active when exactly on /user
     if (path === "/user") {
       return location.pathname === "/user";
     }
-    // For other paths, check exact match or children
     return location.pathname === path || location.pathname.startsWith(path + "/");
   };
 
   const sidebarItems = userSidebar as SidebarItem[];
 
   const groupedItems = {
-    overview: sidebarItems.filter(item =>
-      ["/user"].includes(item.path)
-    ),
-    projects: sidebarItems.filter(item =>
-      ["/user/projects", "/user/workshops", "/user/hire-expert"].includes(item.path)
-    ),
-    tools: sidebarItems.filter(item =>
-      ["/user/narrative-engine", "/user/voice-calibrator"].includes(item.path)
-    ),
-    resources: sidebarItems.filter(item =>
-      ["/user/store"].includes(item.path)
-    ),
+    overview: sidebarItems.filter(item => ["/user"].includes(item.path)),
+    projects: sidebarItems.filter(item => ["/user/projects", "/user/workshops", "/user/hire-expert"].includes(item.path)),
+    tools: sidebarItems.filter(item => ["/user/narrative-engine", "/user/voice-calibrator"].includes(item.path)),
+    resources: sidebarItems.filter(item => ["/user/store"].includes(item.path)),
   };
 
   const categoryLabels: Record<string, string> = {
@@ -148,13 +141,13 @@ const UserSidebar = ({
     <>
       <aside
         className={`
-            fixed left-0 top-0 bottom-0 z-30 
-            bg-[#0F2D63] transition-all duration-300
-            flex flex-col
-            ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-            lg:${isOpen ? 'translate-x-0' : '-translate-x-full'}
-            ${isOpen ? 'w-[260px]' : 'w-[72px] lg:w-[72px]'}
-          `}
+          fixed left-0 top-0 bottom-0 z-30 
+          bg-[#0F2D63] transition-all duration-300
+          flex flex-col
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0
+          ${isOpen ? 'w-[260px]' : 'w-[72px] lg:w-[72px]'}
+        `}
       >
         {/* Close button for mobile */}
         <button
@@ -277,7 +270,6 @@ const UserSidebar = ({
                 <p className="text-white text-sm font-medium truncate">{userName}</p>
                 <p className="text-white/50 text-xs truncate">{userEmail}</p>
               </div>
-              {/* ✅ FIXED: Added onClick handler to open logout modal */}
               <button 
                 onClick={() => setShowLogoutModal(true)}
                 className="text-white/50 hover:text-white transition-colors"
@@ -287,7 +279,6 @@ const UserSidebar = ({
               </button>
             </>
           ) : (
-            // ✅ FIXED: Added onClick handler to open logout modal for collapsed state
             <button 
               onClick={() => setShowLogoutModal(true)}
               className="w-9 h-9 bg-[#C85A32] rounded-full flex items-center justify-center shrink-0 hover:bg-[#a8472a] transition-colors"
@@ -311,7 +302,7 @@ const UserSidebar = ({
         </button>
       </aside>
 
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay - ONLY shows when sidebar is open on mobile */}
       {isOpen && (
         <div
           className="lg:hidden fixed inset-0 z-20 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
