@@ -49,27 +49,18 @@ const Header = () => {
     setHoverTimeout(timeout);
   };
 
-  useEffect(() => {
+    useEffect(() => {
+    const isDesktop = window.innerWidth >= 1024;
+    
+    // Only run this logic on DESKTOP
+    if (!isDesktop) return;
+
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      // Check if we are on DESKTOP (lg breakpoint: >= 1024px)
-      const isDesktop = window.innerWidth >= 1024;
-
-      // 1. Solutions
       if (solutionsRef.current && !solutionsRef.current.contains(event.target as Node)) {
-        if (isDesktop) {
-          setIsSolutionsOpen(false); // Close on desktop click outside
-        } else {
-          setIsSolutionsOpen(true);  // ✅ Keep open on mobile click outside (so you can click links)
-        }
+        setIsSolutionsOpen(false);
       }
-
-      // 2. Company
       if (companyRef.current && !companyRef.current.contains(event.target as Node)) {
-        if (isDesktop) {
-          setIsCompanyOpen(false);  // Close on desktop click outside
-        } else {
-          setIsCompanyOpen(true);   // ✅ Keep open on mobile click outside (so you can click links)
-        }
+        setIsCompanyOpen(false);
       }
     };
 
