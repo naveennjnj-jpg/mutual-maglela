@@ -50,10 +50,9 @@ interface UserData {
 const UserHeader = ({
   onMenuClick,
   isSidebarOpen = true,
-   userName = "User",
-   userEmail = "user@email.com",
+  userName = "User",
+  userEmail = "user@email.com",
   userInitials = "U"
-  
 }: UserHeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -78,72 +77,152 @@ const UserHeader = ({
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  // Fetch user data on mount
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        
-        if (!token) {
-          setLoading(false);
-          return;
-        }
+  // ✅ Function to fetch user data
+  const fetchUserData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
-        const response = await axios.get(`${API_URL}/api/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await axios.get(`${API_URL}/api/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.success && response.data.data) {
+        const data = response.data.data;
+        
+        // Generate initials from name
+        const nameParts = data.name?.split(' ') || ['U'];
+        const initials = nameParts
+          .map((part: string) => part.charAt(0).toUpperCase())
+          .join('')
+          .slice(0, 2);
+
+        const credits = data.credits || data.creditsBalance || 0;
+
+        setUserData({
+          id: data.id || data._id,
+          name: data.name || 'User',
+          email: data.email || 'user@email.com',
+          role: data.role || 'user',
+          avatar: data.avatar || data.profileImage,
+          theme: data.theme || 'light',
+          credits: credits,
+          initials: initials || 'U'
         });
 
-        if (response.data.success && response.data.data) {
-          const data = response.data.data;
-          
-          // Generate initials from name
-          const nameParts = data.name?.split(' ') || ['U'];
-          const initials = nameParts
-            .map((part: string) => part.charAt(0).toUpperCase())
-            .join('')
-            .slice(0, 2);
+        // Update localStorage
+        localStorage.setItem('userCredits', credits.toString());
+        localStorage.setItem('userName', data.name || 'User');
+        localStorage.setItem('userEmail', data.email || '');
 
-          setUserData({
-            id: data.id || data._id,
-            name: data.name || 'User',
-            email: data.email || 'user@email.com',
-            role: data.role || 'user',
-            avatar: data.avatar || data.profileImage,
-            theme: data.theme || 'light',
-            credits: data.credits || data.creditsBalance || 0,
-            initials: initials || 'U'
-          });
-
-          // Apply theme if needed
-          if (data.theme) {
-            localStorage.setItem('theme', data.theme);
-            // You can call a theme function here if you have one
-          }
+        // Apply theme if needed
+        if (data.theme) {
+          localStorage.setItem('theme', data.theme);
         }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        // Fallback to localStorage or default values
-        const savedName = localStorage.getItem('userName') || 'User';
-        const savedEmail = localStorage.getItem('userEmail') || 'user@email.com';
-        const savedCredits = parseInt(localStorage.getItem('userCredits') || '0');
-        const savedInitials = savedName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
-        
-        setUserData(prev => ({
-          ...prev,
-          name: savedName,
-          email: savedEmail,
-          credits: savedCredits,
-          initials: savedInitials
-        }));
-      } finally {
-        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      // Fallback to localStorage or default values
+      const savedName = localStorage.getItem('userName') || 'User';
+      const savedEmail = localStorage.getItem('userEmail') || 'user@email.com';
+      const savedCredits = parseInt(localStorage.getItem('userCredits') || '0');
+      const savedInitials = savedName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+      
+      setUserData(prev => ({
+        ...prev,
+        name: savedName,
+        email: savedEmail,
+        credits: savedCredits,
+        initials: savedInitials
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Fetch user data on mount
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  // ✅ Listen for storage changes (when credits update from other tabs/pages)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'userCredits') {
+        const newCredits = parseInt(e.newValue || '0');
+        setUserData(prev => ({ ...prev, credits: newCredits }));
+      }
+      if (e.key === 'userName') {
+        setUserData(prev => ({ ...prev, name: e.newValue || 'User' }));
+      }
+      if (e.key === 'userEmail') {
+        setUserData(prev => ({ ...prev, email: e.newValue || '' }));
       }
     };
 
-    fetchUserData();
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
+
+  // ✅ Listen for custom creditsUpdated event
+  useEffect(() => {
+    const handleCreditsUpdate = (e: CustomEvent) => {
+      if (e.detail?.credits !== undefined) {
+        setUserData(prev => ({ ...prev, credits: e.detail.credits }));
+        localStorage.setItem('userCredits', e.detail.credits.toString());
+      }
+      if (e.detail?.userData) {
+        const data = e.detail.userData;
+        setUserData(prev => ({
+          ...prev,
+          name: data.name || prev.name,
+          email: data.email || prev.email,
+          credits: data.credits !== undefined ? data.credits : prev.credits,
+          avatar: data.avatar || prev.avatar,
+          role: data.role || prev.role
+        }));
+        if (data.name) localStorage.setItem('userName', data.name);
+        if (data.email) localStorage.setItem('userEmail', data.email);
+        if (data.credits !== undefined) localStorage.setItem('userCredits', data.credits.toString());
+      }
+    };
+
+    window.addEventListener('creditsUpdated', handleCreditsUpdate as EventListener);
+    return () => window.removeEventListener('creditsUpdated', handleCreditsUpdate as EventListener);
+  }, []);
+
+  // ✅ Function to refresh credits manually
+  const refreshCredits = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await axios.get(`${API_URL}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+          if (response.data.success && response.data.data) {
+        const data = response.data.data;
+        const credits = data.credits || data.creditsBalance || 0;
+        
+        setUserData(prev => ({ ...prev, credits }));
+        localStorage.setItem('userCredits', credits.toString());
+        
+        // Dispatch event for other components
+        window.dispatchEvent(new CustomEvent('creditsUpdated', { 
+          detail: { credits } 
+        }));
+      }
+    } catch (error) {
+      console.error('Error refreshing credits:', error);
+    }
+  };
 
   // Click outside handlers
   useEffect(() => {
@@ -262,6 +341,7 @@ const UserHeader = ({
                 Add Credits
               </Link>
             </div>
+            
             <button
               onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
               className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
@@ -360,8 +440,22 @@ const UserHeader = ({
                   <div className="px-4 py-3 border-b border-gray-100">
                     <p className="font-semibold text-[#0F2D63] text-sm">{userData.name}</p>
                     <p className="text-xs text-gray-500">{userData.email}</p>
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <Coins className="w-3 h-3 text-[#C85A32]" />
+                      <span className="text-xs font-medium text-[#0F2D63]">
+                        {userData.credits} credits
+                      </span>
+                    </div>
                   </div>
                   <div className="py-1">
+                    <Link
+                      to="/user/add-credits"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#C85A32] hover:bg-gray-50"
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Credits
+                    </Link>
                     {userNavItems.map((item) => (
                       <Link
                         key={item.path}

@@ -1,7 +1,8 @@
 // pages/user/Ai-writing/Result.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
+import axios from 'axios';
 import {
   ArrowLeft,
   Copy,
@@ -15,7 +16,9 @@ import {
   Sparkles,
   Clock,
   Save,
-  X
+  X,
+  Plus,
+  Coins
 } from 'lucide-react';
 
 interface ResultData {
@@ -27,6 +30,17 @@ interface ResultData {
   wordCount: number;
   createdAt: string;
   author: string;
+  creditsUsed?: number;
+  creditsRemaining?: number;
+}
+
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  credits: number;
+  initials?: string;
 }
 
 const Result = () => {
@@ -36,11 +50,80 @@ const Result = () => {
     location.state?.data as ResultData || getMockResult()
   );
   
+  // ✅ User credits state
+  const [userData, setUserData] = useState<UserData>({
+    id: '',
+    name: 'User',
+    email: '',
+    role: 'user',
+    credits: 0,
+    initials: 'U'
+  });
+  const [loading, setLoading] = useState(true);
+
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   // Edit mode states
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(resultData.title);
   const [editContent, setEditContent] = useState(resultData.content);
   const [isSaving, setIsSaving] = useState(false);
+
+  // ✅ Fetch updated user data (to get latest credits)
+  const fetchUpdatedUserData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await axios.get(`${API_URL}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data.success && response.data.data) {
+        const data = response.data.data;
+        const nameParts = data.name?.split(' ') || ['U'];
+        const initials = nameParts
+          .map((part: string) => part.charAt(0).toUpperCase())
+          .join('')
+          .slice(0, 2);
+
+        const credits = data.credits || data.creditsBalance || 0;
+
+        setUserData({
+          id: data.id || data._id,
+          name: data.name || 'User',
+          email: data.email || '',
+          role: data.role || 'user',
+          credits: credits,
+          initials: initials || 'U'
+        });
+
+        // ✅ Update localStorage for header
+        localStorage.setItem('userCredits', credits.toString());
+        localStorage.setItem('userName', data.name || 'User');
+        localStorage.setItem('userEmail', data.email || '');
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Fetch user data on mount
+  useEffect(() => {
+    fetchUpdatedUserData();
+  }, []);
+
+  // ✅ Also check if result has credits info from API response
+  useEffect(() => {
+    if (location.state?.data?.creditsRemaining !== undefined) {
+      // Update local state with credits from API response
+      const credits = location.state.data.creditsRemaining;
+      setUserData(prev => ({ ...prev, credits }));
+      localStorage.setItem('userCredits', credits.toString());
+    }
+  }, [location.state]);
 
   const handleCopyContent = () => {
     if (resultData?.content) {
@@ -106,11 +189,9 @@ const Result = () => {
     let items: string[] = [];
 
     if (typeof outline === 'string') {
-      // If outline is already a string with markdown
       if (outline.includes('**') || outline.includes('#')) {
         return outline;
       }
-      // If outline is plain text with numbers
       items = outline.split(/\n(?=\d+\.)/).map((item: string) => {
         return item.replace(/^\d+\.\s*/, '').trim();
       }).filter(Boolean);
@@ -120,7 +201,6 @@ const Result = () => {
 
     if (items.length === 0) return null;
 
-    // Convert to markdown numbered list
     return items.map((item, index) => `${index + 1}. ${item}`).join('\n');
   };
 
@@ -128,13 +208,10 @@ const Result = () => {
   const getFullMarkdownContent = () => {
     let fullContent = '';
     
-    // Add outline if exists
-    const outlineMarkdown = getOutlineMarkdown();
-    if (outlineMarkdown) {
-      fullContent += `## Outline\n\n${outlineMarkdown}\n\n---\n\n`;
+    if (getOutlineMarkdown()) {
+      fullContent += `## Outline\n\n${getOutlineMarkdown()}\n\n---\n\n`;
     }
 
-    // Add main content
     if (resultData.content) {
       fullContent += resultData.content;
     }
@@ -160,6 +237,36 @@ const Result = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[1000px] mx-auto">
+        {/* ✅ Credits Display Banner */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#F9F7F4] dark:bg-gray-700 rounded-full flex items-center justify-center">
+              <Coins className="w-5 h-5 text-[#C85A32]" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Available Credits</p>
+              <p className="text-xl font-bold text-[#0F2D63] dark:text-white">
+                {loading ? '...' : userData.credits}
+              </p>
+            </div>
+          </div>
+          {resultData.creditsUsed !== undefined && (
+            <div className="text-right">
+              <p className="text-xs text-gray-500 dark:text-gray-400">Credits Used</p>
+              <p className="text-sm font-semibold text-[#C85A32]">
+                -{resultData.creditsUsed} credits
+              </p>
+            </div>
+          )}
+          <button
+            onClick={() => navigate('/user/add-credits')}
+            className="flex items-center gap-2 px-4 py-2 bg-[#C85A32] hover:bg-[#a8472a] text-white text-sm font-semibold rounded-xl transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Credits
+          </button>
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -261,7 +368,7 @@ const Result = () => {
           </div>
         </div>
 
-        {/* ✅ Full Content with Markdown Rendering (Outline + Content) */}
+        {/* Full Content */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
           <div className="p-6">
             <div className="prose prose-sm max-w-none dark:prose-invert">
@@ -319,7 +426,7 @@ const Result = () => {
         {/* Bottom Actions */}
         <div className="flex gap-3 mt-6">
           <button
-            onClick={() => navigate('/user/narrative-engine')}
+            onClick={handleBack}
             className="flex-1 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl py-3 text-sm font-semibold transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -358,6 +465,8 @@ const getMockResult = (): ResultData => {
     wordCount: 450,
     createdAt: 'Just now',
     author: 'AI Assistant',
+    creditsUsed: 0.5,
+    creditsRemaining: 99.5,
     content: `# Annual Report Executive Summary
 
 ## Introduction
