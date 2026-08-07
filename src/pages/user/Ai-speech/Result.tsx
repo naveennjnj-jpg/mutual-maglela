@@ -723,8 +723,18 @@ const AISpeechResult = () => {
                 )}
               </div>
             </div>
+             {/* Disclaimer */}
+            <div className="mt-6 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 flex items-start gap-3">
+              <span className="text-amber-500 text-lg flex-shrink-0 mt-0.5">⚠️</span>
+              <div>
+                <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1.5">Disclaimer</p>
+                <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+                  AI-generated content from Magalela Media Services may contain inaccuracies and is not intended for immediate publication. All outputs must be submitted to an editor for final review and approval.
+                </p>
+              </div>
+            </div>  
           </div>
-
+             
           {/* Parameters Sidebar */}
           <div className="flex flex-col gap-4">
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
