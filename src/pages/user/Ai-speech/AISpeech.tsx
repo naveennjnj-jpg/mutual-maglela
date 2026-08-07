@@ -616,138 +616,146 @@ const AISpeech = () => {
           </div>
         )}
 
-        {/* Speeches Table */}
+        {/* ============================================ */}
+        {/* ✅ RESPONSIVE SCROLLABLE SPEECHES TABLE */}
+        {/* ============================================ */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-          <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-            <div className="col-span-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Speech Name</div>
-            <div className="col-span-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Top Parameters</div>
-            <div className="col-span-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Avg Score</div>
-            <div className="col-span-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Duration</div>
-            <div className="col-span-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Status</div>
-            <div className="col-span-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Created</div>
-            <div className="col-span-1"></div>
-          </div>
-
-          {filteredSpeeches.length > 0 ? (
-            filteredSpeeches.map((speech, index) => {
-              const topParams = getTopParameters(speech.parameters);
-
-              return (
-                <div
-                  key={speech._id}
-                  className={`grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${index < filteredSpeeches.length - 1 ? 'border-b border-gray-50 dark:border-gray-700/50' : ''
-                    }`}
-                  onClick={() => handleView(speech)}
-                >
-                  <div className="col-span-3 flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 bg-[#FFF8F5] dark:bg-[#C85A32]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Mic className="w-4 h-4 text-[#C85A32]" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-[#0F2D63] dark:text-white truncate">
-                        {speech.title}
-                      </p>
-                      <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate">
-                        {speech.identifier}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="col-span-2 flex items-center gap-1.5 flex-wrap">
-                    {topParams.map((param, idx) => (
-                      <span
-                        key={idx}
-                        className={`text-[10px] font-medium px-2 py-0.5 rounded-full border whitespace-nowrap ${getParameterColor(param.value)}`}
-                      >
-                        {param.label}: {param.value}%
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="col-span-2 flex items-center justify-center">
-                    <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1">
-                      <span className={`text-sm font-bold ${speech.avgScore >= 70 ? 'text-green-600 dark:text-green-400' :
-                          speech.avgScore >= 50 ? 'text-amber-600 dark:text-amber-400' :
-                            'text-red-600 dark:text-red-400'
-                        }`}>
-                        {speech.avgScore}
-                      </span>
-                      <span className="text-xs text-gray-400 dark:text-gray-500">/ 100</span>
-                    </div>
-                  </div>
-
-                  <div className="col-span-1 text-xs font-medium text-gray-600 dark:text-gray-400 text-center">
-                    {speech.duration}
-                  </div>
-
-                  <div className="col-span-1 flex items-center justify-center">
-                    <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full border ${getStatusColor(speech.status)} flex items-center gap-1`}>
-                      {getStatusIcon(speech.status)}
-                      {speech.status}
-                    </span>
-                  </div>
-
-                  <div className="col-span-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                    {formatDate(speech.createdAt)}
-                  </div>
-
-                  <div className="col-span-1 flex items-center justify-end gap-1">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleView(speech);
-                      }}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
-                      title="View"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCopyContent(speech.content);
-                      }}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
-                      title="Copy Content"
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowDeleteModal(speech._id);
-                      }}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Mic className="w-10 h-10 text-gray-400" />
+          <div className="overflow-x-auto w-full">
+            <div className="min-w-[900px]">
+              {/* Header Row */}
+              <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+                <div className="col-span-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Speech Name</div>
+                <div className="col-span-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Top Parameters</div>
+                <div className="col-span-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Avg Score</div>
+                <div className="col-span-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Duration</div>
+                <div className="col-span-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Status</div>
+                <div className="col-span-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Created</div>
+                <div className="col-span-1"></div>
               </div>
-              <h3 className="text-lg font-semibold text-[#0F2D63] dark:text-white mb-2">
-                No speeches found
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                {searchTerm ? `No speeches match "${searchTerm}"` : 'Create your first AI Speech'}
-              </p>
-              {!searchTerm && (
-                <button
-                  onClick={handleCreate}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#C85A32] text-white text-sm font-semibold rounded-xl hover:bg-[#a8472a] transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  Create AI Speech
-                </button>
+
+              {/* Data Rows */}
+              {filteredSpeeches.length > 0 ? (
+                filteredSpeeches.map((speech, index) => {
+                  const topParams = getTopParameters(speech.parameters);
+
+                  return (
+                    <div
+                      key={speech._id}
+                      className={`grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${index < filteredSpeeches.length - 1 ? 'border-b border-gray-50 dark:border-gray-700/50' : ''
+                        }`}
+                      onClick={() => handleView(speech)}
+                    >
+                      <div className="col-span-3 flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 bg-[#FFF8F5] dark:bg-[#C85A32]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Mic className="w-4 h-4 text-[#C85A32]" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-[#0F2D63] dark:text-white truncate">
+                            {speech.title}
+                          </p>
+                          <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate">
+                            {speech.identifier}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="col-span-2 flex items-center gap-1.5 flex-wrap">
+                        {topParams.map((param, idx) => (
+                          <span
+                            key={idx}
+                            className={`text-[10px] font-medium px-2 py-0.5 rounded-full border whitespace-nowrap ${getParameterColor(param.value)}`}
+                          >
+                            {param.label}: {param.value}%
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="col-span-2 flex items-center justify-center">
+                        <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1">
+                          <span className={`text-sm font-bold ${speech.avgScore >= 70 ? 'text-green-600 dark:text-green-400' :
+                              speech.avgScore >= 50 ? 'text-amber-600 dark:text-amber-400' :
+                                'text-red-600 dark:text-red-400'
+                            }`}>
+                            {speech.avgScore}
+                          </span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500">/ 100</span>
+                        </div>
+                      </div>
+
+                      <div className="col-span-1 text-xs font-medium text-gray-600 dark:text-gray-400 text-center">
+                        {speech.duration}
+                      </div>
+
+                      <div className="col-span-1 flex items-center justify-center">
+                        <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full border ${getStatusColor(speech.status)} flex items-center gap-1`}>
+                          {getStatusIcon(speech.status)}
+                          {speech.status}
+                        </span>
+                      </div>
+
+                      <div className="col-span-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+                        {formatDate(speech.createdAt)}
+                      </div>
+
+                      <div className="col-span-1 flex items-center justify-end gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleView(speech);
+                          }}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
+                          title="View"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopyContent(speech.content);
+                          }}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
+                          title="Copy Content"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowDeleteModal(speech._id);
+                          }}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Mic className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-[#0F2D63] dark:text-white mb-2">
+                    No speeches found
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    {searchTerm ? `No speeches match "${searchTerm}"` : 'Create your first AI Speech'}
+                  </p>
+                  {!searchTerm && (
+                    <button
+                      onClick={handleCreate}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#C85A32] text-white text-sm font-semibold rounded-xl hover:bg-[#a8472a] transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Create AI Speech
+                    </button>
+                  )}
+                </div>
               )}
             </div>
-          )}
+          </div>
         </div>
 
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 px-1">
