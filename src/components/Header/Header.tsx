@@ -51,11 +51,25 @@ const Header = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      // Check if we are on DESKTOP (lg breakpoint: >= 1024px)
+      const isDesktop = window.innerWidth >= 1024;
+
+      // 1. Solutions
       if (solutionsRef.current && !solutionsRef.current.contains(event.target as Node)) {
-        setIsSolutionsOpen(true);
+        if (isDesktop) {
+          setIsSolutionsOpen(false); // Close on desktop click outside
+        } else {
+          setIsSolutionsOpen(true);  // ✅ Keep open on mobile click outside (so you can click links)
+        }
       }
+
+      // 2. Company
       if (companyRef.current && !companyRef.current.contains(event.target as Node)) {
-        setIsCompanyOpen(true);
+        if (isDesktop) {
+          setIsCompanyOpen(false);  // Close on desktop click outside
+        } else {
+          setIsCompanyOpen(true);   // ✅ Keep open on mobile click outside (so you can click links)
+        }
       }
     };
 
