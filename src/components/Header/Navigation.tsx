@@ -68,7 +68,12 @@ const Navigation: React.FC<NavigationProps> = ({
               <LinkOrAnchor
                 href={item.href}
                 className="block w-full px-6 py-4 text-paragraph text-sm hover:text-primary_heading transition-colors"
-                onClick={onItemClick}
+                onClick={() => {
+                  // ⏳ Small delay lets navigation start before closing menu
+                  setTimeout(() => {
+                    if (onItemClick) onItemClick();
+                  }, 50);
+                }}
               >
                 {item.label}
               </LinkOrAnchor>
@@ -85,7 +90,12 @@ const Navigation: React.FC<NavigationProps> = ({
                     <LinkOrAnchor
                       href={item.href}
                       className="flex-1 hover:text-primary_heading transition-colors"
-                      onClick={onItemClick}
+                      onClick={() => {
+                        // ⏳ Small delay lets navigation start before closing menu
+                        setTimeout(() => {
+                          if (onItemClick) onItemClick();
+                        }, 50);
+                      }}
                     >
                       {item.label}
                     </LinkOrAnchor>
@@ -98,7 +108,7 @@ const Navigation: React.FC<NavigationProps> = ({
                     type="button"
                     aria-label={`Toggle ${item.label} menu`}
                     onClick={(e) => {
-                      e.stopPropagation(); // Prevent any bubbling
+                      e.stopPropagation(); 
                       toggleDropdown(item.label);
                     }}
                     className="p-1 hover:text-primary_heading transition-colors ml-2"
@@ -112,7 +122,7 @@ const Navigation: React.FC<NavigationProps> = ({
                   </button>
                 </div>
 
-                {/* Dropdown Content (Pure Mobile Version) */}
+                {/* Dropdown Content */}
                 <div
                   className={`overflow-hidden transition-all duration-300 bg-light-blue/30 ${
                     openDropdown === item.label
@@ -126,7 +136,12 @@ const Navigation: React.FC<NavigationProps> = ({
                         key={sub.label}
                         href={sub.href}
                         className="block w-full px-10 py-3 text-paragraph text-xs hover:text-primary_heading transition-colors border-b border-gray-100/50 last:border-0"
-                        onClick={onItemClick} // ✅ CLOSES THE ENTIRE MOBILE MENU
+                        onClick={() => {
+                          // ⏳ Small delay lets navigation start before closing menu
+                          setTimeout(() => {
+                            if (onItemClick) onItemClick();
+                          }, 50);
+                        }}
                       >
                         {sub.label}
                       </LinkOrAnchor>
