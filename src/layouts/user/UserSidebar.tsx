@@ -148,12 +148,13 @@ const UserSidebar = ({
     <>
       <aside
         className={`
-          fixed left-0 top-0 bottom-0 z-30 
-          bg-[#0F2D63] transition-all duration-300
-          flex flex-col
-          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          ${isOpen ? 'w-[260px]' : 'w-[72px]'}
-        `}
+            fixed left-0 top-0 bottom-0 z-30 
+            bg-[#0F2D63] transition-all duration-300
+            flex flex-col
+            ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+            lg:${isOpen ? 'translate-x-0' : '-translate-x-full'}
+            ${isOpen ? 'w-[260px]' : 'w-[72px] lg:w-[72px]'}
+          `}
       >
         {/* Close button for mobile */}
         <button
