@@ -52,10 +52,10 @@ const Header = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (solutionsRef.current && !solutionsRef.current.contains(event.target as Node)) {
-        setIsSolutionsOpen(false);
+        setIsSolutionsOpen(true);
       }
       if (companyRef.current && !companyRef.current.contains(event.target as Node)) {
-        setIsCompanyOpen(false);
+        setIsCompanyOpen(true);
       }
     };
 
@@ -182,10 +182,10 @@ const Header = () => {
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white shadow-sm' : 'bg-transparent'
-      }`}
-    >
+  className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+    isScrolled ? 'bg-white shadow-sm' : 'bg-transparent'
+  } ${isMenuOpen ? 'bg-black' : ''}`}
+>
       <nav className="max-w-[1500px] mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}

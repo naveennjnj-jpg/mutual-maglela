@@ -14,7 +14,7 @@ type MenuItem = {
 };
 
 const menuItems: MenuItem[] = [
-  // ... (Your existing menuItems array goes here. Keep it exactly as is)
+  // ... (Insert your existing menuItems array here. It's too long to copy)
 ];
 
 interface NavigationProps {
@@ -22,7 +22,6 @@ interface NavigationProps {
   onItemClick?: () => void;
 }
 
-// Helper to handle external/internal links
 const LinkOrAnchor = ({
   href,
   className,
@@ -55,105 +54,68 @@ const Navigation: React.FC<NavigationProps> = ({
   };
 
   // ==========================================
-  // ✅ MOBILE NAVIGATION (Completely isolated)
+  // MOBILE NAVIGATION
   // ==========================================
   if (isMobile) {
     return (
       <nav className="flex flex-col w-full">
-        {menuItems.map((item, index) => (
-          <div key={item.label} className="w-full">
+        {menuItems.map((item) => (
+          <div key={item.label} className="w-full border-b border-gray-100">
             
-            {/* 1. Items without dropdown */}
-            {!item.dropdown && item.href && (
-              <LinkOrAnchor
-                href={item.href}
-                className="block w-full px-6 py-4 text-paragraph text-sm hover:text-primary_heading transition-colors"
-                onClick={() => {
-                  // ⏳ Small delay lets navigation start before closing menu
-                  setTimeout(() => {
-                    if (onItemClick) onItemClick();
-                  }, 50);
-                }}
-              >
-                {item.label}
-              </LinkOrAnchor>
-            )}
-
-            {/* 2. Items with dropdown */}
-            {item.dropdown && (
-              <div className="w-full">
-                {/* Header Row */}
-                <div className="flex items-center justify-between w-full px-6 py-4 text-paragraph text-sm">
-                  
-                  {/* Left: Clicking text navigates */}
-                  {item.href ? (
-                    <LinkOrAnchor
-                      href={item.href}
-                      className="flex-1 hover:text-primary_heading transition-colors"
-                      onClick={() => {
-                        // ⏳ Small delay lets navigation start before closing menu
-                        setTimeout(() => {
-                          if (onItemClick) onItemClick();
-                        }, 50);
-                      }}
-                    >
-                      {item.label}
-                    </LinkOrAnchor>
-                  ) : (
-                    <span className="flex-1">{item.label}</span>
-                  )}
-
-                  {/* Right: Clicking chevron opens/closes dropdown */}
-                  <button
-                    type="button"
-                    aria-label={`Toggle ${item.label} menu`}
-                    onClick={(e) => {
-                      e.stopPropagation(); 
-                      toggleDropdown(item.label);
-                    }}
-                    className="p-1 hover:text-primary_heading transition-colors ml-2"
-                  >
-                    <ChevronDown
-                      size={18}
-                      className={`transition-transform duration-200 ${
-                        openDropdown === item.label ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                {/* Dropdown Content */}
-                <div
-                  className={`overflow-hidden transition-all duration-300 bg-light-blue/30 ${
-                    openDropdown === item.label
-                      ? "max-h-[500px] opacity-100"
-                      : "max-h-0 opacity-0"
-                  }`}
+            {/* Top Level Items */}
+            <div className="flex items-center justify-between w-full px-6 py-4">
+              
+              {/* Link (Only renders if href exists) */}
+              {item.href ? (
+                <LinkOrAnchor
+                  href={item.href}
+                  className="flex-1 text-paragraph text-sm hover:text-primary_heading"
+                  onClick={onItemClick}
                 >
-                  <div className="py-2">
-                    {item.dropdown.map((sub) => (
-                      <LinkOrAnchor
-                        key={sub.label}
-                        href={sub.href}
-                        className="block w-full px-10 py-3 text-paragraph text-xs hover:text-primary_heading transition-colors border-b border-gray-100/50 last:border-0"
-                        onClick={() => {
-                          // ⏳ Small delay lets navigation start before closing menu
-                          setTimeout(() => {
-                            if (onItemClick) onItemClick();
-                          }, 50);
-                        }}
-                      >
-                        {sub.label}
-                      </LinkOrAnchor>
-                    ))}
-                  </div>
+                  {item.label}
+                </LinkOrAnchor>
+              ) : (
+                <span className="flex-1 text-paragraph text-sm">{item.label}</span>
+              )}
+
+              {/* Chevron Button (Only renders if dropdown exists) */}
+              {item.dropdown && (
+                <button
+                  type="button"
+                  onClick={() => toggleDropdown(item.label)}
+                  className="p-1"
+                >
+                  <ChevronDown
+                    size={18}
+                    className={`transition-transform duration-200 ${
+                      openDropdown === item.label ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+              )}
+            </div>
+
+            {/* Dropdown Content */}
+            {item.dropdown && (
+              <div
+                className={`overflow-hidden transition-all duration-300 bg-light-blue/30 ${
+                  openDropdown === item.label ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="py-2">
+                  {item.dropdown.map((sub) => (
+                    <LinkOrAnchor
+                      key={sub.label}
+                      href={sub.href}
+                      className="block w-full px-10 py-3 text-paragraph text-xs hover:text-primary_heading border-b border-gray-100/50 last:border-0"
+                      // ONLY calling onItemClick here. 
+                      onClick={onItemClick}
+                    >
+                      {sub.label}
+                    </LinkOrAnchor>
+                  ))}
                 </div>
               </div>
-            )}
-
-            {/* Divider between main items */}
-            {index < menuItems.length - 1 && (
-              <div className="border-b border-gray-100 w-full" />
             )}
           </div>
         ))}
@@ -162,7 +124,7 @@ const Navigation: React.FC<NavigationProps> = ({
   }
 
   // ==========================================
-  // ✅ DESKTOP NAVIGATION (Completely isolated)
+  // DESKTOP NAVIGATION
   // ==========================================
   return (
     <nav className="flex-wrap flex gap-3 xl:gap-7 px-4 justify-center items-center border-[1px] border-primary_blue rounded-[20px] bg-white">
@@ -194,7 +156,6 @@ const Navigation: React.FC<NavigationProps> = ({
                 </button>
               )}
 
-              {/* Desktop Dropdown */}
               <div className="absolute left-0 top-full bg-white shadow-lg rounded-md py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 min-w-[200px] z-50">
                 {item.dropdown.map((sub) =>
                   isExternalUrl(sub.href) ? (
