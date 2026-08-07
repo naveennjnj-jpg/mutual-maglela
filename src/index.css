@@ -478,4 +478,9 @@ select option {
   header.bg-black {
       background: #000;
   }
+  .mobilrtabs {
+    flex-wrap: nowrap;
+    display: flex;
+    flex-direction: column;
+}
 }
