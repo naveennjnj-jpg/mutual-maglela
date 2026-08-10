@@ -58,6 +58,10 @@ import HelpCenter from '@/pages/user/HelpCenter/HelpCenter';
 import AddCredits from "@/pages/user/AddCredits/AddCredits";
 import CreditPaymentSuccess from '@/pages/user/AddCredits/CreditPaymentSuccess';
 import CreditPaymentCancelled from '@/pages/user/AddCredits/CreditPaymentCancelled';
+import Invoices from '@/pages/user/Invoices/Invoices';
+import Quotes from '@/pages/user/Quotes/Quotes';
+import Plans from '@/pages/user/Plans/Plans';
+
 
 
 // Admin Pages
@@ -71,6 +75,14 @@ import AdminSettings from "@/pages/admin/Settings";
 import AdminProjects from "@/pages/admin/projects/projects";
 import ProjectDetail from "@/pages/admin/projects/ProjectDetail";
 import ProjectSubmit from "@/pages/admin/projects/ProjectSubmit";
+import Schedule from "@/pages/admin/Schedule/Schedule";
+import AddEvent from "@/pages/admin/Schedule/AddEvent";
+import ManageAvailability from "@/pages/admin/Schedule/ManageAvailability";
+import CreditPlans from "@/pages/admin/CreditPlans/CreditPlans";
+import SubscriptionManagement from "@/pages/admin/SubscriptionManagement/SubscriptionManagement";
+import InvoiceQuoteManagement from "@/pages/admin/InvoiceQuoteManagement/InvoiceQuoteManagement";
+import CreateInvoice from "@/pages/admin/InvoiceQuoteManagement/CreateInvoice";
+import CreateQuote from "@/pages/admin/InvoiceQuoteManagement/CreateQuote";
 
 const AppRoutes = () => {
   return (
@@ -135,7 +147,9 @@ const AppRoutes = () => {
         <Route path="add-credits" element={<AddCredits />} />
         <Route path="credit-success" element={<CreditPaymentSuccess />} />
         <Route path="credit-cancelled" element={<CreditPaymentCancelled />} />
-
+        <Route path="invoices" element={<Invoices />} />
+        <Route path="quotes" element={<Quotes />} />
+        <Route path="plans" element={<Plans />} />
 
       </Route>
 
@@ -156,6 +170,15 @@ const AppRoutes = () => {
         <Route path="/admin/projects" element={<AdminProjects />} />
         <Route path="/admin/projects/:id" element={<ProjectDetail />} />
         <Route path="/admin/projects/:id/submit" element={<ProjectSubmit />} />
+        <Route path="/admin/schedule" element={<Schedule />} />
+        <Route path="/admin/add-event" element={<AddEvent />} />
+        <Route path="/admin/manage-availability" element={<ManageAvailability />} />
+        <Route path="/admin/credit-plans" element={<CreditPlans />} />
+        <Route path="/admin/subscriptions" element={<SubscriptionManagement />} />
+        <Route path="/admin/invoices" element={<InvoiceQuoteManagement />} />
+        <Route path="/admin/create-quote" element={<CreateQuote />} />
+        <Route path="/admin/create-invoice" element={<CreateInvoice />} />
+        <Route path="/admin/help" element={<HelpCenter />} />
       </Route>
     </Routes>
   );

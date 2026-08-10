@@ -1,5 +1,5 @@
 // layouts/user/UserSidebar.tsx
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -9,24 +9,18 @@ import {
   FileText,
   Mic,
   ShoppingBag,
-  ChartColumn,
-  CreditCard,
   Settings,
   LifeBuoy,
   LogOut,
   ChevronLeft,
   ChevronRight,
-  MessageSquare,
-  Calendar,
-  Bell,
-  User,
-  Shield,
-  HelpCircle,
   Sparkles,
   Layers,
-  BookOpen,
   Briefcase,
-  X
+  X,
+  FileSpreadsheet,
+  Wallet,
+  Crown
 } from "lucide-react";
 import Logo from "@/assets/home/logo.png";
 import { userSidebar } from "@/constants/userSidebar";
@@ -61,18 +55,13 @@ const UserSidebar = ({
   const { logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  // ✅ FIXED: Auto-close on navigation only for mobile, BUT only if it was manually opened
-  // We do NOT force it closed on initial load
   useEffect(() => {
-    // Only close if we are on mobile AND sidebar is currently open
     if (window.innerWidth < 1024 && isOpen && onClose) {
       onClose();
     }
-    // We remove the dependency on 'isOpen' to prevent it closing on load
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
-  // ✅ Helper to close only on mobile
   const handleCloseOnMobile = () => {
     if (window.innerWidth < 1024 && onClose) {
       onClose();
@@ -93,11 +82,24 @@ const UserSidebar = ({
 
   const sidebarItems = userSidebar as SidebarItem[];
 
+  // Group items exactly as shown in your HTML
   const groupedItems = {
     overview: sidebarItems.filter(item => ["/user"].includes(item.path)),
-    projects: sidebarItems.filter(item => ["/user/projects", "/user/workshops", "/user/hire-expert"].includes(item.path)),
-    tools: sidebarItems.filter(item => ["/user/narrative-engine", "/user/voice-calibrator"].includes(item.path)),
-    resources: sidebarItems.filter(item => ["/user/store"].includes(item.path)),
+    projects: sidebarItems.filter(item => 
+      ["/user/projects", "/user/workshops", "/user/hire-expert"].includes(item.path)
+    ),
+    tools: sidebarItems.filter(item => 
+      ["/user/narrative-engine", "/user/voice-calibrator"].includes(item.path)
+    ),
+    resources: sidebarItems.filter(item => 
+      ["/user/store"].includes(item.path)
+    ),
+    billing: sidebarItems.filter(item => 
+      ["/user/invoices", "/user/quotes", "/user/plans"].includes(item.path)
+    ),
+    settings: sidebarItems.filter(item => 
+      ["/user/settings"].includes(item.path)
+    ),
   };
 
   const categoryLabels: Record<string, string> = {
@@ -105,6 +107,8 @@ const UserSidebar = ({
     projects: "Services",
     tools: "AI Tools",
     resources: "Resources",
+    billing: "Billing",
+    settings: "Settings",
   };
 
   const categoryIcons: Record<string, any> = {
@@ -112,6 +116,8 @@ const UserSidebar = ({
     projects: Briefcase,
     tools: Sparkles,
     resources: Layers,
+    billing: Wallet,
+    settings: Settings,
   };
 
   const getIcon = (path: string) => {
@@ -122,17 +128,11 @@ const UserSidebar = ({
       "/user/hire-expert": UserCheck,
       "/user/narrative-engine": FileText,
       "/user/voice-calibrator": Mic,
-      "/user/content-generator": Sparkles,
       "/user/store": ShoppingBag,
-      "/user/templates": Layers,
-      "/user/case-studies": BookOpen,
-      "/user/messages": MessageSquare,
-      "/user/notifications": Bell,
-      "/user/calendar": Calendar,
-      "/user/profile": User,
+      "/user/invoices": FileSpreadsheet,
+      "/user/quotes": FileText,
+      "/user/plans": Crown,
       "/user/settings": Settings,
-      "/user/security": Shield,
-      "/user/help": HelpCircle,
     };
     return iconMap[path] || null;
   };
@@ -176,7 +176,7 @@ const UserSidebar = ({
         </div>
 
         {/* Navigation */}
-        <nav className={`flex-1 overflow-y-auto px-3 py-4 [scrollbar-width:none] ${!isOpen && 'px-2'}`}>
+        <nav className="flex-1 overflow-y-auto px-3 py-4 [scrollbar-width:none]">
           {Object.entries(groupedItems).map(([key, items]) => {
             if (items.length === 0) return null;
             const CategoryIcon = categoryIcons[key];
@@ -302,7 +302,7 @@ const UserSidebar = ({
         </button>
       </aside>
 
-      {/* Mobile Overlay - ONLY shows when sidebar is open on mobile */}
+      {/* Mobile Overlay */}
       {isOpen && (
         <div
           className="lg:hidden fixed inset-0 z-20 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
