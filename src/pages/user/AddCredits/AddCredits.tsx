@@ -21,6 +21,20 @@ interface PlanFeature {
   text: string;
 }
 
+interface ApiPlan {
+  _id: string;
+  name: string;
+  billingType: string;
+  credits: number;
+  price: number;
+  description: string;
+  features: string[];
+  accentColor: string;
+  isPopular: boolean;
+  isActive: boolean;
+  displayOrder?: number;
+}
+
 interface PricingPlan {
   id: string;
   name: string;
@@ -58,6 +72,7 @@ interface UserBillingInfo {
   postalCode?: string;
   country?: string;
 }
+
 interface UserData {
   id: string;
   name: string;
@@ -82,13 +97,37 @@ const AddCredits = () => {
   // ============================================
 
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
-  const [currentBalance, setCurrentBalance] = useState(320);
+  const [currentBalance, setCurrentBalance] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userBillingInfo, setUserBillingInfo] = useState<UserBillingInfo | null>(null);
   const [fetchingUser, setFetchingUser] = useState(true);
+  const [apiPlans, setApiPlans] = useState<ApiPlan[]>([]);
+  const [fetchingPlans, setFetchingPlans] = useState(true);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+  // ============================================
+  // FETCH PLANS FROM API
+  // ============================================
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/user/credit-plans`);
+        if (response.data.success) {
+          const activePlans = response.data.data.filter((plan: ApiPlan) => plan.isActive);
+          setApiPlans(activePlans);
+        }
+      } catch (error) {
+        console.error("Error fetching plans:", error);
+      } finally {
+        setFetchingPlans(false);
+      }
+    };
+
+    fetchPlans();
+  }, [API_URL]);
 
   // ============================================
   // FETCH USER BILLING INFO
@@ -104,7 +143,6 @@ const AddCredits = () => {
           return;
         }
 
-        // Fetch user profile from API
         const response = await axios.get(`${API_URL}/api/auth/profile`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -114,7 +152,6 @@ const AddCredits = () => {
         if (response.data.success) {
           const userData = response.data.data;
 
-          // Map the user data to billing info
           setUserBillingInfo({
             firstName: userData.firstName || userData.name?.split(' ')[0] || "",
             lastName: userData.lastName || userData.name?.split(' ').slice(1).join(' ') || "",
@@ -127,16 +164,13 @@ const AddCredits = () => {
             country: userData.country || "",
           });
 
-          // Also update current balance if available
           if (userData.credits !== undefined) {
             setCurrentBalance(userData.credits);
           }
         }
       } catch (err: any) {
         console.error("Error fetching user info:", err);
-        // If user info fetch fails, use auth context as fallback
         if (user) {
-          // Try to get name from user object
           const userName = ((user as any).name || (user as any).displayName || "").trim();
           const nameParts = userName.split(/\s+/);
 
@@ -193,7 +227,6 @@ const AddCredits = () => {
         if (response.data.success && response.data.data) {
           const data = response.data.data;
 
-          // Generate initials from name
           const nameParts = data.name?.split(' ') || ['U'];
           const initials = nameParts
             .map((part: string) => part.charAt(0).toUpperCase())
@@ -210,16 +243,9 @@ const AddCredits = () => {
             credits: data.credits || data.creditsBalance || 0,
             initials: initials || 'U'
           });
-
-          // Apply theme if needed
-          if (data.theme) {
-            localStorage.setItem('theme', data.theme);
-            // You can call a theme function here if you have one
-          }
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
-        // Fallback to localStorage or default values
         const savedName = localStorage.getItem('userName') || 'User';
         const savedEmail = localStorage.getItem('userEmail') || 'user@email.com';
         const savedCredits = parseInt(localStorage.getItem('userCredits') || '0');
@@ -240,111 +266,95 @@ const AddCredits = () => {
     fetchUserData();
   }, []);
 
-
-
   // ============================================
-  // DATA
+  // TRANSFORM API PLANS TO UI PLANS
   // ============================================
 
-  const plans: PricingPlan[] = [
-    {
-      id: "basic",
-      name: "Individual Scholar",
-      subtitle: "Basic",
-      description: "Individual Academics & Early-Career Researchers",
-      targetAudience: "Postdocs, lecturers, and doctoral candidates building their personal brands",
-      monthly: {
-        credits: 100,
-        price: "R 450",
-        priceLabel: "per month",
-        amount: 450,
-      },
-      yearly: {
-        credits: 1200,
-        price: "R 4,500",
-        priceLabel: "per year",
-        savings: "Save 17%",
-        amount: 4500,
-      },
-      type: "basic",
-      buttonText: "Get Started",
-      buttonVariant: "outline",
-      features: [
-        { id: "f1", text: "10 Document translations/month with AI Story Engine" },
-        { id: "f2", text: "1 Standard Academic Profile with Voice & Tone Calibrator" },
-        { id: "f3", text: "Step-by-step tools for op-eds, policy briefs & thought leadership" },
-        { id: "f4", text: "Access to foundational AI tools to articulate research identity" },
-        { id: "f5", text: "Request 'Magalela Polish' at standard hourly/project rate" },
-        { id: "f6", text: "Community support via email" },
-      ],
-    },
-    {
-      id: "pro",
-      name: "Department",
-      subtitle: "Pro",
-      description: "Faculty-Level Comms Teams & Corporate Social Impact Teams",
-      targetAudience: "Faculty marketing units and research centres needing overflow capacity",
-      monthly: {
-        credits: 200,
-        price: "R 2,500",
-        priceLabel: "per month",
-        amount: 2500,
-      },
-      yearly: {
-        credits: 2400,
-        price: "R 25,000",
-        priceLabel: "per year",
-        savings: "Save 20%",
-        amount: 25000,
-      },
-      type: "pro",
-      isPopular: true,
-      buttonText: "Get Started",
-      buttonVariant: "primary",
-      features: [
-        { id: "f7", text: "20 Document translations/month with AI Story Engine" },
-        { id: "f8", text: "Up to 3 Custom Voice Profiles for team members" },
-        { id: "f9", text: "Consistent overflow capacity for high-volume periods" },
-        { id: "f10", text: "1 hour of human-led specialist science communication editing/month" },
-        { id: "f11", text: "Social media content aligned with institutional tone" },
-        { id: "f12", text: "Introduction to premium journalism, strategy & storytelling services" },
-        { id: "f13", text: "Priority email support" },
-      ],
-    },
-    {
-      id: "enterprise",
-      name: "Organisation",
-      subtitle: "Enterprise",
-      description: "Comms Directors, Exec Leaders, & Global Dev Orgs",
-      targetAudience: "Vice-chancellors, university advancement directors, and international NGOs",
-      monthly: {
-        credits: 1000,
-        price: "R 12,500",
-        priceLabel: "per month",
-        amount: 12500,
-      },
-      yearly: {
-        credits: 12000,
-        price: "R 125,000",
-        priceLabel: "per year",
-        savings: "Save 25%",
-        amount: 125000,
-      },
-      type: "enterprise",
-      buttonText: "Contact Sales",
-      buttonVariant: "outline",
-      features: [
-        { id: "f14", text: "100+ Document translations/month with AI Story Engine" },
-        { id: "f15", text: "Unlimited Institutional Voice Profiles" },
-        { id: "f16", text: "IP protection through precise sourcing and rigorous editorial standards" },
-        { id: "f17", text: "Dedicated account manager with integrated narrative impact strategy" },
-        { id: "f18", text: "Custom AI models trained on institutional archives" },
-        { id: "f19", text: "Complex multi-user collaboration with top-tier security" },
-        { id: "f20", text: "Premium service combining journalism, strategy, editing & storytelling" },
-        { id: "f21", text: "24/7 priority support with dedicated success team" },
-      ],
-    },
-  ];
+  const transformPlans = (): PricingPlan[] => {
+    // Group plans by name
+    const planGroups: Record<string, ApiPlan[]> = {};
+    
+    apiPlans.forEach(plan => {
+      if (!planGroups[plan.name]) {
+        planGroups[plan.name] = [];
+      }
+      planGroups[plan.name].push(plan);
+    });
+
+    const result: PricingPlan[] = [];
+
+    Object.keys(planGroups).forEach(name => {
+      const group = planGroups[name];
+      const monthlyPlan = group.find(p => p.billingType === "Monthly" || p.billingType === "One-time");
+      const yearlyPlan = group.find(p => p.billingType === "Yearly");
+
+      // Determine plan type
+      let type: "basic" | "pro" | "enterprise" = "basic";
+      let subtitle = "Basic";
+      let buttonVariant: "primary" | "outline" = "outline";
+      let buttonText = "Get Started";
+
+      if (name.toLowerCase().includes("pro")) {
+        type = "pro";
+        subtitle = "Pro";
+        buttonVariant = "primary";
+        buttonText = "Get Started";
+      } else if (name.toLowerCase().includes("enterprise")) {
+        type = "enterprise";
+        subtitle = "Enterprise";
+        buttonVariant = "outline";
+        buttonText = "Contact Sales";
+      } else if (name.toLowerCase().includes("individual") || name.toLowerCase().includes("scholar")) {
+        type = "basic";
+        subtitle = "Basic";
+        buttonVariant = "outline";
+        buttonText = "Get Started";
+      }
+
+      // Create features with IDs
+      const features: PlanFeature[] = (monthlyPlan?.features || yearlyPlan?.features || []).map((text, index) => ({
+        id: `f${index}`,
+        text: text,
+      }));
+
+      result.push({
+        id: name.toLowerCase().replace(/\s+/g, '-'),
+        name: name,
+        subtitle: subtitle,
+        description: monthlyPlan?.description || yearlyPlan?.description || "",
+        targetAudience: monthlyPlan?.description || yearlyPlan?.description || "",
+        monthly: {
+          credits: monthlyPlan?.credits || 0,
+          price: `R ${(monthlyPlan?.price || 0).toLocaleString()}`,
+          priceLabel: "per month",
+          amount: monthlyPlan?.price || 0,
+        },
+        yearly: {
+          credits: yearlyPlan?.credits || 0,
+          price: `R ${(yearlyPlan?.price || 0).toLocaleString()}`,
+          priceLabel: "per year",
+          savings: yearlyPlan ? "Save 20%" : undefined,
+          amount: yearlyPlan?.price || 0,
+        },
+        features: features,
+        isPopular: monthlyPlan?.isPopular || yearlyPlan?.isPopular || false,
+        type: type,
+        buttonText: buttonText,
+        buttonVariant: buttonVariant,
+      });
+    });
+
+    // Sort: Popular first, then by price
+    result.sort((a, b) => {
+      if (a.isPopular && !b.isPopular) return -1;
+      if (!a.isPopular && b.isPopular) return 1;
+      return (a.monthly.amount || 0) - (b.monthly.amount || 0);
+    });
+
+    return result;
+  };
+
+  const plans = transformPlans();
 
   // ============================================
   // HANDLERS
@@ -360,7 +370,7 @@ const AddCredits = () => {
 
   const handleGetStarted = async (planId: string) => {
     // Enterprise plan redirects to contact
-    if (planId === "enterprise") {
+    if (planId === "enterprise" || planId === "organisation") {
       navigate("/contact");
       return;
     }
@@ -376,7 +386,6 @@ const AddCredits = () => {
         return;
       }
 
-      // ✅ Use userBillingInfo from API or fallback to user context
       const billingData = userBillingInfo;
 
       if (!billingData || !billingData.email) {
@@ -384,14 +393,14 @@ const AddCredits = () => {
         return;
       }
 
-      // Find the plan
       const plan = plans.find(p => p.id === planId);
       if (!plan) {
         setError("Plan not found");
         return;
       }
 
-      // ✅ Prepare request payload with complete billing info
+      const currentBilling = billingCycle === "monthly" ? plan.monthly : plan.yearly;
+
       const payload = {
         userEmail: billingData.email,
         billingInfo: {
@@ -407,11 +416,12 @@ const AddCredits = () => {
         },
         planId: planId,
         billingCycle: billingCycle,
+        credits: currentBilling.credits,
+        amount: currentBilling.amount,
       };
 
       console.log("📤 Initiating payment with payload:", payload);
 
-      // ✅ Call API to initiate payment
       const response = await axios.post(
         `${API_URL}/api/user/credit/create-order`,
         payload,
@@ -428,21 +438,19 @@ const AddCredits = () => {
       if (response.data.success) {
         const { paymentData, paymentUrl, orderNumber, transactionId } = response.data.data;
 
-        // ✅ Store order info for reference
         sessionStorage.setItem("pendingOrder", JSON.stringify({
           orderNumber,
           transactionId,
           planId,
           billingCycle,
-          credits: billingCycle === "monthly" ? plan.monthly.credits : plan.yearly.credits,
+          credits: currentBilling.credits,
         }));
 
-        // ✅ Redirect to PayFast
+        // Redirect to PayFast
         const form = document.createElement("form");
         form.method = "POST";
         form.action = paymentUrl;
 
-        // Add all payment data as hidden fields
         Object.keys(paymentData).forEach((key) => {
           const input = document.createElement("input");
           input.type = "hidden";
@@ -472,18 +480,17 @@ const AddCredits = () => {
   // RENDER
   // ============================================
 
-  // Get current billing data
   const getCurrentBilling = (plan: PricingPlan) => {
     return billingCycle === "monthly" ? plan.monthly : plan.yearly;
   };
 
-  // Show loading state while fetching user info
-  if (fetchingUser) {
+  // Show loading state
+  if (fetchingUser || fetchingPlans) {
     return (
       <div className="min-h-screen bg-[#F9F7F4] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-[#C85A32] mx-auto" />
-          <p className="text-gray-500 mt-3 text-sm">Loading your information...</p>
+          <p className="text-gray-500 mt-3 text-sm">Loading plans...</p>
         </div>
       </div>
     );
@@ -538,12 +545,6 @@ const AddCredits = () => {
                 {userBillingInfo.company && ` · ${userBillingInfo.company}`}
               </p>
             </div>
-            {/* <button
-              onClick={() => navigate("/user/profile")}
-              className="text-xs text-[#C85A32] font-medium hover:underline"
-            >
-              Update Profile
-            </button> */}
           </div>
         )}
 
@@ -556,7 +557,7 @@ const AddCredits = () => {
           </div>
           <div>
             <p className="text-xs text-gray-400 font-medium">Current Balance</p>
-            <p className="text-base font-bold text-[#0F2D63]"> {loading ? '...' : userData.credits} credits</p>
+            <p className="text-base font-bold text-[#0F2D63]">{userData.credits} credits</p>
           </div>
         </div>
 
@@ -567,19 +568,21 @@ const AddCredits = () => {
           <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
             <button
               onClick={() => handleBillingToggle("monthly")}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-all ${billingCycle === "monthly"
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-all ${
+                billingCycle === "monthly"
                   ? "bg-[#0F2D63] text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
-                }`}
+              }`}
             >
               Monthly
             </button>
             <button
               onClick={() => handleBillingToggle("yearly")}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-all ${billingCycle === "yearly"
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-all ${
+                billingCycle === "yearly"
                   ? "bg-[#0F2D63] text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
-                }`}
+              }`}
             >
               Yearly
             </button>
@@ -594,124 +597,134 @@ const AddCredits = () => {
         {/* ==========================================
             PRICING PLANS
             ========================================== */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {plans.map((plan) => {
-            const isPro = plan.type === "pro";
-            const currentBilling = getCurrentBilling(plan);
-            const isYearly = billingCycle === "yearly";
+        {plans.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center">
+            <Coins className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500 font-medium">No plans available</p>
+            <p className="text-sm text-gray-400 mt-1">Please check back later for available credit plans</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {plans.map((plan) => {
+              const isPro = plan.type === "pro";
+              const currentBilling = getCurrentBilling(plan);
+              const isYearly = billingCycle === "yearly";
 
-            return (
-              <div
-                key={plan.id}
-                className={`relative bg-white rounded-2xl flex flex-col overflow-hidden transition-all duration-200 hover:shadow-lg
-                  ${isPro
-                    ? "border-2 border-[#C85A32] shadow-xl shadow-[#C85A32]/10"
-                    : "border border-gray-200 shadow-sm hover:border-gray-300"
-                  }`}
-              >
-                {/* Popular Badge */}
-                {plan.isPopular && (
-                  <>
-                    <div className="h-1 bg-[#C85A32]"></div>
-                    <div className="absolute top-4 right-4">
-                      <span className="flex items-center gap-1 bg-[#C85A32] text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest">
-                        <Star className="w-2.5 h-2.5 fill-white" />
-                        Most Popular
+              return (
+                <div
+                  key={plan.id}
+                  className={`relative bg-white rounded-2xl flex flex-col overflow-hidden transition-all duration-200 hover:shadow-lg
+                    ${
+                      plan.isPopular
+                        ? "border-2 border-[#C85A32] shadow-xl shadow-[#C85A32]/10"
+                        : "border border-gray-200 shadow-sm hover:border-gray-300"
+                    }`}
+                >
+                  {/* Popular Badge */}
+                  {plan.isPopular && (
+                    <>
+                      <div className="h-1 bg-[#C85A32]"></div>
+                      <div className="absolute top-4 right-4">
+                        <span className="flex items-center gap-1 bg-[#C85A32] text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest">
+                          <Star className="w-2.5 h-2.5 fill-white" />
+                          Most Popular
+                        </span>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Savings Badge for Yearly */}
+                  {isYearly && plan.yearly.savings && (
+                    <div className="absolute top-4 left-4">
+                      <span className="flex items-center gap-1 bg-green-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest">
+                        {plan.yearly.savings}
                       </span>
                     </div>
-                  </>
-                )}
+                  )}
 
-                {/* Savings Badge for Yearly */}
-                {isYearly && plan.yearly.savings && (
-                  <div className="absolute top-4 left-4">
-                    <span className="flex items-center gap-1 bg-green-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest">
-                      {plan.yearly.savings}
-                    </span>
-                  </div>
-                )}
-
-                <div className="p-6 flex flex-col flex-1">
-                  {/* Plan Type */}
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">
-                    {plan.subtitle}
-                  </p>
-
-                  {/* Plan Name */}
-                  <h3 className="text-xl font-bold text-[#1C1C1C] mb-1">
-                    {plan.name}
-                  </h3>
-                  <p className="text-xs text-gray-500 leading-relaxed mb-1">
-                    {plan.description}
-                  </p>
-                  <p className="text-xs text-gray-400 leading-relaxed mb-5">
-                    {plan.targetAudience}
-                  </p>
-
-                  {/* Credits Display */}
-                  <div className="flex items-center gap-1.5 bg-[#fff4f0] border border-[#f5c9b8] rounded-xl px-3 py-2 mb-4 w-fit">
-                    <Coins className="w-3.5 h-3.5 text-[#C85A32]" />
-                    <span className="text-sm font-bold text-[#C85A32]">
-                      {currentBilling.credits.toLocaleString()}
-                    </span>
-                    <span className="text-xs text-[#C85A32]/70 font-medium">
-                      credits / {billingCycle === "monthly" ? "month" : "year"}
-                    </span>
-                  </div>
-
-                  {/* Price */}
-                  <div className="mb-6">
-                    <p className="text-2xl font-bold text-[#1C1C1C] leading-tight">
-                      {currentBilling.price}
+                  <div className="p-6 flex flex-col flex-1">
+                    {/* Plan Type */}
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">
+                      {plan.subtitle}
                     </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {currentBilling.priceLabel}
+
+                    {/* Plan Name */}
+                    <h3 className="text-xl font-bold text-[#1C1C1C] mb-1">
+                      {plan.name}
+                    </h3>
+                    <p className="text-xs text-gray-500 leading-relaxed mb-1">
+                      {plan.description}
                     </p>
-                    {isYearly && plan.yearly.savings && (
-                      <p className="text-xs text-green-600 mt-1 font-medium">
-                        {plan.yearly.savings} compared to monthly
+                    <p className="text-xs text-gray-400 leading-relaxed mb-5">
+                      {plan.targetAudience}
+                    </p>
+
+                    {/* Credits Display */}
+                    <div className="flex items-center gap-1.5 bg-[#fff4f0] border border-[#f5c9b8] rounded-xl px-3 py-2 mb-4 w-fit">
+                      <Coins className="w-3.5 h-3.5 text-[#C85A32]" />
+                      <span className="text-sm font-bold text-[#C85A32]">
+                        {currentBilling.credits.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-[#C85A32]/70 font-medium">
+                        credits / {billingCycle === "monthly" ? "month" : "year"}
+                      </span>
+                    </div>
+
+                    {/* Price */}
+                    <div className="mb-6">
+                      <p className="text-2xl font-bold text-[#1C1C1C] leading-tight">
+                        {currentBilling.price}
                       </p>
-                    )}
-                  </div>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {currentBilling.priceLabel}
+                      </p>
+                      {isYearly && plan.yearly.savings && (
+                        <p className="text-xs text-green-600 mt-1 font-medium">
+                          {plan.yearly.savings} compared to monthly
+                        </p>
+                      )}
+                    </div>
 
-                  {/* Features */}
-                  <ul className="space-y-2.5 mb-7 flex-1">
-                    {plan.features.map((feature) => (
-                      <li key={feature.id} className="flex items-start gap-2.5">
-                        <Check className="w-4 h-4 text-[#C85A32] flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-600 leading-relaxed">
-                          {feature.text}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                    {/* Features */}
+                    <ul className="space-y-2.5 mb-7 flex-1">
+                      {plan.features.map((feature) => (
+                        <li key={feature.id} className="flex items-start gap-2.5">
+                          <Check className="w-4 h-4 text-[#C85A32] flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-600 leading-relaxed">
+                            {feature.text}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
 
-                  {/* CTA Button */}
-                  <button
-                    onClick={() => handleGetStarted(plan.id)}
-                    disabled={loading || !userBillingInfo}
-                    className={`w-full py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${plan.buttonVariant === "primary"
-                        ? "bg-[#C85A32] hover:bg-[#a8472a] text-white"
-                        : "border border-[#0F2D63] text-[#0F2D63] hover:bg-[#0F2D63] hover:text-white"
+                    {/* CTA Button */}
+                    <button
+                      onClick={() => handleGetStarted(plan.id)}
+                      disabled={loading || !userBillingInfo}
+                      className={`w-full py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+                        plan.buttonVariant === "primary"
+                          ? "bg-[#C85A32] hover:bg-[#a8472a] text-white"
+                          : "border border-[#0F2D63] text-[#0F2D63] hover:bg-[#0F2D63] hover:text-white"
                       } ${loading || !userBillingInfo ? "opacity-70 cursor-not-allowed" : ""}`}
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="w-3.5 h-3.5" />
-                        {plan.buttonText}
-                      </>
-                    )}
-                  </button>
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="w-3.5 h-3.5" />
+                          {plan.buttonText}
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* ==========================================
             ENTERPRISE CTA

@@ -1,5 +1,5 @@
 // pages/admin/SubscriptionManagement.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   GripVertical,
@@ -10,10 +10,15 @@ import {
   Trash2,
   X,
   Check,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
 } from "lucide-react";
+import axios from "axios";
 
 interface SubscriptionPlan {
   id: string;
+  _id?: string;
   tier: string;
   name: string;
   audience: string;
@@ -28,6 +33,7 @@ interface SubscriptionPlan {
   features: string[];
   isPopular: boolean;
   isActive: boolean;
+  displayOrder?: number;
 }
 
 interface NewPlanFormData {
@@ -47,9 +53,17 @@ interface NewPlanFormData {
   isActive: boolean;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
 const SubscriptionManagement = () => {
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showNewPlanModal, setShowNewPlanModal] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
   const [featuresText, setFeaturesText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<NewPlanFormData>({
     tier: "",
     name: "",
@@ -67,72 +81,137 @@ const SubscriptionManagement = () => {
     isActive: true,
   });
 
-  // Mock data - in real app this would come from an API
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([
-    {
-      id: "1",
-      tier: "Basic",
-      name: "Individual Scholar",
-      audience: "Individual Academics & Early-Career Researchers",
-      targetAudience: "Postdocs, lecturers, and doctoral candidates...",
-      monthlyPrice: "R 450 – R 850",
-      yearlyPrice: "R 380 – R 720",
-      creditsMonthly: 100,
-      creditsYearly: 1200,
-      periodLabel: "/ mo",
-      buttonLabel: "Get Started",
-      buttonLink: "/contact",
-      features: [
-        "10 Document translations/month with AI Story Engine",
-        "1 Standard Academic Profile with Voice & Tone Calibrator",
-        "Step-by-step tools for op-eds, policy briefs & thought leadership",
-      ],
-      isPopular: false,
-      isActive: true,
-    },
-    {
-      id: "2",
-      tier: "Pro",
-      name: "Department",
-      audience: "Faculty-Level Comms Teams & Corporate Social Impact Teams",
-      targetAudience: "Comms directors, faculty leads, and NGO comms managers...",
-      monthlyPrice: "R 4,500 – R 8,500",
-      yearlyPrice: "R 3,800 – R 7,200",
-      creditsMonthly: 500,
-      creditsYearly: 6000,
-      periodLabel: "/ mo",
-      buttonLabel: "Get Started",
-      buttonLink: "/contact",
-      features: [
-        "50 Document translations/month with AI Story Engine",
-        "Up to 5 Custom Voice Profiles for team members",
-        "Consistent overflow capacity for high-volume periods",
-      ],
-      isPopular: true,
-      isActive: true,
-    },
-    {
-      id: "3",
-      tier: "Enterprise",
-      name: "Organisation",
-      audience: "Comms Directors, Exec Leaders, & Global Dev Orgs",
-      targetAudience: "Heads of comms, executive leadership, and global development organizations...",
-      monthlyPrice: "R 25,000+",
-      yearlyPrice: "R 21,000+",
-      creditsMonthly: 2000,
-      creditsYearly: 24000,
-      periodLabel: "/ mo",
-      buttonLabel: "Contact Sales",
-      buttonLink: "/contact",
-      features: [
-        "Unlimited document processing with AI Story Engine",
-        "Unlimited Institutional Voice Profiles",
-        "IP protection through precise sourcing and rigorous editorial standards",
-      ],
-      isPopular: false,
-      isActive: true,
-    },
-  ]);
+  // Fetch plans on mount
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  // Clear messages after 5 seconds
+  useEffect(() => {
+    if (success || error) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+        setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, error]);
+
+  // ============================================
+  // API CALLS
+  // ============================================
+
+  const fetchPlans = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${API_BASE_URL}/api/admin/subscription-plans`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.success) {
+        const transformedPlans = response.data.data.map((plan: any) => ({
+          id: plan._id,
+          _id: plan._id,
+          tier: plan.tier || getTierFromName(plan.name),
+          name: plan.name,
+          audience: plan.audience || plan.description || "",
+          targetAudience: plan.targetAudience || plan.description || "",
+          monthlyPrice: plan.monthlyPrice || `R ${plan.price?.toLocaleString() || 0}`,
+          yearlyPrice: plan.yearlyPrice || (plan.price ? `R ${(plan.price * 10).toLocaleString()}` : ""),
+          creditsMonthly: plan.creditsMonthly || plan.credits || 0,
+          creditsYearly: plan.creditsYearly || (plan.credits ? plan.credits * 12 : 0),
+          periodLabel: plan.periodLabel || "per month",
+          buttonLabel: plan.buttonLabel || "Get Started",
+          buttonLink: plan.buttonLink || "/contact",
+          features: plan.features || [],
+          isPopular: plan.isPopular || false,
+          isActive: plan.isActive !== undefined ? plan.isActive : true,
+          displayOrder: plan.displayOrder || 0,
+        }));
+        setPlans(transformedPlans);
+        setSuccess(response.data.message || "Plans loaded successfully");
+      } else {
+        setError(response.data.message || "Failed to fetch plans");
+      }
+    } catch (error: any) {
+      console.error("Error fetching plans:", error);
+      setError(error.response?.data?.message || "Failed to fetch plans");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getTierFromName = (name: string): string => {
+    const nameLower = name.toLowerCase();
+    if (nameLower.includes('pro')) return 'Pro';
+    if (nameLower.includes('enterprise') || nameLower.includes('organisation')) return 'Enterprise';
+    if (nameLower.includes('individual') || nameLower.includes('scholar')) return 'Basic';
+    return 'Basic';
+  };
+
+  const createPlan = async (data: any) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `${API_BASE_URL}/api/admin/subscription-plans`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || error;
+    }
+  };
+
+  const updatePlan = async (id: string, data: any) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/admin/subscription-plans/${id}`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || error;
+    }
+  };
+
+  const deletePlan = async (id: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.delete(
+        `${API_BASE_URL}/api/admin/subscription-plans/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || error;
+    }
+  };
+
+  // ============================================
+  // HANDLERS
+  // ============================================
 
   const getFeatureDisplay = (features: string[]) => {
     const displayCount = 3;
@@ -169,36 +248,6 @@ const SubscriptionManagement = () => {
     }));
   };
 
-  const handleCreatePlan = () => {
-    // Validate form
-    if (!formData.tier || !formData.name || !formData.monthlyPrice) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
-    const newPlan: SubscriptionPlan = {
-      id: String(Date.now()),
-      tier: formData.tier,
-      name: formData.name,
-      audience: formData.audience,
-      targetAudience: formData.targetAudience,
-      monthlyPrice: formData.monthlyPrice,
-      yearlyPrice: formData.yearlyPrice,
-      creditsMonthly: formData.creditsMonthly,
-      creditsYearly: formData.creditsYearly,
-      periodLabel: formData.periodLabel,
-      buttonLabel: formData.buttonLabel,
-      buttonLink: formData.buttonLink,
-      features: formData.features.length > 0 ? formData.features : ["No features specified"],
-      isPopular: formData.isPopular,
-      isActive: formData.isActive,
-    };
-
-    setPlans([...plans, newPlan]);
-    setShowNewPlanModal(false);
-    resetForm();
-  };
-
   const resetForm = () => {
     setFormData({
       tier: "",
@@ -217,38 +266,225 @@ const SubscriptionManagement = () => {
       isActive: true,
     });
     setFeaturesText("");
+    setEditingPlan(null);
+    setIsSubmitting(false);
+    setSuccess(null);
+    setError(null);
   };
 
-  const togglePopular = (planId: string) => {
-    setPlans((prev) =>
-      prev.map((plan) => ({
-        ...plan,
-        isPopular: plan.id === planId ? !plan.isPopular : plan.isPopular,
-      }))
-    );
-  };
+  const handleCreatePlan = async () => {
+    if (!formData.tier || !formData.name || !formData.monthlyPrice) {
+      setError("Please fill in all required fields");
+      return;
+    }
 
-  const toggleActive = (planId: string) => {
-    setPlans((prev) =>
-      prev.map((plan) =>
-        plan.id === planId ? { ...plan, isActive: !plan.isActive } : plan
-      )
-    );
-  };
+    setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
 
-  const deletePlan = (planId: string) => {
-    if (window.confirm("Are you sure you want to delete this plan?")) {
-      setPlans((prev) => prev.filter((plan) => plan.id !== planId));
+    try {
+      const payload = {
+        tier: formData.tier,
+        name: formData.name,
+        audience: formData.audience,
+        targetAudience: formData.targetAudience,
+        monthlyPrice: formData.monthlyPrice,
+        yearlyPrice: formData.yearlyPrice,
+        creditsMonthly: formData.creditsMonthly,
+        creditsYearly: formData.creditsYearly,
+        periodLabel: formData.periodLabel,
+        buttonLabel: formData.buttonLabel,
+        buttonLink: formData.buttonLink,
+        features: formData.features,
+        isPopular: formData.isPopular,
+        isActive: formData.isActive,
+        price: parseFloat(formData.monthlyPrice.replace(/[^0-9.]/g, '')) || 0,
+        credits: formData.creditsMonthly,
+        description: formData.audience,
+      };
+
+      const response = await createPlan(payload);
+      
+      if (response.success) {
+        setSuccess(response.message || "Plan created successfully");
+        await fetchPlans();
+        setTimeout(() => {
+          setShowNewPlanModal(false);
+          resetForm();
+        }, 1500);
+      } else {
+        setError(response.message || "Failed to create plan");
+      }
+    } catch (error: any) {
+      console.error("Error creating plan:", error);
+      setError(error.message || "Failed to create plan");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const editPlan = (planId: string) => {
-    // Implement edit functionality
-    console.log("Edit plan:", planId);
+  const handleEditPlan = (plan: SubscriptionPlan) => {
+    setEditingPlan(plan);
+    setFormData({
+      tier: plan.tier,
+      name: plan.name,
+      audience: plan.audience,
+      targetAudience: plan.targetAudience,
+      monthlyPrice: plan.monthlyPrice,
+      yearlyPrice: plan.yearlyPrice,
+      creditsMonthly: plan.creditsMonthly,
+      creditsYearly: plan.creditsYearly,
+      periodLabel: plan.periodLabel,
+      buttonLabel: plan.buttonLabel,
+      buttonLink: plan.buttonLink,
+      features: plan.features || [],
+      isPopular: plan.isPopular,
+      isActive: plan.isActive,
+    });
+    setFeaturesText((plan.features || []).join("\n"));
+    setShowNewPlanModal(true);
+    setError(null);
+    setSuccess(null);
+  };
+
+  const handleUpdatePlan = async () => {
+    if (!editingPlan) return;
+    
+    if (!formData.tier || !formData.name || !formData.monthlyPrice) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const payload = {
+        tier: formData.tier,
+        name: formData.name,
+        audience: formData.audience,
+        targetAudience: formData.targetAudience,
+        monthlyPrice: formData.monthlyPrice,
+        yearlyPrice: formData.yearlyPrice,
+        creditsMonthly: formData.creditsMonthly,
+        creditsYearly: formData.creditsYearly,
+        periodLabel: formData.periodLabel,
+        buttonLabel: formData.buttonLabel,
+        buttonLink: formData.buttonLink,
+        features: formData.features,
+        isPopular: formData.isPopular,
+        isActive: formData.isActive,
+        price: parseFloat(formData.monthlyPrice.replace(/[^0-9.]/g, '')) || 0,
+        credits: formData.creditsMonthly,
+        description: formData.audience,
+      };
+
+      const response = await updatePlan(editingPlan._id || editingPlan.id, payload);
+      
+      if (response.success) {
+        setSuccess(response.message || "Plan updated successfully");
+        await fetchPlans();
+        setTimeout(() => {
+          setShowNewPlanModal(false);
+          resetForm();
+        }, 1500);
+      } else {
+        setError(response.message || "Failed to update plan");
+      }
+    } catch (error: any) {
+      console.error("Error updating plan:", error);
+      setError(error.message || "Failed to update plan");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeletePlan = async (planId: string, planName: string) => {
+    if (!window.confirm(`Are you sure you want to delete the "${planName}" plan?`)) {
+      return;
+    }
+
+    try {
+      const response = await deletePlan(planId);
+      
+      if (response.success) {
+        setSuccess(response.message || `Plan "${planName}" deleted successfully`);
+        await fetchPlans();
+      } else {
+        setError(response.message || "Failed to delete plan");
+      }
+    } catch (error: any) {
+      console.error("Error deleting plan:", error);
+      setError(error.message || "Failed to delete plan");
+    }
+  };
+
+  const handleTogglePopular = async (planId: string, currentStatus: boolean) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/admin/subscription-plans/${planId}`,
+        { isPopular: !currentStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setSuccess(response.data.message || `Plan ${!currentStatus ? 'marked as' : 'unmarked from'} popular`);
+        await fetchPlans();
+      } else {
+        setError(response.data.message || "Failed to update plan");
+      }
+    } catch (error: any) {
+      console.error("Error toggling popular:", error);
+      setError(error.response?.data?.message || "Failed to update plan");
+    }
+  };
+
+  const handleToggleActive = async (planId: string, currentStatus: boolean) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/admin/subscription-plans/${planId}`,
+        { isActive: !currentStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setSuccess(response.data.message || `Plan ${!currentStatus ? 'activated' : 'deactivated'}`);
+        await fetchPlans();
+      } else {
+        setError(response.data.message || "Failed to update plan");
+      }
+    } catch (error: any) {
+      console.error("Error toggling active:", error);
+      setError(error.response?.data?.message || "Failed to update plan");
+    }
   };
 
   const activePlans = plans.filter((p) => p.isActive).length;
   const featuredPlan = plans.find((p) => p.isPopular);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F4F6FB] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 text-[#0F2D63] animate-spin" />
+          <p className="text-sm text-gray-500">Loading plans...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F4F6FB] p-6 space-y-6">
@@ -267,13 +503,37 @@ const SubscriptionManagement = () => {
           </p>
         </div>
         <button
-          onClick={() => setShowNewPlanModal(true)}
+          onClick={() => {
+            resetForm();
+            setShowNewPlanModal(true);
+          }}
           className="flex items-center gap-2 px-4 py-2.5 bg-[#0F2D63] text-white text-sm font-semibold rounded-xl hover:bg-[#0a2050] transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
           Add New Plan
         </button>
       </div>
+
+      {/* Success/Error Messages - Shows API response message */}
+      {success && (
+        <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
+          <CheckCircle className="w-4 h-4 flex-shrink-0" />
+          <span>{success}</span>
+          <button onClick={() => setSuccess(null)} className="ml-auto">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>{error}</span>
+          <button onClick={() => setError(null)} className="ml-auto">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
@@ -296,161 +556,171 @@ const SubscriptionManagement = () => {
       </div>
 
       {/* Plans List */}
-      <div className="space-y-4">
-        {plans.map((plan) => {
-          const isActive = plan.isActive;
-          const isPopular = plan.isPopular;
-          const { shownFeatures, remaining } = getFeatureDisplay(plan.features);
+      {plans.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+          <Coins className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-500 font-medium">No subscription plans found</p>
+          <p className="text-sm text-gray-400 mt-1">Create your first subscription plan</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {plans.map((plan) => {
+            const isActive = plan.isActive;
+            const isPopular = plan.isPopular;
+            const { shownFeatures, remaining } = getFeatureDisplay(plan.features || []);
 
-          return (
-            <div
-              key={plan.id}
-              className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-opacity ${
-                isActive ? "border-gray-100" : "border-gray-100 opacity-60"
-              }`}
-            >
-              {isPopular && <div className="h-1 bg-[#C85A32]" />}
-              <div className="p-5 flex gap-5 items-start">
-                {/* Drag Handle */}
-                <div className="mt-1 text-gray-200 cursor-grab flex-shrink-0">
-                  <GripVertical className="w-[18px] h-[18px]" />
-                </div>
-
-                {/* Plan Content */}
-                <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Left Column - Plan Info */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                        {plan.tier}
-                      </span>
-                      {isPopular && (
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-[#C85A32] bg-[#fff4f0] px-2 py-0.5 rounded-full flex items-center gap-1">
-                          <Star className="w-2.5 h-2.5 fill-[#C85A32] text-[#C85A32]" />
-                          Popular
-                        </span>
-                      )}
-                    </div>
-                    <p className="font-bold text-[#0F2D63] text-base">
-                      {plan.name}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
-                      {plan.audience}
-                    </p>
+            return (
+              <div
+                key={plan._id || plan.id}
+                className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-opacity ${
+                  isActive ? "border-gray-100" : "border-gray-100 opacity-60"
+                }`}
+              >
+                {isPopular && <div className="h-1 bg-[#C85A32]" />}
+                <div className="p-5 flex gap-5 items-start">
+                  {/* Drag Handle */}
+                  <div className="mt-1 text-gray-200 cursor-grab flex-shrink-0">
+                    <GripVertical className="w-[18px] h-[18px]" />
                   </div>
 
-                  {/* Middle Column - Pricing */}
-                  <div className="space-y-2">
-                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">
-                      Pricing & Credits
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1.5 bg-[#fff4f0] border border-[#f5c9b8] rounded-lg px-2.5 py-1">
-                        <Coins className="w-3 h-3 text-[#C85A32]" />
-                        <span className="text-xs font-bold text-[#C85A32]">
-                          {plan.creditsMonthly} cr {plan.periodLabel}
+                  {/* Plan Content */}
+                  <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Left Column - Plan Info */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                          {plan.tier}
+                        </span>
+                        {isPopular && (
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-[#C85A32] bg-[#fff4f0] px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <Star className="w-2.5 h-2.5 fill-[#C85A32] text-[#C85A32]" />
+                            Popular
+                          </span>
+                        )}
+                      </div>
+                      <p className="font-bold text-[#0F2D63] text-base">
+                        {plan.name}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                        {plan.audience}
+                      </p>
+                    </div>
+
+                    {/* Middle Column - Pricing */}
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">
+                        Pricing & Credits
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 bg-[#fff4f0] border border-[#f5c9b8] rounded-lg px-2.5 py-1">
+                          <Coins className="w-3 h-3 text-[#C85A32]" />
+                          <span className="text-xs font-bold text-[#C85A32]">
+                            {plan.creditsMonthly} cr {plan.periodLabel}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1 w-fit">
+                        <Coins className="w-3 h-3 text-emerald-600" />
+                        <span className="text-xs font-bold text-emerald-700">
+                          {plan.creditsYearly} cr / yr
                         </span>
                       </div>
+                      <p className="text-sm font-semibold text-[#0F2D63]">
+                        {plan.monthlyPrice}{" "}
+                        <span className="text-gray-400 font-normal">
+                          {plan.periodLabel}
+                        </span>
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {plan.yearlyPrice}{" "}
+                        <span className="text-gray-400 font-normal">/ yr</span>
+                      </p>
+                      <p className="text-xs text-gray-400 italic">
+                        "{plan.buttonLabel}"
+                      </p>
                     </div>
-                    <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1 w-fit">
-                      <Coins className="w-3 h-3 text-emerald-600" />
-                      <span className="text-xs font-bold text-emerald-700">
-                        {plan.creditsYearly} cr / yr
-                      </span>
+
+                    {/* Right Column - Features */}
+                    <div>
+                      <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">
+                        {(plan.features || []).length} Features
+                      </p>
+                      <ul className="space-y-1">
+                        {shownFeatures.map((feature, index) => (
+                          <li
+                            key={index}
+                            className="flex items-start gap-1.5 text-xs text-gray-600"
+                          >
+                            <Check className="w-2.5 h-2.5 text-[#C85A32] flex-shrink-0 mt-0.5" />
+                            <span className="line-clamp-1">{feature}</span>
+                          </li>
+                        ))}
+                        {remaining > 0 && (
+                          <li className="text-xs text-gray-400 pl-4">
+                            +{remaining} more
+                          </li>
+                        )}
+                      </ul>
                     </div>
-                    <p className="text-sm font-semibold text-[#0F2D63]">
-                      {plan.monthlyPrice}{" "}
-                      <span className="text-gray-400 font-normal">
-                        {plan.periodLabel}
-                      </span>
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {plan.yearlyPrice}{" "}
-                      <span className="text-gray-400 font-normal">/ yr</span>
-                    </p>
-                    <p className="text-xs text-gray-400 italic">
-                      "{plan.buttonLabel}"
-                    </p>
                   </div>
 
-                  {/* Right Column - Features */}
-                  <div>
-                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">
-                      {plan.features.length} Features
-                    </p>
-                    <ul className="space-y-1">
-                      {shownFeatures.map((feature, index) => (
-                        <li
-                          key={index}
-                          className="flex items-start gap-1.5 text-xs text-gray-600"
-                        >
-                          <Check className="w-2.5 h-2.5 text-[#C85A32] flex-shrink-0 mt-0.5" />
-                          <span className="line-clamp-1">{feature}</span>
-                        </li>
-                      ))}
-                      {remaining > 0 && (
-                        <li className="text-xs text-gray-400 pl-4">
-                          +{remaining} more
-                        </li>
-                      )}
-                    </ul>
+                  {/* Actions */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => handleTogglePopular(plan._id || plan.id, isPopular)}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+                        isPopular
+                          ? "bg-[#fff4f0] text-[#C85A32]"
+                          : "hover:bg-gray-100 text-gray-300"
+                      }`}
+                      title={isPopular ? "Unset as popular" : "Mark as popular"}
+                    >
+                      <Star
+                        className={`w-3.5 h-3.5 ${isPopular ? "fill-[#C85A32]" : ""}`}
+                      />
+                    </button>
+                    <button
+                      onClick={() => handleToggleActive(plan._id || plan.id, isActive)}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+                        isActive
+                          ? "hover:bg-gray-100 text-gray-400"
+                          : "hover:bg-gray-100 text-gray-300"
+                      }`}
+                      title={isActive ? "Hide from users" : "Show to users"}
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleEditPlan(plan)}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors"
+                      title="Edit plan"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeletePlan(plan._id || plan.id, plan.name)}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                      title="Delete plan"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  <button
-                    onClick={() => togglePopular(plan.id)}
-                    className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-                      isPopular
-                        ? "bg-[#fff4f0] text-[#C85A32]"
-                        : "hover:bg-gray-100 text-gray-300"
-                    }`}
-                    title={isPopular ? "Unset as popular" : "Mark as popular"}
-                  >
-                    <Star
-                      className={`w-3.5 h-3.5 ${isPopular ? "fill-[#C85A32]" : ""}`}
-                    />
-                  </button>
-                  <button
-                    onClick={() => toggleActive(plan.id)}
-                    className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-                      isActive
-                        ? "hover:bg-gray-100 text-gray-400"
-                        : "hover:bg-gray-100 text-gray-300"
-                    }`}
-                    title={isActive ? "Hide from users" : "Show to users"}
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => editPlan(plan.id)}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors"
-                    title="Edit plan"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => deletePlan(plan.id)}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
-                    title="Delete plan"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
-      {/* New Plan Modal */}
+      {/* New/Edit Plan Modal */}
       {showNewPlanModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
-              <h3 className="font-bold text-[#0F2D63] text-lg">Add New Plan</h3>
+              <h3 className="font-bold text-[#0F2D63] text-lg">
+                {editingPlan ? "Edit Plan" : "Add New Plan"}
+              </h3>
               <button
                 onClick={() => {
                   setShowNewPlanModal(false);
@@ -464,6 +734,20 @@ const SubscriptionManagement = () => {
 
             {/* Modal Body */}
             <div className="p-6 space-y-5">
+              {/* Success/Error Messages in Modal - Shows API response */}
+              {success && (
+                <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
+                  <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{success}</span>
+                </div>
+              )}
+              {error && (
+                <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
               {/* Plan Identity */}
               <div>
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
@@ -499,6 +783,7 @@ const SubscriptionManagement = () => {
                 </div>
               </div>
 
+              {/* Rest of the modal stays the same... */}
               {/* Target Audience */}
               <div>
                 <div>
@@ -580,7 +865,7 @@ const SubscriptionManagement = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                      Credits / Year (yearly billing)
+                      Credits / Year
                     </label>
                     <input
                       type="number"
@@ -698,10 +983,20 @@ const SubscriptionManagement = () => {
                   Cancel
                 </button>
                 <button
-                  onClick={handleCreatePlan}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#0F2D63] text-white hover:bg-[#0a2050] transition-colors"
+                  onClick={editingPlan ? handleUpdatePlan : handleCreatePlan}
+                  disabled={isSubmitting}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-semibold bg-[#0F2D63] text-white hover:bg-[#0a2050] transition-colors flex items-center justify-center gap-2 ${
+                    isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
                 >
-                  Add Plan
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {editingPlan ? "Updating..." : "Adding..."}
+                    </>
+                  ) : (
+                    editingPlan ? "Update Plan" : "Add Plan"
+                  )}
                 </button>
               </div>
             </div>

@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+// components/PricingPlans.tsx
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, Loader2 } from "lucide-react";
+import axios from "axios";
+import { toast } from "sonner";
 
 interface PricingPlan {
   id: number;
+  _id?: string;
   name: string;
   title: string;
   subtitle: string;
@@ -16,6 +20,11 @@ interface PricingPlan {
   isPopular?: boolean;
   isEnterprise?: boolean;
   priceSuffix?: string;
+  credits?: number;
+  creditsMonthly?: number;
+  creditsYearly?: number;
+  tier?: string;
+  billingType?: string;
 }
 
 interface PricingPlansProps {
@@ -44,6 +53,8 @@ interface PricingPlansProps {
     monthly: string;
     yearly: string;
   };
+  apiEndpoint?: string;
+  useApi?: boolean;
 }
 
 const PricingPlans = ({
@@ -72,79 +83,126 @@ const PricingPlans = ({
     monthly: "Monthly",
     yearly: "Yearly",
   },
+  apiEndpoint = "/api/admin/subscription-plans",
+  useApi = true,
 }: PricingPlansProps) => {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(defaultBilling);
+  const [plans, setPlans] = useState<PricingPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const defaultPlans: PricingPlan[] = [
-    {
-      id: 1,
-      name: "Basic",
-      title: "Individual Scholar",
-      subtitle: "Individual Academics & Early-Career Researchers",
-      description: "Postdocs, lecturers, and doctoral candidates building their personal brands",
-      monthlyPrice: "R 450",
-      yearlyPrice: "R 850",
-      features: [
-        "10 Document translations/month with AI Story Engine",
-        "1 Standard Academic Profile with Voice & Tone Calibrator",
-        "Step-by-step tools for op-eds, policy briefs & thought leadership",
-        "Access to foundational AI tools to articulate research identity",
-        "Request 'Magalela Polish' at standard hourly/project rate",
-      ],
-      buttonText: "Get Started",
-      buttonLink: "/contact",
-    },
-    {
-      id: 2,
-      name: "Pro",
-      title: "Department",
-      subtitle: "Faculty-Level Comms Teams & Corporate Social Impact Teams",
-      description: "Faculty marketing units and research centres needing overflow capacity",
-      monthlyPrice: "R 4,500",
-      yearlyPrice: "R 8,500",
-      features: [
-        "50 Document translations/month with AI Story Engine",
-        "Up to 5 Custom Voice Profiles for team members",
-        "Consistent overflow capacity for high-volume periods",
-        "2 hours of human-led specialist science communication editing/month",
-        "Social media content aligned with institutional tone",
-        "Introduction to premium journalism, strategy & storytelling services",
-      ],
-      buttonText: "Get Started",
-      buttonLink: "/contact",
-      isPopular: true,
-    },
-    {
-      id: 3,
-      name: "Enterprise",
-      title: "Organisation",
-      subtitle: "Comms Directors, Exec Leaders, & Global Dev Orgs",
-      description: "Vice-chancellors, university advancement directors, and international NGOs",
-      monthlyPrice: "R 25,000",
-      yearlyPrice: "R 25,000",
-      features: [
-        "Unlimited document processing with AI Story Engine",
-        "Unlimited Institutional Voice Profiles",
-        "IP protection through precise sourcing and rigorous editorial standards",
-        "Dedicated account manager with integrated narrative impact strategy",
-        "Custom AI models trained on institutional archives",
-        "Complex multi-user collaboration with top-tier security",
-        "Premium service combining journalism, strategy, editing & storytelling",
-      ],
-      buttonText: "Contact Sales",
-      buttonLink: "/contact",
-      isEnterprise: true,
-      priceSuffix: "+",
-    },
-  ];
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  const plans = propPlans || defaultPlans;
+  // Fetch plans from API
+  useEffect(() => {
+    if (useApi) {
+      fetchPlans();
+    } else if (propPlans) {
+      setPlans(propPlans);
+      setLoading(false);
+    } else {
+      setPlans([]);
+      setLoading(false);
+    }
+  }, [useApi, propPlans]);
+
+  const fetchPlans = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(`${API_BASE_URL}${apiEndpoint}`);
+      
+      if (response.data.success) {
+        const transformedPlans = transformApiPlans(response.data.data);
+        setPlans(transformedPlans);
+      } else {
+        setError(response.data.message || "Failed to fetch plans");
+        toast.error(response.data.message || "Failed to fetch plans");
+      }
+    } catch (error: any) {
+      console.error("Error fetching plans:", error);
+      setError(error.response?.data?.message || "Failed to load plans");
+      toast.error(error.response?.data?.message || "Failed to load plans");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Transform API data to component format
+  const transformApiPlans = (apiPlans: any[]): PricingPlan[] => {
+    // Group plans by name/tier
+    const groupedPlans: Record<string, any> = {};
+
+    apiPlans.forEach((plan) => {
+      const key = plan.name || plan.tier;
+      
+      if (!groupedPlans[key]) {
+        groupedPlans[key] = {
+          id: Object.keys(groupedPlans).length + 1,
+          _id: plan._id,
+          name: plan.tier || "Basic",
+          title: plan.name || plan.tier || "Plan",
+          subtitle: plan.audience || "",
+          description: plan.targetAudience || plan.description || "",
+          features: plan.features || [],
+          buttonText: plan.buttonLabel || "Get Started",
+          buttonLink: plan.buttonLink || "/contact",
+          isPopular: plan.isPopular || false,
+          isEnterprise: plan.tier?.toLowerCase() === "enterprise",
+          priceSuffix: plan.tier?.toLowerCase() === "enterprise" ? "+" : "",
+          credits: plan.creditsMonthly || plan.credits || 0,
+          creditsMonthly: plan.creditsMonthly || plan.credits || 0,
+          creditsYearly: plan.creditsYearly || (plan.credits || 0) * 12 || 0,
+          tier: plan.tier,
+          billingType: plan.billingType,
+          // Store the plan data directly
+          monthlyPrice: plan.monthlyPrice || `R ${plan.price?.toLocaleString() || 0}`,
+          yearlyPrice: plan.yearlyPrice || (plan.price ? `R ${(plan.price * 10).toLocaleString()}` : "R 0"),
+        };
+      } else {
+        // Update existing grouped plan with data from this plan
+        const existing = groupedPlans[key];
+        
+        // Update monthly data if this plan has it
+        if (plan.monthlyPrice || plan.price) {
+          existing.monthlyPrice = plan.monthlyPrice || `R ${plan.price?.toLocaleString() || 0}`;
+          existing.creditsMonthly = plan.creditsMonthly || plan.credits || 0;
+        }
+        
+        // Update yearly data if this plan has it
+        if (plan.yearlyPrice || plan.price) {
+          existing.yearlyPrice = plan.yearlyPrice || `R ${(plan.price * 10).toLocaleString()}`;
+          existing.creditsYearly = plan.creditsYearly || (plan.credits || 0) * 12 || 0;
+        }
+        
+        // Update features if this plan has more
+        if (plan.features && plan.features.length > 0) {
+          existing.features = plan.features;
+        }
+        
+        // Update other fields
+        if (plan.isPopular) existing.isPopular = plan.isPopular;
+        if (plan.buttonLabel) existing.buttonText = plan.buttonLabel;
+        if (plan.buttonLink) existing.buttonLink = plan.buttonLink;
+        if (plan.audience) existing.subtitle = plan.audience;
+        if (plan.targetAudience) existing.description = plan.targetAudience;
+        if (plan.tier) existing.name = plan.tier;
+      }
+    });
+
+    // Convert to array and sort
+    return Object.values(groupedPlans).sort((a, b) => {
+      if (a.isPopular && !b.isPopular) return -1;
+      if (!a.isPopular && b.isPopular) return 1;
+      return (a.id || 0) - (b.id || 0);
+    });
+  };
 
   const getPrice = (plan: PricingPlan) => {
     if (billingCycle === "monthly") {
-      return plan.monthlyPrice;
+      return plan.monthlyPrice || "R 0";
     }
-    return plan.yearlyPrice;
+    return plan.yearlyPrice || plan.monthlyPrice || "R 0";
   };
 
   const getPriceSuffix = (plan: PricingPlan) => {
@@ -153,6 +211,46 @@ const PricingPlans = ({
     }
     return "";
   };
+
+  const getCredits = (plan: PricingPlan) => {
+    if (billingCycle === "monthly") {
+      return plan.creditsMonthly || plan.credits || 0;
+    }
+    return plan.creditsYearly || (plan.credits || 0) * 12;
+  };
+
+  const displayPlans = useApi ? plans : (propPlans || []);
+
+  if (loading) {
+    return (
+      <section className={`${padding} ${bgColor}`}>
+        <div className={`${maxWidth} mx-auto px-6 lg:px-8`}>
+          <div className="flex flex-col items-center justify-center min-h-[400px]">
+            <Loader2 className="w-10 h-10 text-[#C85A32] animate-spin" />
+            <p className="text-gray-500 mt-4 text-sm">Loading plans...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className={`${padding} ${bgColor}`}>
+        <div className={`${maxWidth} mx-auto px-6 lg:px-8`}>
+          <div className="text-center bg-red-50 border border-red-200 rounded-2xl p-8">
+            <p className="text-red-600 text-sm">{error}</p>
+            <button
+              onClick={fetchPlans}
+              className="mt-4 px-4 py-2 bg-red-600 text-white text-sm rounded-xl hover:bg-red-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className={`${padding} ${bgColor}`}>
@@ -177,7 +275,7 @@ const PricingPlans = ({
         </div>
 
         {/* Billing Toggle */}
-        {showToggle && (
+        {showToggle && displayPlans.length > 0 && (
           <div className="flex justify-center mb-10">
             <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 w-fit">
               <button
@@ -205,78 +303,97 @@ const PricingPlans = ({
         )}
 
         {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-          {plans.map((plan) => (
-            <div
-              key={plan.id}
-              className={`relative rounded-2xl p-7 flex flex-col ${cardBgColor} border ${
-                plan.isPopular ? `border-2 ${popularBorderColor} shadow-xl ${popularShadowColor}` : "border-gray-200 shadow-sm"
-              }`}
-            >
-              {/* Popular Badge */}
-              {plan.isPopular && (
-                <div className="absolute -top-3.5 right-5">
-                  <span className={`${popularBadgeColor} text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest whitespace-nowrap`}>
-                    Most Popular
-                  </span>
-                </div>
-              )}
-
-              {/* Plan Name */}
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
-                {plan.name}
-              </p>
-
-              {/* Plan Title */}
-              <h3 className="text-xl font-['Roboto'] font-bold text-[#1C1C1C] mb-1">
-                {plan.title}
-              </h3>
-
-              {/* Plan Subtitle */}
-              <p className="text-xs font-medium text-gray-500 mb-1">
-                {plan.subtitle}
-              </p>
-
-              {/* Plan Description */}
-              <p className="text-xs text-gray-400 leading-relaxed mb-5">
-                {plan.description}
-              </p>
-
-              {/* Price */}
-              <div className="mb-6">
-                <p className="text-2xl md:text-3xl font-bold text-[#1C1C1C] leading-tight">
-                  {getPrice(plan)}
-                  {getPriceSuffix(plan)}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">per month</p>
-              </div>
-
-              {/* Features */}
-              <ul className="space-y-3 mb-8 flex-1">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-2.5">
-                    <Check className="w-4 h-4 text-[#C85A32] shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-600 leading-relaxed">
-                      {feature}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* Button */}
-              <Link
-                to={plan.buttonLink}
-                className={`w-full py-3 rounded-xl font-semibold text-sm text-center transition-all ${
+        {displayPlans.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No plans available</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+            {displayPlans.map((plan) => (
+              <div
+                key={plan._id || plan.id}
+                className={`relative rounded-2xl p-7 flex flex-col ${cardBgColor} border ${
                   plan.isPopular
-                    ? `${buttonPrimaryColor} ${buttonPrimaryHoverColor} text-white`
-                    : `border ${buttonSecondaryColor} ${buttonSecondaryHoverColor}`
+                    ? `border-2 ${popularBorderColor} shadow-xl ${popularShadowColor}`
+                    : "border-gray-200 shadow-sm"
                 }`}
               >
-                {plan.buttonText}
-              </Link>
-            </div>
-          ))}
-        </div>
+                {/* Popular Badge */}
+                {plan.isPopular && (
+                  <div className="absolute -top-3.5 right-5">
+                    <span
+                      className={`${popularBadgeColor} text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest whitespace-nowrap`}
+                    >
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+
+                {/* Plan Name */}
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
+                  {plan.name}
+                </p>
+
+                {/* Plan Title */}
+                <h3 className="text-xl font-['Roboto'] font-bold text-[#1C1C1C] mb-1">
+                  {plan.title}
+                </h3>
+
+                {/* Plan Subtitle */}
+                <p className="text-xs font-medium text-gray-500 mb-1">
+                  {plan.subtitle}
+                </p>
+
+                {/* Plan Description */}
+                <p className="text-xs text-gray-400 leading-relaxed mb-5">
+                  {plan.description}
+                </p>
+
+                {/* Credits */}
+                {getCredits(plan) > 0 && (
+                  <div className="mb-3">
+                    <span className="text-xs font-semibold text-[#C85A32] bg-[#fff4f0] px-3 py-1 rounded-full">
+                      {getCredits(plan).toLocaleString()} credits / {billingCycle}
+                    </span>
+                  </div>
+                )}
+
+                {/* Price */}
+                <div className="mb-6">
+                  <p className="text-2xl md:text-3xl font-bold text-[#1C1C1C] leading-tight">
+                    {getPrice(plan)}
+                    {getPriceSuffix(plan)}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">per {billingCycle === "monthly" ? "month" : "year"}</p>
+                </div>
+
+                {/* Features */}
+                <ul className="space-y-3 mb-8 flex-1">
+                  {plan.features.map((feature, index) => (
+                    <li key={index} className="flex items-start gap-2.5">
+                      <Check className="w-4 h-4 text-[#C85A32] shrink-0 mt-0.5" />
+                      <span className="text-sm text-gray-600 leading-relaxed">
+                        {feature}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Button */}
+                <Link
+                  to={plan.buttonLink}
+                  className={`w-full py-3 rounded-xl font-semibold text-sm text-center transition-all ${
+                    plan.isPopular
+                      ? `${buttonPrimaryColor} ${buttonPrimaryHoverColor} text-white`
+                      : `border ${buttonSecondaryColor} ${buttonSecondaryHoverColor}`
+                  }`}
+                >
+                  {plan.buttonText}
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

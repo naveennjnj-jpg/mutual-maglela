@@ -1,5 +1,5 @@
 // pages/user/ManageAvailability.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ArrowLeft,
   Calendar,
@@ -7,8 +7,12 @@ import {
   Globe,
   Trash2,
   Plus,
+  Loader2
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 interface TimeSlot {
   id: string;
@@ -35,6 +39,11 @@ interface AvailabilityFormData {
 
 const ManageAvailability = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<AvailabilityFormData>({
     mode: "recurring",
     selectedDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
@@ -64,6 +73,50 @@ const ManageAvailability = () => {
     "America/New_York",
     "Asia/Dubai",
   ];
+
+  // Fetch existing availability on mount
+  useEffect(() => {
+    fetchAvailability();
+  }, []);
+
+  const fetchAvailability = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.get(
+        `${API_URL}/api/admin/availability`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.success && response.data.data) {
+        const data = response.data.data;
+        setFormData({
+          mode: data.mode || "recurring",
+          selectedDays: data.selectedDays || ["Mon", "Tue", "Wed", "Thu", "Fri"],
+          status: data.status || "available",
+          startDate: data.startDate ? new Date(data.startDate).toISOString().split('T')[0] : "",
+          endDate: data.endDate ? new Date(data.endDate).toISOString().split('T')[0] : "",
+          startTime: data.startTime || "09:00",
+          endTime: data.endTime || "17:00",
+          timezone: data.timezone || "Africa/Johannesburg",
+          timeSlots: data.timeSlots || [{ id: "1", startTime: "09:00", endTime: "17:00" }],
+          blockStartDate: data.blockStartDate ? new Date(data.blockStartDate).toISOString().split('T')[0] : "",
+          blockEndDate: data.blockEndDate ? new Date(data.blockEndDate).toISOString().split('T')[0] : "",
+          blockStartTime: data.blockStartTime || "",
+          blockEndTime: data.blockEndTime || "",
+          blockTimezone: data.blockTimezone || "Africa/Johannesburg",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching availability:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleModeSelect = (mode: "recurring" | "specific") => {
     setFormData((prev) => ({
@@ -134,16 +187,57 @@ const ManageAvailability = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Implement save availability logic
-    console.log("Availability data:", formData);
-    navigate("/admin/schedule");
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login");
+        setSaving(false);
+        return;
+      }
+
+      const response = await axios.post(
+        `${API_URL}/api/admin/availability`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        toast.success("Availability settings saved successfully!");
+        navigate("/admin/schedule");
+      } else {
+        toast.error(response.data.message || "Failed to save availability");
+      }
+    } catch (error: any) {
+      console.error("Error saving availability:", error);
+      toast.error(error.response?.data?.message || "Failed to save availability");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
     navigate("/admin/schedule");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F4F6FB] flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-[#C85A32] mx-auto mb-4" />
+          <p className="text-gray-500">Loading availability settings...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F4F6FB]">
@@ -165,9 +259,17 @@ const ManageAvailability = () => {
         </div>
         <button
           onClick={handleSubmit}
+          disabled={saving}
           className="flex items-center gap-2 px-5 py-2.5 bg-[#0F2D63] text-white text-sm font-semibold rounded-xl hover:bg-[#0a2050] transition-colors disabled:opacity-60"
         >
-          Save Settings
+          {saving ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            "Save Settings"
+          )}
         </button>
       </div>
 
@@ -315,7 +417,7 @@ const ManageAvailability = () => {
 
         {/* Date & Time Range */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-4">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-[#C85A32]" />
             Date & Time Range
           </p>
@@ -391,7 +493,7 @@ const ManageAvailability = () => {
 
         {/* Time Slots */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-3">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-4">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-[#C85A32]" />
             Time Slots
           </p>
@@ -441,7 +543,7 @@ const ManageAvailability = () => {
 
         {/* Block Dates */}
         <div className="bg-white rounded-2xl border border-red-100 shadow-sm p-6 space-y-4">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-4">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-red-500" />
             Block Dates
           </p>
@@ -525,9 +627,17 @@ const ManageAvailability = () => {
           </button>
           <button
             onClick={handleSubmit}
-            className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[#0F2D63] text-white hover:bg-[#0a2050] transition-colors disabled:opacity-60"
+            disabled={saving}
+            className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[#0F2D63] text-white hover:bg-[#0a2050] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            Save Availability
+            {saving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Availability"
+            )}
           </button>
         </div>
       </div>

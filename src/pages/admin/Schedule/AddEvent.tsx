@@ -8,8 +8,12 @@ import {
   MapPin,
   FileText,
   Bell,
+  Loader2
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 interface EventFormData {
   title: string;
@@ -24,6 +28,10 @@ interface EventFormData {
 
 const AddEvent = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<EventFormData>({
     title: "",
     type: "Meeting",
@@ -80,12 +88,57 @@ const AddEvent = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Implement event save logic
-    console.log("Event data:", formData);
-    // Navigate back to schedule or show success message
-    navigate("/admin/schedule");
+    
+    if (!formData.title.trim()) {
+      toast.error("Please enter an event title");
+      return;
+    }
+
+    if (!formData.date) {
+      toast.error("Please select a date");
+      return;
+    }
+
+    if (!formData.startTime) {
+      toast.error("Please select a start time");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please login to create event");
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.post(
+        `${API_URL}/api/admin/events`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        toast.success("Event created successfully!");
+        navigate("/admin/schedule");
+      } else {
+        toast.error(response.data.message || "Failed to create event");
+      }
+    } catch (error: any) {
+      console.error("Error creating event:", error);
+      toast.error(error.response?.data?.message || "Failed to create event");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -116,10 +169,17 @@ const AddEvent = () => {
         </div>
         <button
           onClick={handleSubmit}
-          disabled={!isFormValid()}
+          disabled={!isFormValid() || loading}
           className="flex items-center gap-2 px-5 py-2.5 bg-[#C85A32] text-white text-sm font-semibold rounded-xl hover:bg-[#a8472a] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Save Event
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            "Save Event"
+          )}
         </button>
       </div>
 
@@ -299,10 +359,17 @@ const AddEvent = () => {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={!isFormValid()}
-            className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[#C85A32] text-white hover:bg-[#a8472a] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled={!isFormValid() || loading}
+            className="flex-1 py-3 rounded-xl text-sm font-semibold bg-[#C85A32] text-white hover:bg-[#a8472a] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Save Event
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Event"
+            )}
           </button>
         </div>
       </div>

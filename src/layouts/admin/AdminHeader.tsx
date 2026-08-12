@@ -26,10 +26,16 @@ import {
   BarChart3,
   Store,
   UserCheck,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Activity,
+    FolderKanban,
+  CircleAlert,
+  CircleCheck,
+  Timer
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
+import { toast } from "sonner";
 
 interface AdminHeaderProps {
   onMenuClick?: () => void;
@@ -45,6 +51,102 @@ interface UserData {
   theme?: string;
   initials?: string;
 }
+
+interface Notification {
+  id: string;
+  title: string;
+  description: string;
+  time: string;
+  icon: string;
+  color: string;
+  bgColor: string;
+  read: boolean;
+  timestamp: Date;
+}
+
+// Map icon strings to components
+const iconMap: Record<string, any> = {
+  Users: Users,
+  FolderKanban: FolderKanban,
+  UserCheck: UserCheck,
+  CreditCard: CreditCard,
+  Activity: Activity,
+  Clock: Clock,
+  CircleAlert: CircleAlert,
+  CircleCheck: CircleCheck,
+  Timer: Timer,
+  FileText: FileText,
+  Settings: Settings,
+  MessageSquare: MessageSquare,
+  Calendar: Calendar,
+  User: User,
+  Shield: Shield,
+  Home: Home,
+  BarChart3: BarChart3,
+  Store: Store,
+  FileSpreadsheet: FileSpreadsheet,
+  UserCog: UserCog,
+  Briefcase: Briefcase,
+  LayoutDashboard: LayoutDashboard
+};
+
+// Color mapping for different activity types
+const getColorForIcon = (icon: string): string => {
+  const colorMap: Record<string, string> = {
+    Users: "text-[#4F6EF7]",
+    FolderKanban: "text-[#22C9A5]",
+    UserCheck: "text-[#F59E0B]",
+    CreditCard: "text-[#E05C97]",
+    Activity: "text-[#C85A32]",
+    Clock: "text-gray-500",
+    CircleAlert: "text-amber-500",
+    CircleCheck: "text-emerald-600",
+    Timer: "text-blue-500",
+    FileText: "text-blue-500",
+    Settings: "text-purple-500",
+    MessageSquare: "text-indigo-500",
+    Calendar: "text-rose-500",
+    User: "text-cyan-500",
+    Shield: "text-violet-500",
+    Home: "text-gray-500",
+    BarChart3: "text-teal-500",
+    Store: "text-orange-500",
+    FileSpreadsheet: "text-green-500",
+    UserCog: "text-slate-500",
+    Briefcase: "text-amber-600",
+    LayoutDashboard: "text-gray-700"
+  };
+  return colorMap[icon] || "text-gray-500";
+};
+
+// Get background color for icon
+const getBgColorForIcon = (icon: string): string => {
+  const colorMap: Record<string, string> = {
+    Users: "bg-[#4F6EF7]/10",
+    FolderKanban: "bg-[#22C9A5]/10",
+    UserCheck: "bg-[#F59E0B]/10",
+    CreditCard: "bg-[#E05C97]/10",
+    Activity: "bg-[#C85A32]/10",
+    Clock: "bg-gray-500/10",
+    CircleAlert: "bg-amber-500/10",
+    CircleCheck: "bg-emerald-500/10",
+    Timer: "bg-blue-500/10",
+    FileText: "bg-blue-500/10",
+    Settings: "bg-purple-500/10",
+    MessageSquare: "bg-indigo-500/10",
+    Calendar: "bg-rose-500/10",
+    User: "bg-cyan-500/10",
+    Shield: "bg-violet-500/10",
+    Home: "bg-gray-500/10",
+    BarChart3: "bg-teal-500/10",
+    Store: "bg-orange-500/10",
+    FileSpreadsheet: "bg-green-500/10",
+    UserCog: "bg-slate-500/10",
+    Briefcase: "bg-amber-500/10",
+    LayoutDashboard: "bg-gray-500/10"
+  };
+  return colorMap[icon] || "bg-gray-500/10";
+};
 
 const AdminHeader = ({ 
   onMenuClick, 
@@ -69,6 +171,8 @@ const AdminHeader = ({
     initials: 'A'
   });
   const [loading, setLoading] = useState(true);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(true);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -112,7 +216,6 @@ const AdminHeader = ({
           // Apply theme if needed
           if (data.theme) {
             localStorage.setItem('theme', data.theme);
-            // You can call a theme function here if you have one
           }
         }
       } catch (error) {
@@ -136,6 +239,62 @@ const AdminHeader = ({
     fetchUserData();
   }, []);
 
+  // Fetch notifications from separate endpoint
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setNotificationsLoading(false);
+          return;
+        }
+
+        // ✅ Use separate API endpoint for notifications
+        const response = await axios.get(`${API_URL}/api/admin/notifications`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.data.success && response.data.data) {
+          const activities = response.data.data;
+          
+          // Transform activities to notifications
+          const transformedNotifications: Notification[] = activities.map((activity: any, index: number) => ({
+            id: activity.id || `${index}-${activity.time}`,
+            title: activity.title,
+            description: activity.description,
+            time: activity.time,
+            icon: activity.icon || 'Activity',
+            color: getColorForIcon(activity.icon || 'Activity'),
+            bgColor: getBgColorForIcon(activity.icon || 'Activity'),
+            read: activity.read || index >= 5, // Mark older notifications as read
+            timestamp: activity.timestamp || new Date(Date.now() - (index + 1) * 60000)
+          }));
+
+          setNotifications(transformedNotifications.slice(0, 10)); // Limit to 10
+        } else {
+          // Fallback to empty state
+          setNotifications([]);
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        // Fallback to empty state
+        setNotifications([]);
+      } finally {
+        setNotificationsLoading(false);
+      }
+    };
+
+    fetchNotifications();
+
+    // Refresh notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Click outside handlers
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -156,48 +315,67 @@ const AdminHeader = ({
     navigate("/login");
   };
 
-  const notifications = [
-    {
-      id: 1,
-      title: "New user registered",
-      description: "John Doe just created a new account",
-      time: "5 min ago",
-      icon: Users,
-      color: "text-[#C85A32]",
-      bgColor: "bg-[#C85A32]/10",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Project submission",
-      description: "New project 'Q2 Research Output' submitted for review",
-      time: "1 hour ago",
-      icon: FileText,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
-      read: false,
-    },
-    {
-      id: 3,
-      title: "Payment received",
-      description: "Invoice #INV-2026-004 has been paid",
-      time: "3 hours ago",
-      icon: CreditCard,
-      color: "text-green-500",
-      bgColor: "bg-green-500/10",
-      read: true,
-    },
-    {
-      id: 4,
-      title: "System update",
-      description: "New version 2.4.0 is ready for deployment",
-      time: "5 hours ago",
-      icon: Settings,
-      color: "text-purple-500",
-      bgColor: "bg-purple-500/10",
-      read: true,
-    },
-  ];
+  // Get notification icon component
+  const getNotificationIcon = (iconName: string) => {
+    return iconMap[iconName] || Activity;
+  };
+
+  // Mark notification as read
+  const markAsRead = async (id: string) => {
+    try {
+      // Update local state
+      setNotifications(prev => 
+        prev.map(notif => 
+          notif.id === id ? { ...notif, read: true } : notif
+        )
+      );
+
+      // ✅ Call API to mark as read
+      const token = localStorage.getItem('token');
+      if (token) {
+        await axios.patch(
+          `${API_URL}/api/admin/notifications/${id}/read`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  // Mark all as read
+  const markAllAsRead = async () => {
+    try {
+      // Update local state
+      setNotifications(prev => 
+        prev.map(notif => ({ ...notif, read: true }))
+      );
+
+      // ✅ Call API to mark all as read
+      const token = localStorage.getItem('token');
+      if (token) {
+        await axios.patch(
+          `${API_URL}/api/admin/notifications/read-all`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
+      
+      toast.success('All notifications marked as read');
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+      toast.error('Failed to mark notifications as read');
+    }
+  };
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -243,7 +421,6 @@ const AdminHeader = ({
               <h1 className="text-lg font-semibold text-[#0F2D63] dark:text-white hidden sm:block">
                 {getPageTitle()}
               </h1>
-  
             </div>
           </div>
 
@@ -272,45 +449,70 @@ const AdminHeader = ({
                 <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50">
                   <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                     <h3 className="font-semibold text-[#0F2D63] dark:text-white">Notifications</h3>
-                    {unreadCount > 0 && (
-                      <button className="text-xs text-[#C85A32] hover:underline font-medium">
+                    {/* {unreadCount > 0 && (
+                      <button 
+                        onClick={markAllAsRead}
+                        className="text-xs text-[#C85A32] hover:underline font-medium"
+                      >
                         Mark all read
                       </button>
-                    )}
+                    )} */}
                   </div>
                   <div className="max-h-80 overflow-y-auto">
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer ${
-                          !notification.read ? "bg-[#C85A32]/5 dark:bg-[#C85A32]/10" : ""
-                        }`}
-                      >
-                        <div className={`${notification.bgColor} rounded-lg p-2 shrink-0`}>
-                          <notification.icon className={`w-4 h-4 ${notification.color}`} />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-[#1C1C1C] dark:text-white truncate">
-                            {notification.title}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {notification.description}
-                          </p>
-                          <p className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {notification.time}
-                          </p>
-                        </div>
-                        {!notification.read && (
-                          <div className="w-2 h-2 bg-[#C85A32] rounded-full shrink-0 mt-2"></div>
-                        )}
+                    {notificationsLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin w-6 h-6 border-2 border-[#C85A32] border-t-transparent rounded-full"></div>
                       </div>
-                    ))}
+                    ) : notifications.length > 0 ? (
+                      notifications.map((notification) => {
+                        const IconComponent = getNotificationIcon(notification.icon);
+                        return (
+                          <div
+                            key={notification.id}
+                            onClick={() => markAsRead(notification.id)}
+                            className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer ${
+                              !notification.read ? "bg-[#C85A32]/5 dark:bg-[#C85A32]/10" : ""
+                            }`}
+                          >
+                            <div className={`${notification.bgColor} rounded-lg p-2 shrink-0`}>
+                              <IconComponent className={`w-4 h-4 ${notification.color}`} />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-[#1C1C1C] dark:text-white truncate">
+                                {notification.title}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                {notification.description}
+                              </p>
+                              <p className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {notification.time}
+                              </p>
+                            </div>
+                            {!notification.read && (
+                              <div className="w-2 h-2 bg-[#C85A32] rounded-full shrink-0 mt-2"></div>
+                            )}
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-8">
+                        <Bell className="w-8 h-8 text-gray-300 dark:text-gray-600 mb-2" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400">No notifications</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">All caught up!</p>
+                      </div>
+                    )}
                   </div>
                   <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-2 text-center">
-                    <button className="text-xs text-[#C85A32] font-medium hover:underline">
-                      View all
-                    </button>
+                    {/* <button 
+                      onClick={() => {
+                        setIsNotificationsOpen(false);
+                        navigate('/admin/activity');
+                      }}
+                      className="text-xs text-[#C85A32] font-medium hover:underline"
+                    >
+                      View all activity
+                    </button> */}
                   </div>
                 </div>
               )}
@@ -347,7 +549,6 @@ const AdminHeader = ({
                   <p className="text-sm font-medium text-[#1C1C1C] dark:text-white">
                     {loading ? 'Loading...' : userData.name}
                   </p>
-
                 </div>
                 <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
               </button>

@@ -1,5 +1,5 @@
 // pages/admin/CreateQuote.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ArrowLeft,
   Save,
@@ -7,8 +7,14 @@ import {
   Trash2,
   Plus,
   Lightbulb,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
 
 interface QuoteItem {
   id: string;
@@ -20,6 +26,7 @@ interface QuoteItem {
 }
 
 interface QuoteFormData {
+  clientId: string;
   clientName: string;
   organisation: string;
   email: string;
@@ -28,9 +35,28 @@ interface QuoteFormData {
   items: QuoteItem[];
 }
 
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  organisation?: string;
+  company?: string;
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
 const CreateQuote = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
   const [formData, setFormData] = useState<QuoteFormData>({
+    clientId: "",
     clientName: "",
     organisation: "",
     email: "",
@@ -48,6 +74,44 @@ const CreateQuote = () => {
     ],
   });
 
+  // Fetch users on mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const response = await axios.get(`${API_BASE_URL}/api/admin/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.success) {
+        setUsers(response.data.data);
+      }
+    } catch (error: any) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  // Clear messages after 5 seconds
+  React.useEffect(() => {
+    if (success || error) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+        setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, error]);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -56,6 +120,29 @@ const CreateQuote = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleClientSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedUserId = e.target.value;
+    const selectedUser = users.find((u) => u._id === selectedUserId);
+
+    if (selectedUser) {
+      setFormData((prev) => ({
+        ...prev,
+        clientId: selectedUser._id,
+        clientName: selectedUser.name,
+        email: selectedUser.email,
+        organisation: selectedUser.organisation || selectedUser.company || "",
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        clientId: "",
+        clientName: "",
+        email: "",
+        organisation: "",
+      }));
+    }
   };
 
   const handleItemChange = (
@@ -116,25 +203,167 @@ const CreateQuote = () => {
     return calculateSubtotal() + calculateVAT();
   };
 
-  const handleSend = () => {
-    console.log("Sending quote:", formData);
-    navigate("/admin/invoices");
-  };
-
-  const handleSaveDraft = () => {
-    console.log("Saving draft:", formData);
-    navigate("/admin/invoices");
-  };
-
-  const handleBack = () => {
-    navigate("/admin/invoices");
-  };
-
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString("en-ZA", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
+  };
+
+  const validateForm = (): boolean => {
+    if (!formData.clientName.trim()) {
+      setError("Client name is required");
+      return false;
+    }
+    if (!formData.email.trim()) {
+      setError("Email address is required");
+      return false;
+    }
+    if (!formData.validUntil) {
+      setError("Valid until date is required");
+      return false;
+    }
+    if (formData.items.length === 0) {
+      setError("At least one line item is required");
+      return false;
+    }
+    const hasEmptyItem = formData.items.some(item => !item.description.trim());
+    if (hasEmptyItem) {
+      setError("All items must have a description");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSend = async () => {
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("You must be logged in");
+        return;
+      }
+
+      const payload = {
+        clientInfo: {
+          clientName: formData.clientName.trim(),
+          organisation: formData.organisation.trim() || "",
+          email: formData.email.trim(),
+        },
+        validUntil: new Date(formData.validUntil).toISOString(),
+        items: formData.items.map((item) => ({
+          serviceType: item.serviceType,
+          description: item.description.trim(),
+          quantity: item.quantity,
+          rate: item.rate,
+        })),
+        additionalNotes: formData.notes.trim() || "",
+        createdBy: (user as any)?.id || "system",
+        createdByEmail: (user as any)?.email || "system@magalela.com",
+        status: "sent",
+      };
+
+      const response = await axios.post(
+        `${API_BASE_URL}/api/admin/quotes`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setSuccess(response.data.message || "Quote sent successfully");
+        setTimeout(() => {
+          navigate("/admin/invoices");
+        }, 2000);
+      } else {
+        setError(response.data.message || "Failed to send quote");
+      }
+    } catch (error: any) {
+      console.error("Error sending quote:", error);
+      setError(error.response?.data?.message || "Failed to send quote");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!formData.clientName.trim()) {
+      setError("Client name is required");
+      return;
+    }
+    if (!formData.email.trim()) {
+      setError("Email address is required");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("You must be logged in");
+        return;
+      }
+
+      const payload = {
+        clientInfo: {
+          clientName: formData.clientName.trim(),
+          organisation: formData.organisation.trim() || "",
+          email: formData.email.trim(),
+        },
+        validUntil: formData.validUntil ? new Date(formData.validUntil).toISOString() : null,
+        items: formData.items.map((item) => ({
+          serviceType: item.serviceType,
+          description: item.description.trim(),
+          quantity: item.quantity,
+          rate: item.rate,
+        })),
+        additionalNotes: formData.notes.trim() || "",
+        createdBy: (user as any)?.id || "system",
+        createdByEmail: (user as any)?.email || "system@magalela.com",
+        status: "draft",
+      };
+
+      const response = await axios.post(
+        `${API_BASE_URL}/api/admin/quotes/draft`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setSuccess(response.data.message || "Quote saved as draft");
+        setTimeout(() => {
+          navigate("/admin/invoices");
+        }, 1500);
+      } else {
+        setError(response.data.message || "Failed to save draft");
+      }
+    } catch (error: any) {
+      console.error("Error saving draft:", error);
+      setError(error.response?.data?.message || "Failed to save draft");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleBack = () => {
+    navigate("/admin/invoices");
   };
 
   return (
@@ -158,20 +387,51 @@ const CreateQuote = () => {
         <div className="flex gap-2">
           <button
             onClick={handleSaveDraft}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors"
+            disabled={isSubmitting}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" />
             Save as Draft
           </button>
           <button
             onClick={handleSend}
-            className="flex items-center gap-2 px-4 py-2 bg-[#0F2D63] text-white text-sm font-semibold rounded-xl hover:bg-[#0a2050] transition-colors"
+            disabled={isSubmitting}
+            className="flex items-center gap-2 px-4 py-2 bg-[#0F2D63] text-white text-sm font-semibold rounded-xl hover:bg-[#0a2050] transition-colors disabled:opacity-50"
           >
-            <Send className="w-3.5 h-3.5" />
-            Send Quote
+            {isSubmitting ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Send className="w-3.5 h-3.5" />
+            )}
+            {isSubmitting ? "Processing..." : "Send Quote"}
           </button>
         </div>
       </div>
+
+      {/* Success/Error Messages */}
+      {success && (
+        <div className="max-w-[1200px] mx-auto px-6 pt-4">
+          <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
+            <CheckCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{success}</span>
+            <button onClick={() => setSuccess(null)} className="ml-auto">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="max-w-[1200px] mx-auto px-6 pt-4">
+          <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="ml-auto">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Form Content */}
       <div className="max-w-[1200px] mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -187,14 +447,29 @@ const CreateQuote = () => {
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                   Client Name *
                 </label>
-                <input
-                  type="text"
-                  name="clientName"
-                  value={formData.clientName}
-                  onChange={handleInputChange}
-                  placeholder="e.g. Ronald Sithole"
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-[#0F2D63] focus:ring-2 focus:ring-[#0F2D63]/10 transition-all bg-white"
-                />
+                <select
+                  value={formData.clientId}
+                  onChange={handleClientSelect}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-[#0F2D63] focus:ring-2 focus:ring-[#0F2D63]/10 transition-all bg-white appearance-none"
+                  style={{
+                    backgroundImage:
+                      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 12px center",
+                    paddingRight: "40px",
+                  }}
+                >
+                  <option value="">Select a client...</option>
+                  {loadingUsers ? (
+                    <option value="" disabled>Loading users...</option>
+                  ) : (
+                    users.map((user) => (
+                      <option key={user._id} value={user._id}>
+                        {user.name} - {user.email}
+                      </option>
+                    ))
+                  )}
+                </select>
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
@@ -427,14 +702,20 @@ const CreateQuote = () => {
             <div className="space-y-2 pt-1">
               <button
                 onClick={handleSend}
-                className="w-full py-3 bg-[#0F2D63] text-white text-sm font-semibold rounded-xl hover:bg-[#0a2050] transition-colors flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="w-full py-3 bg-[#0F2D63] text-white text-sm font-semibold rounded-xl hover:bg-[#0a2050] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <Send className="w-3.5 h-3.5" />
+                {isSubmitting ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Send className="w-3.5 h-3.5" />
+                )}
                 Send Quote
               </button>
               <button
                 onClick={handleSaveDraft}
-                className="w-full py-2.5 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="w-full py-2.5 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <Save className="w-3.5 h-3.5" />
                 Save as Draft

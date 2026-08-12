@@ -1,13 +1,19 @@
 // pages/admin/CreateInvoice.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ArrowLeft,
   Save,
   Send,
   Trash2,
   Plus,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
 
 interface InvoiceItem {
   id: string;
@@ -19,7 +25,10 @@ interface InvoiceItem {
 }
 
 interface InvoiceFormData {
-  client: string;
+  clientId: string;
+  clientName: string;
+  organisation: string;
+  email: string;
   invoiceNumber: string;
   issueDate: string;
   dueDate: string;
@@ -29,10 +38,30 @@ interface InvoiceFormData {
   items: InvoiceItem[];
 }
 
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  organisation?: string;
+  company?: string;
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
 const CreateInvoice = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
   const [formData, setFormData] = useState<InvoiceFormData>({
-    client: "",
+    clientId: "",
+    clientName: "",
+    organisation: "",
+    email: "",
     invoiceNumber: `INV-${Math.floor(Math.random() * 900000) + 100000}`,
     issueDate: new Date().toISOString().split("T")[0],
     dueDate: "",
@@ -51,17 +80,43 @@ const CreateInvoice = () => {
     ],
   });
 
-  const [activeItem, setActiveItem] = useState("1");
+  // Fetch users on mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-  const clients = [
-    "Ronald Sithole — Wits University",
-    "Thabo Nkosi — UCT",
-    "Dr. Sipho Dlamini — Univ. of Pretoria",
-    "Kwame Asante — Univ. of Ghana",
-    "Amara Nwosu — Individual",
-    "Bongani Zulu — Stellenbosch Univ.",
-    "Fatima Al-Hassan — Individual",
-  ];
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const response = await axios.get(`${API_BASE_URL}/api/admin/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.success) {
+        setUsers(response.data.data);
+      }
+    } catch (error: any) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  // Clear messages after 5 seconds
+  React.useEffect(() => {
+    if (success || error) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+        setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, error]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -71,6 +126,29 @@ const CreateInvoice = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleClientSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedUserId = e.target.value;
+    const selectedUser = users.find((u) => u._id === selectedUserId);
+
+    if (selectedUser) {
+      setFormData((prev) => ({
+        ...prev,
+        clientId: selectedUser._id,
+        clientName: selectedUser.name,
+        email: selectedUser.email,
+        organisation: selectedUser.organisation || selectedUser.company || "",
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        clientId: "",
+        clientName: "",
+        email: "",
+        organisation: "",
+      }));
+    }
   };
 
   const handleItemChange = (
@@ -83,7 +161,6 @@ const CreateInvoice = () => {
       items: prev.items.map((item) => {
         if (item.id === id) {
           const updatedItem = { ...item, [field]: value };
-          // Recalculate line total
           if (field === "quantity" || field === "rate") {
             updatedItem.lineTotal = updatedItem.quantity * updatedItem.rate;
           }
@@ -110,7 +187,6 @@ const CreateInvoice = () => {
         },
       ],
     }));
-    setActiveItem(newId);
   };
 
   const removeItem = (id: string) => {
@@ -119,9 +195,6 @@ const CreateInvoice = () => {
       ...prev,
       items: prev.items.filter((item) => item.id !== id),
     }));
-    if (activeItem === id) {
-      setActiveItem(formData.items[0]?.id || "");
-    }
   };
 
   const calculateSubtotal = () => {
@@ -136,27 +209,173 @@ const CreateInvoice = () => {
     return calculateSubtotal() + calculateVAT();
   };
 
-  const handleSend = () => {
-    console.log("Sending invoice:", formData);
-    // Implement send logic
-    navigate("/admin/invoices");
-  };
-
-  const handleSaveDraft = () => {
-    console.log("Saving draft:", formData);
-    // Implement save draft logic
-    navigate("/admin/invoices");
-  };
-
-  const handleBack = () => {
-    navigate("/admin/invoices");
-  };
-
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString("en-ZA", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
+  };
+
+  const validateForm = (): boolean => {
+    if (!formData.clientName.trim()) {
+      setError("Client name is required");
+      return false;
+    }
+    if (!formData.email.trim()) {
+      setError("Email address is required");
+      return false;
+    }
+    if (!formData.dueDate) {
+      setError("Due date is required");
+      return false;
+    }
+    if (formData.items.length === 0) {
+      setError("At least one line item is required");
+      return false;
+    }
+    const hasEmptyItem = formData.items.some(item => !item.description.trim());
+    if (hasEmptyItem) {
+      setError("All items must have a description");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSend = async () => {
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("You must be logged in");
+        return;
+      }
+
+      const payload = {
+        clientInfo: {
+          clientName: formData.clientName.trim(),
+          organisation: formData.organisation.trim() || "",
+          email: formData.email.trim(),
+        },
+        issueDate: new Date(formData.issueDate).toISOString(),
+        dueDate: new Date(formData.dueDate).toISOString(),
+        currency: formData.currency,
+        paymentTerms: formData.paymentTerms,
+        items: formData.items.map((item) => ({
+          serviceType: item.serviceType,
+          description: item.description.trim(),
+          quantity: item.quantity,
+          rate: item.rate,
+        })),
+        additionalNotes: formData.notes.trim() || "",
+        createdBy: (user as any)?.id || "system",
+        createdByEmail: (user as any)?.email || "system@magalela.com",
+        status: "sent",
+      };
+
+      const response = await axios.post(
+        `${API_BASE_URL}/api/admin/invoices`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setSuccess(response.data.message || "Invoice sent successfully");
+        setTimeout(() => {
+          navigate("/admin/invoices");
+        }, 2000);
+      } else {
+        setError(response.data.message || "Failed to send invoice");
+      }
+    } catch (error: any) {
+      console.error("Error sending invoice:", error);
+      setError(error.response?.data?.message || "Failed to send invoice");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!formData.clientName.trim()) {
+      setError("Client name is required");
+      return;
+    }
+    if (!formData.email.trim()) {
+      setError("Email address is required");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("You must be logged in");
+        return;
+      }
+
+      const payload = {
+        clientInfo: {
+          clientName: formData.clientName.trim(),
+          organisation: formData.organisation.trim() || "",
+          email: formData.email.trim(),
+        },
+        issueDate: new Date(formData.issueDate).toISOString(),
+        dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : null,
+        currency: formData.currency,
+        paymentTerms: formData.paymentTerms,
+        items: formData.items.map((item) => ({
+          serviceType: item.serviceType,
+          description: item.description.trim(),
+          quantity: item.quantity,
+          rate: item.rate,
+        })),
+        additionalNotes: formData.notes.trim() || "",
+        createdBy: (user as any)?.id || "system",
+        createdByEmail: (user as any)?.email || "system@magalela.com",
+        status: "draft",
+      };
+
+      const response = await axios.post(
+        `${API_BASE_URL}/admin/invoices/draft`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setSuccess(response.data.message || "Invoice saved as draft");
+        setTimeout(() => {
+          navigate("/admin/invoices");
+        }, 1500);
+      } else {
+        setError(response.data.message || "Failed to save draft");
+      }
+    } catch (error: any) {
+      console.error("Error saving draft:", error);
+      setError(error.response?.data?.message || "Failed to save draft");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleBack = () => {
+    navigate("/admin/invoices");
   };
 
   return (
@@ -180,20 +399,51 @@ const CreateInvoice = () => {
         <div className="flex gap-2">
           <button
             onClick={handleSaveDraft}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors"
+            disabled={isSubmitting}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" />
             Save as Draft
           </button>
           <button
             onClick={handleSend}
-            className="flex items-center gap-2 px-4 py-2 bg-[#C85A32] text-white text-sm font-semibold rounded-xl hover:bg-[#a8472a] transition-colors"
+            disabled={isSubmitting}
+            className="flex items-center gap-2 px-4 py-2 bg-[#C85A32] text-white text-sm font-semibold rounded-xl hover:bg-[#a8472a] transition-colors disabled:opacity-50"
           >
-            <Send className="w-3.5 h-3.5" />
-            Send Invoice
+            {isSubmitting ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Send className="w-3.5 h-3.5" />
+            )}
+            {isSubmitting ? "Processing..." : "Send Invoice"}
           </button>
         </div>
       </div>
+
+      {/* Success/Error Messages */}
+      {success && (
+        <div className="max-w-[1200px] mx-auto px-6 pt-4">
+          <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
+            <CheckCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{success}</span>
+            <button onClick={() => setSuccess(null)} className="ml-auto">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="max-w-[1200px] mx-auto px-6 pt-4">
+          <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="ml-auto">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Form Content */}
       <div className="max-w-[1200px] mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -210,17 +460,27 @@ const CreateInvoice = () => {
                   Client *
                 </label>
                 <select
-                  name="client"
-                  value={formData.client}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-[#0F2D63] focus:ring-2 focus:ring-[#0F2D63]/10 transition-all bg-white cursor-pointer"
+                  value={formData.clientId}
+                  onChange={handleClientSelect}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-[#0F2D63] focus:ring-2 focus:ring-[#0F2D63]/10 transition-all bg-white appearance-none"
+                  style={{
+                    backgroundImage:
+                      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 12px center",
+                    paddingRight: "40px",
+                  }}
                 >
                   <option value="">Select a client…</option>
-                  {clients.map((client) => (
-                    <option key={client} value={client}>
-                      {client}
-                    </option>
-                  ))}
+                  {loadingUsers ? (
+                    <option value="" disabled>Loading users...</option>
+                  ) : (
+                    users.map((user) => (
+                      <option key={user._id} value={user._id}>
+                        {user.name} - {user.email}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
               <div>
@@ -305,14 +565,14 @@ const CreateInvoice = () => {
               Service & Items
             </p>
             <div className="space-y-4">
-              {formData.items.map((item) => (
+              {formData.items.map((item, index) => (
                 <div
                   key={item.id}
                   className="rounded-sm border border-gray-200 overflow-hidden shadow-sm"
                 >
                   <div className="flex items-center justify-between px-4 py-2.5 bg-[#fff8f5] border-b border-gray-200">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                      Item {formData.items.indexOf(item) + 1}
+                      Item {index + 1}
                     </span>
                     <button
                       onClick={() => removeItem(item.id)}
@@ -503,14 +763,20 @@ const CreateInvoice = () => {
             <div className="space-y-2 pt-1">
               <button
                 onClick={handleSend}
-                className="w-full py-3 bg-[#C85A32] text-white text-sm font-semibold rounded-xl hover:bg-[#a8472a] transition-colors flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="w-full py-3 bg-[#C85A32] text-white text-sm font-semibold rounded-xl hover:bg-[#a8472a] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <Send className="w-3.5 h-3.5" />
+                {isSubmitting ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Send className="w-3.5 h-3.5" />
+                )}
                 Send Invoice
               </button>
               <button
                 onClick={handleSaveDraft}
-                className="w-full py-2.5 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="w-full py-2.5 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <Save className="w-3.5 h-3.5" />
                 Save as Draft

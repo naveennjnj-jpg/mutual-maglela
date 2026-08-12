@@ -1,7 +1,7 @@
 // layouts/admin/AdminSidebar.tsx
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { 
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import {
   LayoutDashboard,
   Users,
   Briefcase,
@@ -32,6 +32,8 @@ import {
   TrendingUp
 } from "lucide-react";
 import Logo from "@/assets/home/logo.png";
+import { useAuth } from "@/context/AuthContext";
+
 
 interface AdminSidebarProps {
   isOpen?: boolean;
@@ -49,7 +51,7 @@ interface SidebarItem {
   badge?: string | number;
 }
 
-const AdminSidebar = ({ 
+const AdminSidebar = ({
   isOpen = true,
   onToggle,
   onClose,
@@ -58,46 +60,54 @@ const AdminSidebar = ({
   adminInitials = "A"
 }: AdminSidebarProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + "/");
   };
 
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
+
   // Admin menu items
-const sidebarItems: SidebarItem[] = [
-  { title: "Dashboard", path: "/admin", icon: LayoutDashboard },
-  // { title: "Users", path: "/admin/users", icon: Users, badge: "1,284" },
-  { title: "Manage Projects", path: "/admin/projects", icon: Briefcase },
-  { title: "Manage Experts", path: "/admin/experts", icon: UserCheck },
-  { title: "My Schedule", path: "/admin/schedule", icon: Calendar },
-  { title: "Workshop Requests", path: "/admin/workshop-requests", icon: BookOpen },
-  { title: "Credit Plans", path: "/admin/credit-plans", icon: CreditCard },
-  { title: "Subscription Management", path: "/admin/subscriptions", icon: TrendingUp,},
-  { title: "Invoicing", path: "/admin/invoices", icon: FileSpreadsheet },
-  { title: "Settings", path: "/admin/settings", icon: Settings },
-];
+  const sidebarItems: SidebarItem[] = [
+    { title: "Dashboard", path: "/admin", icon: LayoutDashboard },
+    // { title: "Users", path: "/admin/users", icon: Users, badge: "1,284" },
+    { title: "Manage Projects", path: "/admin/projects", icon: Briefcase },
+    { title: "Manage Experts", path: "/admin/experts", icon: UserCheck },
+    { title: "My Schedule", path: "/admin/schedule", icon: Calendar },
+    { title: "Workshop Requests", path: "/admin/workshop-requests", icon: BookOpen },
+    { title: "Credit Plans", path: "/admin/credit-plans", icon: CreditCard },
+    { title: "Subscription Management", path: "/admin/subscriptions", icon: TrendingUp, },
+    { title: "Invoicing", path: "/admin/invoices", icon: FileSpreadsheet },
+    { title: "Settings", path: "/admin/settings", icon: Settings },
+  ];
 
-const groupedItems = {
-  overview: sidebarItems.filter(item =>
-    ["/admin"].includes(item.path)
-  ),
+  const groupedItems = {
+    overview: sidebarItems.filter(item =>
+      ["/admin"].includes(item.path)
+    ),
 
-  // users: sidebarItems.filter(item =>
-  //   ["/admin/users"].includes(item.path)
-  // ),
+    // users: sidebarItems.filter(item =>
+    //   ["/admin/users"].includes(item.path)
+    // ),
 
-  operations: sidebarItems.filter(item =>
-    ["/admin/projects", "/admin/experts", "/admin/schedule", "/admin/workshop-requests",].includes(item.path)
-  ),
+    operations: sidebarItems.filter(item =>
+      ["/admin/projects", "/admin/experts", "/admin/schedule", "/admin/workshop-requests",].includes(item.path)
+    ),
 
-  creditmanagement: sidebarItems.filter(item =>
-    ["/admin/credit-plans", "/admin/subscriptions", "/admin/invoices",].includes(item.path)
-  ),
+    creditmanagement: sidebarItems.filter(item =>
+      ["/admin/credit-plans", "/admin/subscriptions", "/admin/invoices",].includes(item.path)
+    ),
 
-  settings: sidebarItems.filter(item =>
-    ["/admin/settings"].includes(item.path)
-  ),
-};
+    settings: sidebarItems.filter(item =>
+      ["/admin/settings"].includes(item.path)
+    ),
+  };
 
   const categoryLabels: Record<string, string> = {
     overview: "Overview",
@@ -115,31 +125,30 @@ const groupedItems = {
     settings: Settings,
   };
 
-const iconMap: Record<string, any> = {
-  "/admin": LayoutDashboard,
-  "/admin/users": Users,
-  "/admin/projects": Briefcase,
-  "/admin/experts": UserCheck,
-  "/admin/schedule": Calendar,
-  "/admin/workshop-requests": BookOpen,
-  "/admin/credit-plans": CreditCard,
-  "/admin/subscriptions": TrendingUp,
-  "/admin/invoices": FileSpreadsheet,
-  "/admin/settings": Settings,
-};
+  const iconMap: Record<string, any> = {
+    "/admin": LayoutDashboard,
+    "/admin/users": Users,
+    "/admin/projects": Briefcase,
+    "/admin/experts": UserCheck,
+    "/admin/schedule": Calendar,
+    "/admin/workshop-requests": BookOpen,
+    "/admin/credit-plans": CreditCard,
+    "/admin/subscriptions": TrendingUp,
+    "/admin/invoices": FileSpreadsheet,
+    "/admin/settings": Settings,
+  };
 
   return (
     <>
-      <aside className={`hidden lg:flex lg:flex-col fixed left-0 top-0 bottom-0 z-30 bg-[#0F2D63] dark:bg-[#0F2D63] transition-all duration-300 ${
-        isOpen ? 'w-[260px]' : 'w-[72px]'
-      }`}>
+      <aside className={`hidden lg:flex lg:flex-col fixed left-0 top-0 bottom-0 z-30 bg-[#0F2D63] dark:bg-[#0F2D63] transition-all duration-300 ${isOpen ? 'w-[260px]' : 'w-[72px]'
+        }`}>
         {/* Logo */}
         <div className={`flex items-center ${isOpen ? 'justify-center' : 'justify-center'} h-20 flex-shrink-0 px-4 border-b border-white/10`}>
           <Link to="/admin">
             {isOpen ? (
-              <img 
-                src={Logo} 
-                alt="Magalela Media" 
+              <img
+                src={Logo}
+                alt="Magalela Media"
                 className="h-10 w-auto object-contain brightness-0 invert"
               />
             ) : (
@@ -155,7 +164,7 @@ const iconMap: Record<string, any> = {
           {Object.entries(groupedItems).map(([key, items]) => {
             if (items.length === 0) return null;
             const CategoryIcon = categoryIcons[key];
-            
+
             return (
               <div key={key} className="mt-4 first:mt-0">
                 {isOpen && (
@@ -172,35 +181,32 @@ const iconMap: Record<string, any> = {
                   {items.map((item) => {
                     const active = isActive(item.path);
                     const Icon = iconMap[item.path] || item.icon;
-                    
+
                     return (
                       <Link
                         key={item.path}
                         to={item.path}
-                        className={`relative flex items-center ${isOpen ? 'gap-3 px-3' : 'gap-0 justify-center px-0'} h-11 rounded-xl transition-all group ${
-                          active ? 'bg-white/10' : 'hover:bg-white/[0.06]'
-                        }`}
+                        className={`relative flex items-center ${isOpen ? 'gap-3 px-3' : 'gap-0 justify-center px-0'} h-11 rounded-xl transition-all group ${active ? 'bg-white/10' : 'hover:bg-white/[0.06]'
+                          }`}
                       >
                         {active && isOpen && (
                           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 bg-[#C85A32] rounded-r-full"></div>
                         )}
-                        
+
                         {Icon && (
-                          <Icon 
-                            className={`w-[18px] h-[18px] shrink-0 transition-colors ${
-                              active 
-                                ? 'text-[#C85A32]' 
+                          <Icon
+                            className={`w-[18px] h-[18px] shrink-0 transition-colors ${active
+                                ? 'text-[#C85A32]'
                                 : 'text-white/65 group-hover:text-white/90'
-                            }`}
+                              }`}
                           />
                         )}
-                        
+
                         {isOpen && (
-                          <span className={`flex-1 text-[14px] font-medium transition-colors ${
-                            active 
-                              ? 'text-white' 
+                          <span className={`flex-1 text-[14px] font-medium transition-colors ${active
+                              ? 'text-white'
                               : 'text-white/80 group-hover:text-white/95'
-                          }`}>
+                            }`}>
                             {item.title}
                           </span>
                         )}
@@ -247,7 +253,11 @@ const iconMap: Record<string, any> = {
                 <p className="text-white text-sm font-medium truncate">{adminName}</p>
                 <p className="text-white/50 text-xs truncate">{adminEmail}</p>
               </div>
-              <button className="text-white/50 hover:text-white transition-colors">
+              <button 
+                onClick={() => setShowLogoutModal(true)}
+                className="text-white/50 hover:text-white transition-colors"
+                aria-label="Logout"
+              >
                 <LogOut className="w-4 h-4" />
               </button>
             </>
@@ -259,10 +269,10 @@ const iconMap: Record<string, any> = {
         </div>
 
         {/* Toggle Button - Fixed position relative to sidebar */}
-        <button 
+        <button
           onClick={onToggle}
           className="hidden lg:flex absolute -right-4 top-[130px] items-center justify-center w-8 h-8 bg-[#C85A32] rounded-full shadow-lg hover:bg-[#a8472a] transition-all z-40"
-          style={{ 
+          style={{
             transform: isOpen ? 'translateX(0)' : 'translateX(0)',
             right: isOpen ? '-16px' : '-16px'
           }}
@@ -277,10 +287,41 @@ const iconMap: Record<string, any> = {
 
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 z-20 bg-black/50 backdrop-blur-sm"
           onClick={onClose}
         ></div>
+      )}
+
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-7 w-full max-w-sm shadow-xl">
+            <h3 className="font-semibold text-[#0F2D63] text-lg mb-2">
+              Sign out?
+            </h3>
+            <p className="text-gray-500 text-sm mb-6">
+              You'll need to sign in again to access your workspace.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setShowLogoutModal(false);
+                  await handleLogout();
+                }}
+                className="flex-1 bg-[#C85A32] hover:bg-[#a8472a] text-white rounded-xl py-2.5 text-sm font-semibold transition-colors"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

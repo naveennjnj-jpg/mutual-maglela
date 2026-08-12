@@ -7,8 +7,8 @@ export const userSidebar = [
   { title: "AI Writing", path: "/user/narrative-engine", icon: null },
   { title: "AI Speech", path: "/user/voice-calibrator", icon: null },
   { title: "Toolkits", path: "/user/store", icon: null },
-  { title: "My Invoices", path: "/user/invoices", icon: null, badge: 3 },
-  { title: "Quotes", path: "/user/quotes", icon: null, badge: 5 },
+  { title: "My Invoices", path: "/user/invoices", icon: null },
+  { title: "Quotes", path: "/user/quotes", icon: null },
   { title: "Plans", path: "/user/plans", icon: null },
   { title: "Settings", path: "/user/settings", icon: null }
 ];

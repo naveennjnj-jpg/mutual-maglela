@@ -61,7 +61,8 @@ import CreditPaymentCancelled from '@/pages/user/AddCredits/CreditPaymentCancell
 import Invoices from '@/pages/user/Invoices/Invoices';
 import Quotes from '@/pages/user/Quotes/Quotes';
 import Plans from '@/pages/user/Plans/Plans';
-
+import InvoicePaymentSuccess from '@/pages/user/Invoices/InvoicePaymentSuccess';
+import InvoicePaymentCancelled from '@/pages/user/Invoices/InvoicePaymentCancelled';
 
 
 // Admin Pages
@@ -149,8 +150,9 @@ const AppRoutes = () => {
         <Route path="credit-cancelled" element={<CreditPaymentCancelled />} />
         <Route path="invoices" element={<Invoices />} />
         <Route path="quotes" element={<Quotes />} />
-        <Route path="plans" element={<Plans />} />
-
+        <Route path="plans" element={<AddCredits />} />
+        <Route path="invoice-success" element={<InvoicePaymentSuccess />} />
+        <Route path="invoice-cancelled" element={<InvoicePaymentCancelled />} />
       </Route>
 
       {/* ADMIN - Protected (Admin Only) */}
