@@ -76,7 +76,7 @@ const AdminSidebar = ({
   // Admin menu items
   const sidebarItems: SidebarItem[] = [
     { title: "Dashboard", path: "/admin", icon: LayoutDashboard },
-    // { title: "Users", path: "/admin/users", icon: Users, badge: "1,284" },
+    { title: "Users", path: "/admin/users", icon: Users },
     { title: "Manage Projects", path: "/admin/projects", icon: Briefcase },
     { title: "Manage Experts", path: "/admin/experts", icon: UserCheck },
     { title: "My Schedule", path: "/admin/schedule", icon: Calendar },
@@ -92,9 +92,9 @@ const AdminSidebar = ({
       ["/admin"].includes(item.path)
     ),
 
-    // users: sidebarItems.filter(item =>
-    //   ["/admin/users"].includes(item.path)
-    // ),
+    users: sidebarItems.filter(item =>
+      ["/admin/users"].includes(item.path)
+    ),
 
     operations: sidebarItems.filter(item =>
       ["/admin/projects", "/admin/experts", "/admin/schedule", "/admin/workshop-requests",].includes(item.path)

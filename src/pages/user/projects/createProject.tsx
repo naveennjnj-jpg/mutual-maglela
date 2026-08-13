@@ -1,5 +1,5 @@
 // pages/user/CreateProject.tsx
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -15,6 +15,9 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle,
+  Clock,
+  AlertTriangle,
+  Info,
 } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
@@ -38,6 +41,10 @@ interface FileAttachment {
   name: string;
   size: number;
   type: string;
+}
+
+interface BlockedDate {
+  date: string;
 }
 
 interface ApiResponse {
@@ -72,6 +79,17 @@ const CreateProject = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  const [showAvailabilityWarning, setShowAvailabilityWarning] = useState(false);
+
+  // ============================================
+  // AVAILABILITY STATE
+  // ============================================
+
+  const [blockedDates, setBlockedDates] = useState<string[]>([]);
+  const [blockedDatesFull, setBlockedDatesFull] = useState<BlockedDate[]>([]);
+  const [showAvailabilityBanner, setShowAvailabilityBanner] = useState(true);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
 
   // ============================================
   // VALIDATION STATE
@@ -95,6 +113,104 @@ const CreateProject = () => {
   });
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+  // ============================================
+  // FETCH BLOCKED DATES
+  // ============================================
+
+  useEffect(() => {
+    fetchBlockedDates();
+  }, []);
+
+  const fetchBlockedDates = async () => {
+    try {
+      setAvailabilityLoading(true);
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        console.log("No token found, skipping blocked dates fetch");
+        setAvailabilityLoading(false);
+        return;
+      }
+
+      const response = await axios.get(
+        `${API_URL}/api/admin/all-availabilities`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Blocked dates response:", response.data);
+
+      if (response.data.success) {
+        const data = response.data.data || [];
+        setBlockedDatesFull(data);
+        
+        // Extract dates and format to YYYY-MM-DD for comparison with input
+        const blocked = data.map((item: BlockedDate) => {
+          const date = new Date(item.date);
+          return date.toISOString().split('T')[0];
+        });
+        
+        setBlockedDates(blocked);
+        console.log("Blocked dates (formatted):", blocked);
+      }
+    } catch (err: any) {
+      console.error("Error fetching blocked dates:", err);
+      // Don't show error to user, just log it
+    } finally {
+      setAvailabilityLoading(false);
+    }
+  };
+
+  // ============================================
+  // CHECK IF DATE IS BLOCKED
+  // ============================================
+
+  const isDateBlocked = (date: string): boolean => {
+    if (!date) return false;
+    return blockedDates.includes(date);
+  };
+
+  const checkDeadlineAvailability = (deadline: string) => {
+    if (!deadline) return true;
+    
+    // Only check for hire-expert option
+    if (formData.proceedOption !== 'hire-expert') return true;
+    
+    const isBlocked = isDateBlocked(deadline);
+    
+    if (isBlocked) {
+      setAvailabilityError(
+        "Experts are not available on this date. Please select a different date."
+      );
+      setShowAvailabilityWarning(true);
+      return false;
+    } else {
+      setAvailabilityError(null);
+      setShowAvailabilityWarning(false);
+      return true;
+    }
+  };
+
+  // ============================================
+  // FORMAT BLOCKED DATES FOR DISPLAY
+  // ============================================
+
+  const formatDateForDisplay = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-ZA', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const getBlockedDatesDisplay = () => {
+    return blockedDatesFull.map(item => formatDateForDisplay(item.date)).join(', ');
+  };
 
   // ============================================
   // PROJECT TYPES
@@ -233,6 +349,11 @@ const CreateProject = () => {
 
     // Clear validation error on change
     setValidationErrors(prev => ({ ...prev, [name]: undefined }));
+
+    // Check deadline availability if deadline changes
+    if (name === 'deadline' && value) {
+      checkDeadlineAvailability(value);
+    }
   };
 
   const handlePrioritySelect = (priority: "low" | "medium" | "high" | "critical") => {
@@ -249,6 +370,15 @@ const CreateProject = () => {
       ...prev,
       proceedOption: option,
     }));
+
+    // Reset availability error when switching to AI options
+    if (option !== 'hire-expert') {
+      setAvailabilityError(null);
+      setShowAvailabilityWarning(false);
+    } else if (formData.deadline) {
+      // Check availability if switching to hire-expert and deadline is set
+      checkDeadlineAvailability(formData.deadline);
+    }
   };
 
   const handleBlur = (
@@ -346,6 +476,23 @@ const CreateProject = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check availability for hire-expert
+    if (formData.proceedOption === 'hire-expert' && formData.deadline) {
+      if (isDateBlocked(formData.deadline)) {
+        setAvailabilityError(
+          "Experts are not available on this date. Please select a different date."
+        );
+        setShowAvailabilityWarning(true);
+        
+        // Scroll to the deadline field
+        const deadlineField = document.querySelector('[name="deadline"]');
+        if (deadlineField) {
+          deadlineField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+    }
 
     // Mark all fields as touched
     setTouched({
@@ -500,6 +647,33 @@ const CreateProject = () => {
       </div>
 
       {/* ==========================================
+          AVAILABILITY BANNER
+          ========================================== */}
+      {showAvailabilityBanner && blockedDatesFull.length > 0 && (
+        <div className="bg-amber-50 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-800 px-6 py-3">
+          <div className="max-w-[1100px] mx-auto flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <div>
+                <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                  Expert Unavailability Notice
+                </span>
+                <span className="text-sm text-amber-600 dark:text-amber-400 ml-2">
+                  Experts are unavailable on: {getBlockedDatesDisplay()}
+                </span>
+              </div>
+            </div>
+            {/* <button
+              onClick={() => setShowAvailabilityBanner(false)}
+              className="text-amber-500 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition-colors text-sm"
+            >
+              Dismiss
+            </button> */}
+          </div>
+        </div>
+      )}
+
+      {/* ==========================================
           MAIN CONTENT
           ========================================== */}
       <div className="max-w-[1100px] mx-auto px-6 py-8">
@@ -513,6 +687,14 @@ const CreateProject = () => {
           </p>
         </div>
 
+        {/* Availability Warning */}
+        {showAvailabilityWarning && availabilityError && (
+          <div className="flex items-start gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-6">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span>{availabilityError}</span>
+          </div>
+        )}
+
         {/* Success/Error Messages */}
         {success && (
           <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm mb-6">
@@ -521,7 +703,7 @@ const CreateProject = () => {
           </div>
         )}
 
-        {error && (
+        {error && !availabilityError && (
           <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-6">
             <AlertCircle className="w-4 h-4" />
             <span>{error}</span>
@@ -928,6 +1110,23 @@ const CreateProject = () => {
                         <AlertCircle className="w-3 h-3" />
                         {validationErrors.deadline}
                       </p>
+                    )}
+                    
+                    {/* Show availability status near deadline field */}
+                    {formData.proceedOption === 'hire-expert' && formData.deadline && (
+                      <>
+                        {isDateBlocked(formData.deadline) ? (
+                          <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            Experts unavailable on this date
+                          </p>
+                        ) : (
+                          <p className="mt-1.5 text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" />
+                            Experts available on this date
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
