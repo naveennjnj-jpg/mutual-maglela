@@ -1,35 +1,35 @@
-// pages/user/ProjectDetail.tsx
+// pages/admin/ProjectDetail.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Clock, Calendar, Send, Loader2, AlertCircle,
   Eye, MessageSquare, CircleCheck, FileText, ExternalLink, Download,
   File, FileImage, FileVideo, FileAudio, FileArchive, FileCode, 
-  FileSpreadsheet, FileText as FileTextIcon
+  FileSpreadsheet, WandSparkles, Mic, Users, Sparkles,
+  CheckCircle
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 
 interface Project {
   _id: string;
+  identifier: string;
+  userId: string;
   title: string;
-  description: string;
   type: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'active' | 'in_revision' | 'completed' | 'pending';
-  assignedTo: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
+  description: string;
+  priority: "high" | "medium" | "low" | "critical";
   deadline: string;
-  attachments: string[] | string | null;
+  proceedOption: "hire-expert" | "ai-writing" | "ai-speech";
+  attachments: string | null;
+  status: "Pending" | "In Progress" | "Under Review" | "Completed" | "On Hold" | "Cancelled" | "publish";
   createdAt: string;
+  updatedAt: string;
+  __v: number;
+  adminnote?: string | null;
+  adminattachment?: string | null;
+  feedbacknote?: string | null;
+  feedbackadminattachment?: string | null;
 }
 
 const ProjectDetail: React.FC = () => {
@@ -81,19 +81,77 @@ const ProjectDetail: React.FC = () => {
     const colors = {
       low: 'bg-blue-50 text-blue-600 border-blue-100',
       medium: 'bg-amber-50 text-amber-600 border-amber-100',
-      high: 'bg-red-50 text-red-500 border-red-100'
+      high: 'bg-red-50 text-red-500 border-red-100',
+      critical: 'bg-purple-50 text-purple-600 border-purple-100'
     };
     return colors[priority as keyof typeof colors] || colors.medium;
   };
 
+  const getPriorityTextColor = (priority: string) => {
+    const colors = {
+      low: 'text-blue-600',
+      medium: 'text-amber-600',
+      high: 'text-red-500',
+      critical: 'text-purple-600'
+    };
+    return colors[priority as keyof typeof colors] || 'text-gray-600';
+  };
+
   const getStatusColor = (status: string) => {
     const colors = {
-      active: 'bg-green-50 text-green-700 border-green-100',
-      in_revision: 'bg-yellow-50 text-yellow-700 border-yellow-100',
-      completed: 'bg-blue-50 text-blue-700 border-blue-100',
-      pending: 'bg-gray-50 text-gray-600 border-gray-100'
+      'Pending': 'bg-gray-50 text-gray-600 border-gray-100',
+      'In Progress': 'bg-green-50 text-green-700 border-green-100',
+      'Under Review': 'bg-amber-50 text-amber-700 border-amber-100',
+      'Completed': 'bg-blue-50 text-blue-700 border-blue-100',
+      'On Hold': 'bg-yellow-50 text-yellow-700 border-yellow-100',
+      'Cancelled': 'bg-red-50 text-red-600 border-red-100',
+      'publish': 'bg-emerald-50 text-emerald-700 border-emerald-100'
     };
-    return colors[status as keyof typeof colors] || colors.pending;
+    return colors[status as keyof typeof colors] || colors['Pending'];
+  };
+
+  const getStatusLabel = (status: string) => {
+    const labels = {
+      'Pending': 'Pending',
+      'In Progress': 'In Progress',
+      'Under Review': 'Under Review',
+      'Completed': 'Completed',
+      'On Hold': 'On Hold',
+      'Cancelled': 'Cancelled',
+      'publish': 'Published'
+    };
+    return labels[status as keyof typeof labels] || status;
+  };
+
+  const getStatusIcon = (status: string) => {
+    const icons = {
+      'Pending': <Clock className="w-3 h-3" />,
+      'In Progress': <Clock className="w-3 h-3" />,
+      'Under Review': <MessageSquare className="w-3 h-3" />,
+      'Completed': <CircleCheck className="w-3 h-3" />,
+      'On Hold': <Clock className="w-3 h-3" />,
+      'Cancelled': <AlertCircle className="w-3 h-3" />,
+      'publish': <CircleCheck className="w-3 h-3" />
+    };
+    return icons[status as keyof typeof icons] || icons['Pending'];
+  };
+
+  const getProceedOptionLabel = (option: string) => {
+    const labels = {
+      'ai-writing': 'AI Writing',
+      'ai-speech': 'AI Speech',
+      'hire-expert': 'Hire Expert'
+    };
+    return labels[option as keyof typeof labels] || option;
+  };
+
+  const getProceedOptionIcon = (option: string) => {
+    const icons = {
+      'ai-writing': <WandSparkles className="w-3.5 h-3.5" />,
+      'ai-speech': <Mic className="w-3.5 h-3.5" />,
+      'hire-expert': <Users className="w-3.5 h-3.5" />
+    };
+    return icons[option as keyof typeof icons] || <Sparkles className="w-3.5 h-3.5" />;
   };
 
   const getInitials = (name: string) => {
@@ -110,27 +168,21 @@ const ProjectDetail: React.FC = () => {
     });
   };
 
-  // ✅ Get full attachment URL
   const getFullAttachmentUrl = (attachmentPath: string | null) => {
     if (!attachmentPath) return null;
-    // If it already starts with http, return as is
     if (attachmentPath.startsWith('http://') || attachmentPath.startsWith('https://')) {
       return attachmentPath;
     }
-    // Remove leading slash if present to avoid double slashes
     const cleanPath = attachmentPath.startsWith('/') ? attachmentPath.slice(1) : attachmentPath;
     return `${API_URL}/${cleanPath}`;
   };
 
-  // ✅ Get file name from path
   const getFileNameFromPath = (path: string | null) => {
     if (!path) return null;
-    // If it's a URL, extract the last part
     const parts = path.split('/');
     return parts[parts.length - 1] || null;
   };
 
-  // ✅ Get file icon based on extension
   const getFileIcon = (fileName: string | null) => {
     if (!fileName) return <File className="w-5 h-5 text-gray-400" />;
     
@@ -138,10 +190,10 @@ const ProjectDetail: React.FC = () => {
     
     switch (extension) {
       case 'pdf':
-        return <FileTextIcon className="w-5 h-5 text-red-500" />;
+        return <FileText className="w-5 h-5 text-red-500" />;
       case 'doc':
       case 'docx':
-        return <FileTextIcon className="w-5 h-5 text-blue-500" />;
+        return <FileText className="w-5 h-5 text-blue-500" />;
       case 'xls':
       case 'xlsx':
       case 'csv':
@@ -169,37 +221,9 @@ const ProjectDetail: React.FC = () => {
       case 'rar':
       case '7z':
         return <FileArchive className="w-5 h-5 text-yellow-500" />;
-      case 'js':
-      case 'ts':
-      case 'jsx':
-      case 'tsx':
-      case 'html':
-      case 'css':
-      case 'json':
-      case 'py':
-        return <FileCode className="w-5 h-5 text-cyan-500" />;
       default:
         return <File className="w-5 h-5 text-gray-400" />;
     }
-  };
-
-  // ✅ Get file size display
-  const getFileSize = (path: string | null) => {
-    if (!path) return null;
-    // In a real app, you might get this from the API response
-    // For now, we'll just return a placeholder
-    return 'Unknown size';
-  };
-
-  // ✅ Helper to safely get attachments
-  const getAttachments = (): string[] => {
-    if (!project?.attachments) return [];
-    if (Array.isArray(project.attachments)) return project.attachments;
-    if (typeof project.attachments === 'string') {
-      // If it's a comma-separated string
-      return project.attachments.split(',').map(s => s.trim()).filter(Boolean);
-    }
-    return [];
   };
 
   if (loading) {
@@ -228,7 +252,20 @@ const ProjectDetail: React.FC = () => {
     );
   }
 
-  const attachments = getAttachments();
+  const isCompleted = project.status === 'Completed' || project.status === 'publish';
+  const isRevision = project.status === 'Under Review';
+
+  const attachmentUrl = getFullAttachmentUrl(project.attachments);
+  const fileName = project.attachments ? getFileNameFromPath(project.attachments) : null;
+  const fileIcon = fileName ? getFileIcon(fileName) : null;
+
+  const adminAttachmentUrl = getFullAttachmentUrl(project.adminattachment || null);
+  const adminFileName = project.adminattachment ? getFileNameFromPath(project.adminattachment) : null;
+  const adminFileIcon = adminFileName ? getFileIcon(adminFileName) : null;
+
+  const feedbackAttachmentUrl = getFullAttachmentUrl(project.feedbackadminattachment || null);
+  const feedbackFileName = project.feedbackadminattachment ? getFileNameFromPath(project.feedbackadminattachment) : null;
+  const feedbackFileIcon = feedbackFileName ? getFileIcon(feedbackFileName) : null;
 
   return (
     <main className="flex-1">
@@ -251,47 +288,46 @@ const ProjectDetail: React.FC = () => {
                   {project.priority} priority
                 </span>
                 <h1 className="text-xl font-['Roboto'] font-bold text-[#0F2D63] leading-tight">
-                  {project.title}
+                  {project.title || 'Untitled Project'}
                 </h1>
               </div>
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(project.status)}`}>
-                {project.status === 'active' && <Clock className="w-3 h-3" />}
-                {project.status === 'in_revision' && <MessageSquare className="w-3 h-3" />}
-                {project.status === 'completed' && <CircleCheck className="w-3 h-3" />}
-                {project.status}
+                {getStatusIcon(project.status)}
+                {getStatusLabel(project.status)}
               </span>
             </div>
             <div className="flex items-center gap-3 mt-3">
-              <div className="w-7 h-7 rounded-full bg-[#0F2D63] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-                {getInitials(project.assignedTo?.name || 'User')}
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono text-gray-400">
+                  #{project.identifier}
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 flex items-center gap-1">
+                  {getProceedOptionIcon(project.proceedOption)}
+                  {getProceedOptionLabel(project.proceedOption)}
+                </span>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-[#0F2D63]">{project.assignedTo?.name || 'Unassigned'}</p>
-                <p className="text-xs text-gray-400">{project.assignedTo?.email || 'No email'}</p>
-              </div>
-              <span className="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
-                B2C
-              </span>
             </div>
           </div>
 
           {/* Project Type */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Project Type</p>
-            <p className="text-sm font-semibold text-[#0F2D63]">{project.type}</p>
+            <p className="text-sm font-semibold text-[#0F2D63]">{project.type || 'N/A'}</p>
           </div>
 
           {/* Description */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Project Description</p>
-            <p className="text-sm text-gray-700 leading-relaxed">{project.description}</p>
+            <p className="text-sm text-gray-700 leading-relaxed">
+              {project.description || 'No description provided.'}
+            </p>
           </div>
 
           {/* Priority & Deadline */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Priority</p>
-              <p className={`text-sm font-bold capitalize ${project.priority === 'high' ? 'text-red-500' : project.priority === 'medium' ? 'text-amber-600' : 'text-blue-600'}`}>
+              <p className={`text-sm font-bold capitalize ${getPriorityTextColor(project.priority)}`}>
                 {project.priority}
               </p>
             </div>
@@ -299,81 +335,186 @@ const ProjectDetail: React.FC = () => {
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Deadline</p>
               <p className="text-sm font-bold text-[#0F2D63] flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                {formatDate(project.deadline || project.createdAt)}
+                {formatDate(project.deadline)}
               </p>
             </div>
           </div>
 
-          {/* Attachments */}
+          {/* User Attached Files */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">
-              Attached Files
-            </p>
-            {attachments.length > 0 ? (
-              <div className="space-y-3">
-                {attachments.map((attachment, index) => {
-                  const attachmentUrl = getFullAttachmentUrl(attachment);
-                  const fileName = getFileNameFromPath(attachment);
-                  const fileIcon = getFileIcon(fileName);
-                  
-                  return (
-                    <div 
-                      key={index}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#0F2D63]/30 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                          {fileIcon}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-700 truncate max-w-[200px]">
-                            {fileName || 'Unknown file'}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            {getFileSize(attachment)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        {attachmentUrl && (
-                          <>
-                            <a
-                              href={attachmentUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-                              title="View file"
-                            >
-                              <ExternalLink className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
-                            </a>
-                            <a
-                              href={attachmentUrl}
-                              download={fileName || 'download'}
-                              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-                              title="Download file"
-                            >
-                              <Download className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
-                            </a>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+            <div className="flex items-center gap-2 mb-3">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Attached Files</p>
+              <span className="bg-gray-100 text-gray-600 text-[8px] font-bold px-1.5 py-0.5 rounded-full">USER</span>
+            </div>
+            {project.attachments ? (
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[#0F2D63]/10 rounded-xl flex items-center justify-center text-2xl">
+                    {fileIcon}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">{fileName}</p>
+                    <p className="text-xs text-gray-400">Click to view or download</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <a href={attachmentUrl || '#'} target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="View file">
+                    <ExternalLink className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
+                  </a>
+                  <a href={attachmentUrl || '#'} download={fileName || 'download'} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Download file">
+                    <Download className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
+                  </a>
+                </div>
               </div>
             ) : (
               <p className="text-sm text-gray-300 italic">No files attached by user.</p>
             )}
           </div>
 
+          {/* Admin Section */}
+          {(project.adminnote || project.adminattachment) && (
+            <div className={`rounded-2xl border p-5 ${
+              isRevision ? 'bg-blue-50 border-blue-200' : 
+              isCompleted ? 'bg-green-50 border-green-200' : 
+              'bg-gray-50 border-gray-200'
+            }`}>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-lg">{isRevision ? '📋' : isCompleted ? '✅' : '📝'}</span>
+                <p className={`text-[10px] font-bold uppercase tracking-wider ${
+                  isRevision ? 'text-blue-600' : 
+                  isCompleted ? 'text-green-600' : 
+                  'text-gray-600'
+                }`}>
+                  {isRevision ? 'Admin Submission' : isCompleted ? 'Admin Final Submission' : 'Admin Note'}
+                </p>
+                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${
+                  isRevision ? 'bg-blue-200 text-blue-700' : 
+                  isCompleted ? 'bg-green-200 text-green-700' : 
+                  'bg-gray-200 text-gray-700'
+                }`}>
+                  ADMIN
+                </span>
+              </div>
+
+              {project.adminnote && (
+                <div className="mb-4">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Note from Admin</p>
+                  <div className="bg-white rounded-xl p-4 border border-gray-100">
+                    <p className="text-sm text-gray-700 leading-relaxed">{project.adminnote}</p>
+                  </div>
+                </div>
+              )}
+
+              {project.adminattachment && (
+                <div>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Admin Attachment</p>
+                  <div className={`flex items-center justify-between p-3 bg-white rounded-xl border ${
+                    isRevision ? 'border-blue-100' : isCompleted ? 'border-green-100' : 'border-gray-100'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-2xl ${
+                        isRevision ? 'bg-blue-100' : isCompleted ? 'bg-green-100' : 'bg-gray-100'
+                      }`}>
+                        {adminFileIcon}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">{adminFileName}</p>
+                        <p className="text-xs text-gray-400">Admin provided file — click to view or download</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <a href={adminAttachmentUrl || '#'} target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="View file">
+                        <ExternalLink className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
+                      </a>
+                      <a href={adminAttachmentUrl || '#'} download={adminFileName || 'download'} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Download file">
+                        <Download className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Feedback Section */}
+          {(project.feedbacknote || project.feedbackadminattachment) && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-lg">💬</span>
+                <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">User Feedback</p>
+                <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-700">USER</span>
+              </div>
+
+              {project.feedbacknote && (
+                <div className="mb-4">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Feedback Note</p>
+                  <div className="bg-white rounded-xl p-4 border border-amber-100">
+                    <p className="text-sm text-gray-700 leading-relaxed">{project.feedbacknote}</p>
+                  </div>
+                </div>
+              )}
+
+              {project.feedbackadminattachment && (
+                <div>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Feedback Attachment</p>
+                  <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-amber-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-2xl">
+                        {feedbackFileIcon}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">{feedbackFileName}</p>
+                        <p className="text-xs text-gray-400">User provided file — click to view or download</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <a href={feedbackAttachmentUrl || '#'} target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="View file">
+                        <ExternalLink className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
+                      </a>
+                      <a href={feedbackAttachmentUrl || '#'} download={feedbackFileName || 'download'} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Download file">
+                        <Download className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Revision Status Message */}
+          {isRevision && (
+            <div className="rounded-2xl border overflow-hidden border-amber-200">
+              <div className="px-5 py-3 flex items-center gap-2 bg-amber-500">
+                <Clock className="w-4 h-4 text-white" />
+                <span className="text-white text-sm font-bold">⏳ Awaiting User Review</span>
+              </div>
+              <div className="p-5 space-y-4 bg-amber-50">
+                <p className="text-sm text-gray-600">
+                  The submission has been sent to the user. Waiting for their response.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Completed Status Message */}
+          {isCompleted && (
+            <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-green-700">Project Completed</p>
+                <p className="text-xs text-green-600">This project has been successfully completed.</p>
+              </div>
+            </div>
+          )}
+
           {/* Submit Button */}
-          {project.status !== 'completed' && (
+          {!isCompleted && (
             <button
               onClick={() => navigate(`/admin/projects/${project._id}/submit`)}
               className="w-full py-3 bg-[#0F2D63] hover:bg-[#0a2050] text-white rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2"
             >
               <Send className="w-3.5 h-3.5" />
-              Submit Project
+              {isRevision ? 'Resubmit Project' : 'Submit Project'}
             </button>
           )}
         </div>

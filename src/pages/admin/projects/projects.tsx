@@ -1,33 +1,32 @@
-// pages/user/Projects.tsx
+// pages/admin/Projects.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Clock, MessageSquare, CircleCheck, Eye, Send, Calendar,
-  AlertCircle, Loader2
+  AlertCircle, Loader2, WandSparkles, Mic, Users, Sparkles
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 
 interface Project {
   _id: string;
+  identifier: string;
+  userId: string;
   title: string;
-  description: string;
   type: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'active' | 'in_revision' | 'completed' | 'pending';
-  assignedTo: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
+  description: string;
+  priority: "high" | "medium" | "low" | "critical";
   deadline: string;
+  proceedOption: "hire-expert" | "ai-writing" | "ai-speech";
+  attachments: string | null;
+  status: "Pending" | "In Progress" | "Under Review" | "Completed" | "On Hold" | "Cancelled" | "publish";
   createdAt: string;
   updatedAt: string;
+  __v: number;
+  adminnote?: string | null;
+  adminattachment?: string | null;
+  feedbacknote?: string | null;
+  feedbackadminattachment?: string | null;
 }
 
 interface ProjectStats {
@@ -71,11 +70,15 @@ const Projects: React.FC = () => {
         const projectsData = response.data.data || [];
         setProjects(projectsData);
         
-        // Calculate stats
+        // Calculate stats - Include both 'Completed' and 'publish' for completed
         const statsData = {
-          active: projectsData.filter((p: Project) => p.status === 'active').length,
-          inRevision: projectsData.filter((p: Project) => p.status === 'in_revision').length,
-          completed: projectsData.filter((p: Project) => p.status === 'completed').length,
+          active: projectsData.filter((p: Project) => 
+            p.status === 'Pending' || p.status === 'In Progress' || p.status === 'On Hold'
+          ).length,
+          inRevision: projectsData.filter((p: Project) => p.status === 'Under Review').length,
+          completed: projectsData.filter((p: Project) => 
+            p.status === 'Completed' || p.status === 'publish'
+          ).length,
         };
         setStats(statsData);
       }
@@ -88,44 +91,82 @@ const Projects: React.FC = () => {
   };
 
   const getFilteredProjects = () => {
-    if (activeFilter === 'all') return projects;
-    return projects.filter(p => p.status === activeFilter);
+    let filtered = projects;
+
+    if (activeFilter === 'active') {
+      filtered = filtered.filter(p => 
+        p.status === 'Pending' || p.status === 'In Progress' || p.status === 'On Hold'
+      );
+    } else if (activeFilter === 'in_revision') {
+      filtered = filtered.filter(p => p.status === 'Under Review');
+    } else if (activeFilter === 'completed') {
+      filtered = filtered.filter(p => p.status === 'Completed' || p.status === 'publish');
+    }
+
+    return filtered;
   };
 
   const getPriorityColor = (priority: string) => {
     const colors = {
       low: 'bg-blue-50 text-blue-600 border-blue-100',
       medium: 'bg-amber-50 text-amber-600 border-amber-100',
-      high: 'bg-red-50 text-red-500 border-red-100'
+      high: 'bg-red-50 text-red-500 border-red-100',
+      critical: 'bg-purple-50 text-purple-600 border-purple-100'
     };
     return colors[priority as keyof typeof colors] || colors.medium;
   };
 
   const getStatusColor = (status: string) => {
     const colors = {
-      active: 'bg-green-50 text-green-700 border-green-100',
-      in_revision: 'bg-yellow-50 text-yellow-700 border-yellow-100',
-      completed: 'bg-blue-50 text-blue-700 border-blue-100',
-      pending: 'bg-gray-50 text-gray-600 border-gray-100'
+      'Pending': 'bg-gray-50 text-gray-600 border-gray-100',
+      'In Progress': 'bg-green-50 text-green-700 border-green-100',
+      'Under Review': 'bg-amber-50 text-amber-700 border-amber-100',
+      'Completed': 'bg-blue-50 text-blue-700 border-blue-100',
+      'On Hold': 'bg-yellow-50 text-yellow-700 border-yellow-100',
+      'Cancelled': 'bg-red-50 text-red-600 border-red-100',
+      'publish': 'bg-emerald-50 text-emerald-700 border-emerald-100'
     };
-    return colors[status as keyof typeof colors] || colors.pending;
+    return colors[status as keyof typeof colors] || colors['Pending'];
   };
 
-  const getStatusIcon = (status: string) => {
-    const icons = {
-      active: <Clock className="w-3.5 h-3.5" />,
-      in_revision: <MessageSquare className="w-3.5 h-3.5" />,
-      completed: <CircleCheck className="w-3.5 h-3.5" />,
-      pending: <Clock className="w-3.5 h-3.5" />
+  const getStatusLabel = (status: string) => {
+    const labels = {
+      'Pending': 'Pending',
+      'In Progress': 'In Progress',
+      'Under Review': 'Under Review',
+      'Completed': 'Completed',
+      'On Hold': 'On Hold',
+      'Cancelled': 'Cancelled',
+      'publish': 'Published'
     };
-    return icons[status as keyof typeof icons] || icons.pending;
+    return labels[status as keyof typeof labels] || status;
+  };
+
+  const getProceedOptionLabel = (option: string) => {
+    const labels = {
+      'ai-writing': 'AI Writing',
+      'ai-speech': 'AI Speech',
+      'hire-expert': 'Hire Expert'
+    };
+    return labels[option as keyof typeof labels] || option;
+  };
+
+  const getProceedOptionIcon = (option: string) => {
+    const icons = {
+      'ai-writing': <WandSparkles className="w-3 h-3" />,
+      'ai-speech': <Mic className="w-3 h-3" />,
+      'hire-expert': <Users className="w-3 h-3" />
+    };
+    return icons[option as keyof typeof icons] || <Sparkles className="w-3 h-3" />;
   };
 
   const getInitials = (name: string) => {
+    if (!name) return 'U';
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   const formatDate = (date: string) => {
+    if (!date) return 'N/A';
     return new Date(date).toLocaleDateString('en-ZA', {
       day: 'numeric',
       month: 'short',
@@ -170,7 +211,7 @@ const Projects: React.FC = () => {
                 : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
             }`}
           >
-            <Clock className="w-3.5 h-3.5" />
+            <Sparkles className="w-3.5 h-3.5" />
             All
             <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
               activeFilter === 'all' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
@@ -239,66 +280,68 @@ const Projects: React.FC = () => {
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredProjects.length > 0 ? (
-            filteredProjects.map((project) => (
-              <div
-                key={project._id}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-all flex flex-col"
-              >
-                <div className={`h-1 ${
-                  project.status === 'completed' ? 'bg-blue-400' :
-                  project.status === 'in_revision' ? 'bg-yellow-400' :
-                  'bg-green-400'
-                }`}></div>
-                <div className="p-5 flex flex-col flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border capitalize ${getPriorityColor(project.priority)}`}>
-                      {project.priority}
-                    </span>
-                    <span className="text-[10px] text-gray-400 font-medium truncate">
-                      {project.type}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-[#0F2D63] text-sm leading-snug mb-2">
-                    {project.title}
-                  </h3>
-                  <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-3 flex-1">
-                    {project.description}
-                  </p>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-[#0F2D63] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-                        {getInitials(project.assignedTo?.name || 'User')}
-                      </div>
-                      <span className="text-xs text-gray-600 font-medium truncate max-w-[100px]">
-                        {project.assignedTo?.name || 'Unassigned'}
+            filteredProjects.map((project) => {
+              const isCompleted = project.status === 'Completed' || project.status === 'publish';
+              const isRevision = project.status === 'Under Review';
+              const statusColor = isCompleted ? 'bg-blue-400' :
+                                 isRevision ? 'bg-amber-400' :
+                                 'bg-green-400';
+
+              return (
+                <div
+                  key={project._id}
+                  className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-all flex flex-col"
+                >
+                  <div className={`h-1 ${statusColor}`}></div>
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border capitalize ${getPriorityColor(project.priority)}`}>
+                        {project.priority}
+                      </span>
+                      <span className="text-[10px] text-gray-400 font-medium truncate flex items-center gap-1">
+                        {getProceedOptionIcon(project.proceedOption)}
+                        {getProceedOptionLabel(project.proceedOption)}
                       </span>
                     </div>
-                    <span className="text-xs text-gray-400 flex items-center gap-1">
-                      <Calendar className="w-2.5 h-2.5" />
-                      {formatDate(project.deadline || project.createdAt)}
-                    </span>
-                  </div>
-                  <div className="flex gap-2 pt-3 border-t border-gray-50 mt-auto">
-                    <button
-                      onClick={() => navigate(`/admin/projects/${project._id}`)}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg text-xs font-semibold transition-colors"
-                    >
-                      <Eye className="w-3 h-3" />
-                      View
-                    </button>
-                    {project.status !== 'completed' && (
+                    <h3 className="font-bold text-[#0F2D63] text-sm leading-snug mb-2 line-clamp-1">
+                      {project.title || 'Untitled Project'}
+                    </h3>
+                    <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-3 flex-1">
+                      {project.description || 'No description'}
+                    </p>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${getStatusColor(project.status)}`}>
+                          {getStatusLabel(project.status)}
+                        </span>
+                      </div>
+                      <span className="text-xs text-gray-400 flex items-center gap-1">
+                        <Calendar className="w-2.5 h-2.5" />
+                        {formatDate(project.deadline)}
+                      </span>
+                    </div>
+                    <div className="flex gap-2 pt-3 border-t border-gray-50 mt-auto">
                       <button
-                        onClick={() => navigate(`/admin/projects/${project._id}/submit`)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-[#0F2D63] hover:bg-[#0a2050] text-white rounded-lg text-xs font-semibold transition-colors"
+                        onClick={() => navigate(`/admin/projects/${project._id}`)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg text-xs font-semibold transition-colors"
                       >
-                        <Send className="w-3 h-3" />
-                        Submit
+                        <Eye className="w-3 h-3" />
+                        View
                       </button>
-                    )}
+                      {!isCompleted && (
+                        <button
+                          onClick={() => navigate(`/admin/projects/${project._id}/submit`)}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-[#0F2D63] hover:bg-[#0a2050] text-white rounded-lg text-xs font-semibold transition-colors"
+                        >
+                          <Send className="w-3 h-3" />
+                          Submit
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <div className="col-span-full text-center py-12">
               <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -316,4 +359,4 @@ const Projects: React.FC = () => {
   );
 };
 
-export default Projects;
+export default Projects;  

@@ -1,4 +1,4 @@
-// pages/user/ProjectSubmit.tsx
+// pages/admin/ProjectSubmit.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
@@ -46,6 +46,10 @@ const ProjectSubmit: React.FC = () => {
 
             if (response.data.success) {
                 setProject(response.data.data);
+                // If project is in revision, pre-fill with previous admin note if needed
+                if (response.data.data.status === 'Under Review') {
+                    // You might want to pre-fill or show existing admin note
+                }
             } else {
                 setError(response.data.message || 'Failed to fetch project');
             }
@@ -60,13 +64,11 @@ const ProjectSubmit: React.FC = () => {
         if (e.target.files && e.target.files[0]) {
             const selectedFile = e.target.files[0];
 
-            // Validate file size (20MB max)
             if (selectedFile.size > 20 * 1024 * 1024) {
                 setError('File size exceeds 20MB limit');
                 return;
             }
 
-            // Validate file type
             const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
             if (!allowedTypes.includes(selectedFile.type)) {
                 setError('Only PDF, DOCX, and PPTX files are allowed');
@@ -87,7 +89,6 @@ const ProjectSubmit: React.FC = () => {
         setUploadProgress(0);
     };
 
-    // ✅ Upload document and get URL
     const uploadDocument = async (fileToUpload: File): Promise<string | null> => {
         setUploading(true);
         setUploadStatus('uploading');
@@ -119,13 +120,10 @@ const ProjectSubmit: React.FC = () => {
                 }
             );
 
-            console.log('📤 Upload Response:', uploadResponse.data);
-
             if (!uploadResponse.data.success) {
                 throw new Error(uploadResponse.data.message || 'Document upload failed');
             }
 
-            // Get uploaded file URL
             const fileUrl = uploadResponse.data.data?.fileUrl || uploadResponse.data.data?.url || uploadResponse.data.data;
 
             if (!fileUrl) {
@@ -136,7 +134,7 @@ const ProjectSubmit: React.FC = () => {
             return fileUrl;
 
         } catch (err: any) {
-            console.error('❌ Upload error:', err);
+            console.error('Upload error:', err);
             setUploadStatus('error');
             throw new Error(err.response?.data?.message || err.message || 'Failed to upload document');
         } finally {
@@ -144,7 +142,6 @@ const ProjectSubmit: React.FC = () => {
         }
     };
 
-    // ✅ Submit project with note and file URL
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -170,11 +167,10 @@ const ProjectSubmit: React.FC = () => {
                 return;
             }
 
-            // ✅ Step 1: Upload document first
+            // Step 1: Upload document
             let documentUrl: string | null = null;
             try {
                 documentUrl = await uploadDocument(file);
-                console.log('✅ Document uploaded successfully:', documentUrl);
             } catch (uploadErr: any) {
                 setError(uploadErr.message || 'Failed to upload document');
                 setSubmitting(false);
@@ -187,11 +183,11 @@ const ProjectSubmit: React.FC = () => {
                 return;
             }
 
-            // ✅ Step 2: Update project with note and document URL
+            // Step 2: Update project with note and document URL
             const updateData = {
                 adminnote: note,
                 adminattachment: documentUrl,
-                status: 'publish' // Update status to in_revision
+                status: 'Under Review' // Set to Under Review for user review
             };
 
             const response = await axios.put(
@@ -205,28 +201,24 @@ const ProjectSubmit: React.FC = () => {
                 }
             );
 
-            console.log('📝 Project update response:', response.data);
-
             if (response.data.success) {
                 setSuccess('Project submitted successfully!');
 
-                // Clear form
                 setFile(null);
                 setFileName('');
                 setNote('');
                 setUploadStatus('idle');
                 setUploadProgress(0);
 
-                // Redirect after delay
                 setTimeout(() => {
-                    navigate(`/admin/projects`);
+                    navigate(`/admin/projects/${id}`);
                 }, 2000);
             } else {
                 setError(response.data.message || 'Failed to submit project');
             }
 
         } catch (err: any) {
-            console.error('❌ Error submitting project:', err);
+            console.error('Error submitting project:', err);
             setError(err.response?.data?.message || err.message || 'Failed to submit project');
         } finally {
             setSubmitting(false);
@@ -259,6 +251,8 @@ const ProjectSubmit: React.FC = () => {
         );
     }
 
+    const isRevision = project?.status === 'Under Review';
+
     return (
         <main className="flex-1">
             <div className="min-h-screen bg-[#F4F6FB] p-6">
@@ -274,11 +268,19 @@ const ProjectSubmit: React.FC = () => {
 
                     {/* Header */}
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Submit Project</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                            {isRevision ? 'Resubmit Project' : 'Submit Project'}
+                        </p>
                         <h1 className="text-xl font-['Roboto'] font-bold text-[#0F2D63] leading-tight">
                             {project?.title}
                         </h1>
                         <p className="text-sm text-gray-400 mt-1">{project?.type}</p>
+                        {isRevision && (
+                            <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-700">
+                                <p className="font-semibold">Previous submission needs revision</p>
+                                <p className="text-xs text-amber-600 mt-0.5">Please review the user's feedback and resubmit</p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Success Message */}
@@ -305,7 +307,7 @@ const ProjectSubmit: React.FC = () => {
                             </label>
                             <textarea
                                 rows={6}
-                                placeholder="Describe what was done, key decisions made, and what the user should review…"
+                                placeholder={isRevision ? "Explain what was revised and what the user should review…" : "Describe what was done, key decisions made, and what the user should review…"}
                                 value={note}
                                 onChange={(e) => setNote(e.target.value)}
                                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-[#0F2D63] resize-none leading-relaxed"
@@ -380,7 +382,7 @@ const ProjectSubmit: React.FC = () => {
                         {/* Action Buttons */}
                         <div className="flex gap-3">
                             <Link
-                                to={`/admin/projects`}
+                                to={`/admin/projects/${id}`}
                                 className="flex-1 py-3 rounded-xl text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-center"
                             >
                                 Cancel
@@ -398,7 +400,7 @@ const ProjectSubmit: React.FC = () => {
                                 ) : (
                                     <>
                                         <Send className="w-3.5 h-3.5" />
-                                        Submit to User
+                                        {isRevision ? 'Resubmit to User' : 'Submit to User'}
                                     </>
                                 )}
                             </button>
