@@ -299,135 +299,185 @@ const Projects = () => {
   // VIEW PROJECT MODAL
   // ============================================
 
-  const ViewProjectModal = () => {
-    if (!selectedProject) return null;
+ const ViewProjectModal = () => {
+  if (!selectedProject) return null;
 
-    const attachmentUrl = getFullAttachmentUrl(selectedProject.attachments);
-    const fileName = selectedProject.attachments ? getFileNameFromPath(selectedProject.attachments) : null;
-    const fileIcon = fileName ? getFileIcon(fileName) : null;
+  const attachmentUrl = getFullAttachmentUrl(selectedProject.attachments);
+  const fileName = selectedProject.attachments ? getFileNameFromPath(selectedProject.attachments) : null;
+  const fileIcon = fileName ? getFileIcon(fileName) : null;
 
-    return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-xl max-w-[700px] w-full max-h-[90vh] overflow-y-auto">
-          <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleCloseModal}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                  <path d="m12 19-7-7 7-7"></path>
-                  <path d="M19 12H5"></path>
-                </svg>
-              </button>
-              <span className="text-sm font-semibold text-gray-900">Project Details</span>
-            </div>
+  // Admin attachment
+  const adminAttachmentUrl = getFullAttachmentUrl(selectedProject.adminattachment || null);
+  const adminFileName = selectedProject.adminattachment ? getFileNameFromPath(selectedProject.adminattachment) : null;
+  const adminFileIcon = adminFileName ? getFileIcon(adminFileName) : null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-xl max-w-[700px] w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
+          <div className="flex items-center gap-3">
             <button
               onClick={handleCloseModal}
               className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                <path d="M18 6 6 18"></path>
-                <path d="m6 6 12 12"></path>
+                <path d="m12 19-7-7 7-7"></path>
+                <path d="M19 12H5"></path>
               </svg>
             </button>
+            <span className="text-sm font-semibold text-gray-900">Project Details</span>
+          </div>
+          <button
+            onClick={handleCloseModal}
+            className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div className="p-6 space-y-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Project Title</p>
+              <h1 className="text-xl font-['Roboto'] font-bold text-[#0F2D63] leading-tight">{selectedProject.title || "Untitled"}</h1>
+              <p className="text-sm text-gray-400 mt-1">{selectedProject.type || "No type"}</p>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${getPriorityStyles(selectedProject.priority)}`}>
+                {selectedProject.priority}
+              </span>
+            </div>
           </div>
 
-          <div className="p-6 space-y-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Project Title</p>
-                <h1 className="text-xl font-['Roboto'] font-bold text-[#0F2D63] leading-tight">{selectedProject.title || "Untitled"}</h1>
-                <p className="text-sm text-gray-400 mt-1">{selectedProject.type || "No type"}</p>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${getPriorityStyles(selectedProject.priority)}`}>
-                  {selectedProject.priority}
-                </span>
-              </div>
-            </div>
+          <div className="bg-gray-50 rounded-xl px-4 py-2">
+            <p className="text-xs text-gray-400">Project ID: <span className="font-mono text-gray-600">{selectedProject.identifier}</span></p>
+          </div>
 
-            <div className="bg-gray-50 rounded-xl px-4 py-2">
-              <p className="text-xs text-gray-400">Project ID: <span className="font-mono text-gray-600">{selectedProject.identifier}</span></p>
-            </div>
+          <div>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Project Description</p>
+            <p className="text-sm text-gray-700 leading-relaxed">{selectedProject.description || "No description provided"}</p>
+          </div>
 
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Project Description</p>
-              <p className="text-sm text-gray-700 leading-relaxed">{selectedProject.description || "No description provided"}</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gray-50 rounded-xl p-4">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Proceed Option</p>
+              <p className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+                {getProceedOptionIcon(selectedProject.proceedOption)}
+                {getProceedOptionLabel(selectedProject.proceedOption)}
+              </p>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 rounded-xl p-4">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Proceed Option</p>
-                <p className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
-                  {getProceedOptionIcon(selectedProject.proceedOption)}
-                  {getProceedOptionLabel(selectedProject.proceedOption)}
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Deadline</p>
-                <p className="text-sm font-semibold text-gray-700">{formatDate(selectedProject.deadline)}</p>
-              </div>
+            <div className="bg-gray-50 rounded-xl p-4">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Deadline</p>
+              <p className="text-sm font-semibold text-gray-700">{formatDate(selectedProject.deadline)}</p>
             </div>
+          </div>
 
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Attached Files</p>
-              {selectedProject.attachments ? (
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[#0F2D63]/10 rounded-xl flex items-center justify-center text-2xl">{fileIcon}</div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">{fileName}</p>
-                      <p className="text-xs text-gray-400">Click to view or download</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <a href={attachmentUrl || '#'} target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
-                      <ExternalLink className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
-                    </a>
-                    <a href={attachmentUrl || '#'} download={fileName || 'download'} className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
-                      <Download className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
-                    </a>
+          <div>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Attached Files</p>
+            {selectedProject.attachments ? (
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[#0F2D63]/10 rounded-xl flex items-center justify-center text-2xl">{fileIcon}</div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">{fileName}</p>
+                    <p className="text-xs text-gray-400">Click to view or download</p>
                   </div>
                 </div>
-              ) : (
-                <p className="text-sm text-gray-300 italic">No files attached</p>
-              )}
-            </div>
+                <div className="flex gap-2">
+                  <a href={attachmentUrl || '#'} target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
+                    <ExternalLink className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
+                  </a>
+                  <a href={attachmentUrl || '#'} download={fileName || 'download'} className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
+                    <Download className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-300 italic">No files attached</p>
+            )}
+          </div>
 
-            <div className="text-xs text-gray-400 border-t border-gray-100 pt-4">Created: {formatDate(selectedProject.createdAt)}</div>
-
-            <div className="flex gap-3 pt-2">
-              {selectedProject.proceedOption === "ai-writing" && (
-                <button
-                  onClick={() => { handleCloseModal(); navigate(`/user/narrative-engine`); }}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-[#0F2D63] hover:bg-[#1a3d7a] text-white rounded-xl text-xs font-semibold transition-colors"
-                >
-                  <Sparkles className="w-4 h-4" /> Open in AI Writing
-                </button>
-              )}
-              {selectedProject.proceedOption === "ai-speech" && (
-                <button
-                  onClick={() => { handleCloseModal(); navigate(`/user/voice-calibrator`); }}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-[#0F2D63] hover:bg-[#1a3d7a] text-white rounded-xl text-xs font-semibold transition-colors"
-                >
-                  <Mic className="w-4 h-4" /> Open AI Speech
-                </button>
-              )}
-              {selectedProject.proceedOption === "hire-expert" && (
-                <button
-                  onClick={() => { handleCloseModal(); navigate(`/user/hire-expert`); }}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-[#0F2D63] hover:bg-[#1a3d7a] text-white rounded-xl text-xs font-semibold transition-colors"
-                >
-                  <Users className="w-4 h-4" /> View Expert Details
-                </button>
-              )}
+          {/* ADMIN NOTE SECTION - NEW */}
+          {selectedProject.adminnote && (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Admin Note</p>
+                <span className="bg-blue-100 text-blue-600 text-[8px] font-bold px-1.5 py-0.5 rounded-full">ADMIN</span>
+              </div>
+              <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                <p className="text-sm text-gray-700 leading-relaxed">{selectedProject.adminnote}</p>
+              </div>
             </div>
+          )}
+
+          {/* ADMIN ATTACHMENT SECTION - NEW */}
+          {selectedProject.adminattachment && (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Admin Attachment</p>
+                <span className="bg-blue-100 text-blue-600 text-[8px] font-bold px-1.5 py-0.5 rounded-full">ADMIN</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-xl border border-blue-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[#0F2D63]/10 rounded-xl flex items-center justify-center text-2xl">{adminFileIcon}</div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">{adminFileName}</p>
+                    <p className="text-xs text-gray-400">Admin provided file</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <a href={adminAttachmentUrl || '#'} target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-blue-200 rounded-lg transition-colors">
+                    <ExternalLink className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
+                  </a>
+                  <a href={adminAttachmentUrl || '#'} download={adminFileName || 'download'} className="p-2 hover:bg-blue-200 rounded-lg transition-colors">
+                    <Download className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="text-xs text-gray-400 border-t border-gray-100 pt-4">
+            Created: {formatDate(selectedProject.createdAt)}
+            {selectedProject.updatedAt && selectedProject.updatedAt !== selectedProject.createdAt && (
+              <span className="ml-3">Updated: {formatDate(selectedProject.updatedAt)}</span>
+            )}
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            {selectedProject.proceedOption === "ai-writing" && (
+              <button
+                onClick={() => { handleCloseModal(); navigate(`/user/narrative-engine`); }}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-[#0F2D63] hover:bg-[#1a3d7a] text-white rounded-xl text-xs font-semibold transition-colors"
+              >
+                <Sparkles className="w-4 h-4" /> Open in AI Writing
+              </button>
+            )}
+            {selectedProject.proceedOption === "ai-speech" && (
+              <button
+                onClick={() => { handleCloseModal(); navigate(`/user/voice-calibrator`); }}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-[#0F2D63] hover:bg-[#1a3d7a] text-white rounded-xl text-xs font-semibold transition-colors"
+              >
+                <Mic className="w-4 h-4" /> Open AI Speech
+              </button>
+            )}
+            {selectedProject.proceedOption === "hire-expert" && (
+              <button
+                onClick={() => { handleCloseModal(); navigate(`/user/hire-expert`); }}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-[#0F2D63] hover:bg-[#1a3d7a] text-white rounded-xl text-xs font-semibold transition-colors"
+              >
+                <Users className="w-4 h-4" /> View Expert Details
+              </button>
+            )}
           </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
   // ============================================
   // RENDER
