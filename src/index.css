@@ -371,7 +371,7 @@ input:focus, select:focus, textarea:focus {
 /* ============================================
    HOVER STATES - BLUE
    ============================================ */
-.hover\:bg-\[\#0F2D63\]:hover { background-color: #0F2D63 !important; }
+.hover\:bg-\[\#0F2D63\]:hover { background-color: #0F2D63 !important; color:#fff !important;}
 .hover\:text-\[\#0F2D63\]:hover { color: #0F2D63 !important; }
 .hover\:border-\[\#0F2D63\]:hover { border-color: #0F2D63 !important; }
 
