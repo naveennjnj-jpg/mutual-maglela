@@ -200,6 +200,18 @@ aside.fixed.left-0.top-0.bottom-0.z-30.bg-\[\#0F2D63\].transition-all.duration-3
 button.hover\:bg-\[\#FFF8F5\]:hover .text-\[\#C85A32\] {
 color: white !important;
 }
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: block;
+  cursor: pointer;
+  opacity: 1;
+  width: 18px;
+  height: 18px;
+}
+
+input[type="date"] {
+  appearance: auto;
+  -webkit-appearance: auto;
+}
 /* ============================================
    UTILITY CLASSES
    ============================================ */
