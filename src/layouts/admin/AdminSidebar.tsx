@@ -32,6 +32,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import Logo from "@/assets/home/logo.png";
+import Logomobile from "@/assets/home/LO a-01.jpg-Photoroom (2).png";
 import { useAuth } from "@/context/AuthContext";
 
 
@@ -153,7 +154,11 @@ const AdminSidebar = ({
               />
             ) : (
               <div className="w-8 h-8 bg-[#C85A32] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">M</span>
+                <span className="text-white font-bold text-sm"><img
+                src={Logomobile}
+                alt="Magalela Media"
+                className="object-contain brightness-0 invert mobilelogo"
+              /></span>
               </div>
             )}
           </Link>
