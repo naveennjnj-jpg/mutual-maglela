@@ -201,16 +201,19 @@ button.hover\:bg-\[\#FFF8F5\]:hover .text-\[\#C85A32\] {
 color: white !important;
 }
 input[type="date"]::-webkit-calendar-picker-indicator {
-  display: block;
+  display: block !important;
+  -webkit-appearance: auto !important;
+  appearance: auto !important;
+  opacity: 1 !important;
   cursor: pointer;
-  opacity: 1;
   width: 18px;
   height: 18px;
+  visibility: visible !important;
 }
 
 input[type="date"] {
-  appearance: auto;
-  -webkit-appearance: auto;
+  -webkit-appearance: auto !important;
+  appearance: auto !important;
 }
 /* ============================================
    UTILITY CLASSES
