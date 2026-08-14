@@ -149,7 +149,7 @@ const AdminSidebar = ({
               <img
                 src={Logo}
                 alt="Magalela Media"
-                className="h-10 w-auto object-contain brightness-0 invert"
+                className="object-contain brightness-0 invert"
               />
             ) : (
               <div className="w-8 h-8 bg-[#C85A32] rounded-lg flex items-center justify-center">
