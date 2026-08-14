@@ -147,7 +147,7 @@ const UserSidebar = ({
           flex flex-col
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
-          ${isOpen ? 'w-[260px]' : 'w-[72px] lg:w-[72px]'}
+          ${isOpen ? 'w-[260px]' : 'w-[72px] lg:w-[260px]'}
         `}
       >
         {/* Close button for mobile */}
