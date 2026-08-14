@@ -300,11 +300,18 @@ const UserHeader = ({
 
   return (
     <>
-      <header
+      {/* <header
         className={`bg-white border-b border-gray-100 h-16 fixed top-0 right-0 z-40 transition-all duration-300 ${
           isSidebarOpen ? 'left-[260px]' : 'left-[72px]'
         }`}
-      >
+      > */}
+      <header
+      className={`bg-white border-b border-gray-100 h-16 fixed top-0 right-0 z-40 transition-all duration-300 ${
+        isSidebarOpen 
+          ? 'left-0 md:left-[260px]' 
+          : 'left-0 md:left-[72px]'
+      }`}
+    >
         <div className="flex items-center justify-between h-full px-4 lg:px-8">
           {/* Left Section */}
           <div className="flex items-center gap-3">
