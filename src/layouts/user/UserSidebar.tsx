@@ -23,6 +23,7 @@ import {
   Crown
 } from "lucide-react";
 import Logo from "@/assets/home/logo.png";
+import Logomobile from "@/assets/home/LO a-01.jpg-Photoroom (2).png";
 import { userSidebar } from "@/constants/userSidebar";
 import { useAuth } from "@/context/AuthContext";
 
@@ -165,11 +166,15 @@ const UserSidebar = ({
               <img
                 src={Logo}
                 alt="Magalela Media"
-                className="h-10 w-auto object-contain brightness-0 invert"
+                className="h-10 w-auto object-contain brightness-0 invert customheight"
               />
             ) : (
               <div className="w-8 h-8 bg-[#C85A32] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">M</span>
+                <span className="text-white font-bold text-sm"><img
+                src={Logomobile}
+                alt="Magalela Media"
+                className="object-contain brightness-0 invert mobilelogo"
+              /></span>
               </div>
             )}
           </Link>
