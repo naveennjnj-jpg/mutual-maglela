@@ -489,11 +489,12 @@ select option {
 .dark .logo-image {
   filter: brightness(0) invert(1);
 }
-@media screen and (max-width: 768px) {
-  a.mobileonly {
+a.mobileonly {
     height: 40px;
     width: 40px;
 }
+@media screen and (max-width: 768px) {
+  
   header.bg-black {
       background: #000;
   }
