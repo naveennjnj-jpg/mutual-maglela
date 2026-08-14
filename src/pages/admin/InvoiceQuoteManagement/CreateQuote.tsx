@@ -555,8 +555,8 @@ const CreateQuote = () => {
                             backgroundPosition: "right 12px center",
                           }}
                         >
-                          <option value="AI Writing">AI Writing</option>
-                          <option value="AI Speech">AI Speech</option>
+                          <option value="Writing Documentation">Writing Documentation</option>
+                          <option value="Speech Documentation">Speech Documentation</option>
                           <option value="Content Strategy">Content Strategy</option>
                           <option value="Workshop Facilitation">
                             Workshop Facilitation
