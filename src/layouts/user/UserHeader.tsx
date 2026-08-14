@@ -302,7 +302,7 @@ const UserHeader = ({
     <>
       <header
         className={`bg-white border-b border-gray-100 h-16 fixed top-0 right-0 z-40 transition-all duration-300 ${
-          isSidebarOpen ? 'left-[260px]' : 'left-[0px]'
+          isSidebarOpen ? 'left-[260px]' : 'left-[72px]'
         }`}
       >
         <div className="flex items-center justify-between h-full px-4 lg:px-8">
