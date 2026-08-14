@@ -215,6 +215,10 @@ input[type="date"] {
   -webkit-appearance: auto !important;
   appearance: auto !important;
 }
+.customheight {
+    width: 75%;
+    margin: 0 auto;
+}
 /* ============================================
    UTILITY CLASSES
    ============================================ */
