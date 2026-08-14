@@ -191,7 +191,7 @@ const AdminSidebar = ({
                       <Link
                         key={item.path}
                         to={item.path}
-                        className={`relative flex items-center ${isOpen ? 'gap-3 px-3' : 'gap-0 justify-center px-0'} h-11 rounded-xl transition-all group ${active ? 'bg-white/10' : 'hover:bg-white/[0.06]'
+                        className={`mobileonly relative flex items-center ${isOpen ? 'gap-3 px-3' : 'gap-0 justify-center px-0'} h-11 rounded-xl transition-all group ${active ? 'bg-white/10' : 'hover:bg-white/[0.06]'
                           }`}
                       >
                         {active && isOpen && (
