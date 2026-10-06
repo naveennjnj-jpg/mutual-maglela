@@ -1,0 +1,10 @@
+import * as React from "react";
+type P = React.PropsWithChildren<any>;
+export const Dialog = ({ open, children }: P) => (open === false ? null : <div data-testid="dialog">{children}</div>);
+export const DialogContent = ({ children }: P) => <div role="dialog">{children}</div>;
+export const DialogHeader = ({ children }: P) => <div>{children}</div>;
+export const DialogFooter = ({ children }: P) => <div>{children}</div>;
+export const DialogTitle = ({ children }: P) => <h2>{children}</h2>;
+export const DialogDescription = ({ children }: P) => <p>{children}</p>;
+export const DialogTrigger = ({ children }: P) => <>{children}</>;
+export const DialogClose = ({ children }: P) => <>{children}</>;

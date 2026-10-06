@@ -1,52 +1,58 @@
-/// <reference types="node" />
-
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
-import { fileURLToPath, URL } from "node:url";
+import path from "path";
+import fs from "fs";
 
-// Deliberately a *separate* file from vite.config.ts (which stays
-// untouched). `vitest` looks for vitest.config.ts before vite.config.ts,
-// so this is picked up automatically when you run `npm test` — it never
-// changes what `npm run dev` / `npm run build` do.
-//
-// Crucially, this file lives at the project root, so `npm install` here
-// gives every test the SAME node_modules that src/ itself resolves
-// against. That's what fixes the "two copies of React" / axios-mock-
-// never-firing bug you hit when the test tooling lived in its own
-// nested node_modules — Vitest externalizes real npm packages (loads
-// them via plain `require`), which walks up from the importing file and
-// must land on the same node_modules the app already uses.
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      // Same alias as vite.config.ts, so src's "@/..." imports resolve
-      // identically under test.
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
-    },
+const ASSET_RE = /\.(png|jpe?g|svg|webp|gif|avif|ico|mp4|webm|pdf)$/i;
+
+// Resolve any image/media import that is missing on disk to a stub string,
+// so tests don't fail on assets that aren't part of the checkout.
+const stubMissingAssets = () => ({
+  name: "stub-missing-assets",
+  enforce: "pre" as const,
+  resolveId(id: string, importer?: string) {
+    if (!ASSET_RE.test(id)) return null;
+    const file = id.startsWith("@/")
+      ? path.resolve(__dirname, "src", id.slice(2))
+      : importer
+        ? path.resolve(path.dirname(importer), id)
+        : id;
+    return fs.existsSync(file) ? null : "\0stub-asset:" + id;
   },
-  // Your app's real postcss/tailwind v4 pipeline (@tailwindcss/postcss)
-  // is already installed here, so it would work in tests too — but
-  // nothing under test imports CSS, so we skip it for faster, simpler
-  // runs. Safe no-op either way.
-  css: {
-    postcss: {
-      plugins: [],
-    },
+  load(id: string) {
+    return id.startsWith("\0stub-asset:") ? 'export default "test-file-stub";' : null;
+  },
+});
+
+const hasRealUi = fs.existsSync(path.resolve(__dirname, "src/components/ui"));
+
+export default defineConfig({
+  plugins: [stubMissingAssets(), react()],
+  resolve: {
+    alias: [
+      // Only used when src/components/ui is not present (e.g. partial checkout)
+      ...(hasRealUi
+        ? []
+        : [
+            { find: /^@\/components\/ui\/(.*)$/, replacement: path.resolve(__dirname, "unit-tests/mocks/ui/$1.tsx") },
+            { find: /^(\.\.\/)+components\/ui\/(.*)$/, replacement: path.resolve(__dirname, "unit-tests/mocks/ui/$2.tsx") },
+            { find: /^\.\.\/ui\/(.*)$/, replacement: path.resolve(__dirname, "unit-tests/mocks/ui/$1.tsx") },
+          ]),
+      { find: "@", replacement: path.resolve(__dirname, "src") },
+    ],
   },
   test: {
     globals: true,
     environment: "jsdom",
-    setupFiles: [
-      fileURLToPath(new URL("./unit-tests/setup/setupTests.ts", import.meta.url)),
-    ],
+    setupFiles: ["./unit-tests/setup/setup.ts", "./unit-tests/setup/commonMocks.tsx"],
+    include: ["unit-tests/**/*.test.{ts,tsx}"],
     css: false,
-    include: ["unit-tests/__tests__/**/*.{test,spec}.{ts,tsx}"],
+    assetsInclude: ["**/*.png", "**/*.jpg", "**/*.jpeg", "**/*.svg", "**/*.webp"],
     coverage: {
       provider: "v8",
-      reporter: ["text", "html", "lcov"],
       include: ["src/**/*.{ts,tsx}"],
-      exclude: ["src/**/*.d.ts", "src/main.tsx", "src/vite-env.d.ts"],
+      exclude: ["src/main.tsx", "src/vite-env.d.ts", "src/**/*.d.ts"],
+      reporter: ["text", "html"],
     },
   },
 });
