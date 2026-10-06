@@ -47,7 +47,7 @@ const ProfileTab = () => {
         if (pic.startsWith('http://') || pic.startsWith('https://')) {
           profilePicUrl = pic;
         } else {
-          const cleanPath = pic.replace(/^public\
+          const cleanPath = pic.replace(/^public[\\/]/, '');
           profilePicUrl = `${API_URL}/${cleanPath}`;
         }
       }
@@ -128,7 +128,7 @@ const ProfileTab = () => {
           uploadResponse.data.data?.url;
 
         if (imageUrl && !imageUrl.startsWith('http')) {
-          const cleanPath = imageUrl.replace(/^public\
+          const cleanPath = imageUrl.replace(/^public[\\/]/, '');
           imageUrl = `${API_URL}/${cleanPath}`;
         }
 

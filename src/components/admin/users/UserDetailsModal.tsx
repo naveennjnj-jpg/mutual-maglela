@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Mail, Shield, Calendar, X } from 'lucide-react';
 
@@ -141,7 +140,16 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
         </div>
 
         <div className="flex gap-2 pt-1">
-          
+          {/* <button
+            onClick={() => onToggleStatus(user._id, user.isActive)}
+            className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-colors ${
+              user.isActive
+                ? 'border-amber-200 text-amber-700 hover:bg-amber-50'
+                : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'
+            }`}
+          >
+            {user.isActive ? 'Suspend Account' : 'Activate Account'}
+          </button> */}
           <button
             onClick={onClose}
             className="flex-1 py-2 rounded-xl text-sm font-medium bg-[#0F2D63] text-white hover:bg-[#0a2050] transition-colors"
