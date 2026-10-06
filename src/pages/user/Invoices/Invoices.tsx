@@ -1,4 +1,4 @@
-// pages/user/Invoices.tsx
+
 import React, { useState, useEffect } from "react";
 import {
   FileText,
@@ -72,7 +72,7 @@ interface ApiInvoice {
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-// PDF Styles
+
 const styles = StyleSheet.create({
   page: {
     padding: 40,
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
   },
 });
 
-// PDF Document Component
+
 const InvoicePDF = ({ invoice }: { invoice: Invoice }) => {
   const data = invoice.rawData;
   
@@ -242,7 +242,7 @@ const InvoicePDF = ({ invoice }: { invoice: Invoice }) => {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Header */}
+        
         <View style={styles.header}>
           <View>
             <Text style={styles.companyName}>Magalela Media</Text>
@@ -257,7 +257,7 @@ const InvoicePDF = ({ invoice }: { invoice: Invoice }) => {
           </View>
         </View>
 
-        {/* Client Info */}
+        
         {data?.clientInfo && (
           <View style={styles.clientSection}>
             <Text style={styles.clientLabel}>Bill To</Text>
@@ -268,7 +268,7 @@ const InvoicePDF = ({ invoice }: { invoice: Invoice }) => {
           </View>
         )}
 
-        {/* Items Table */}
+        
         <View style={styles.table}>
           <View style={styles.tableHeader}>
             <Text style={[styles.tableHeaderText, styles.col1]}>Description</Text>
@@ -288,7 +288,7 @@ const InvoicePDF = ({ invoice }: { invoice: Invoice }) => {
           ))}
         </View>
 
-        {/* Totals */}
+        
         <View style={styles.totals}>
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Subtotal</Text>
@@ -314,7 +314,7 @@ const InvoicePDF = ({ invoice }: { invoice: Invoice }) => {
           </View>
         </View>
 
-        {/* Notes */}
+        
         {data?.additionalNotes && (
           <View style={styles.notes}>
             <Text style={styles.notesLabel}>Notes</Text>
@@ -322,7 +322,7 @@ const InvoicePDF = ({ invoice }: { invoice: Invoice }) => {
           </View>
         )}
 
-        {/* Footer */}
+        
         <View style={styles.footer}>
           <Text style={styles.footerText}>Thank you for your business</Text>
           <Text style={styles.footerText}>Payment due by: {invoice.dueDate}</Text>
@@ -343,7 +343,7 @@ const Invoices = () => {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
-  // Fetch invoices on mount
+  
   useEffect(() => {
     if (user?.email) {
       fetchInvoices();
@@ -393,7 +393,7 @@ const Invoices = () => {
 
           const status = statusMap[invoice.status] || "Pending";
 
-          // Determine type from items or service type
+          
           let type: "Project" | "Workshop" | "Subscription" | "Consulting" | "AI Writing" | "AI Speech" = "Project";
           if (invoice.items && invoice.items.length > 0) {
             const serviceType = invoice.items[0]?.serviceType || "";
@@ -448,10 +448,10 @@ const Invoices = () => {
     try {
       setDownloadingId(invoice._id);
       
-      // Generate PDF using react-pdf
+      
       const blob = await pdf(<InvoicePDF invoice={invoice} />).toBlob();
       
-      // Create download link
+      
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -489,7 +489,7 @@ const handlePayNow = async (invoice: Invoice) => {
       return;
     }
 
-    // Prepare payment data
+    
     const paymentData = {
       invoiceId: invoice._id,
       invoiceNumber: invoice.number,
@@ -514,7 +514,7 @@ const handlePayNow = async (invoice: Invoice) => {
       })) || []
     };
 
-    // Create order and initiate payment
+    
     const response = await fetch(`${API_BASE_URL}/api/user/invoices/create-payment`, {
       method: 'POST',
       headers: {
@@ -535,14 +535,14 @@ const handlePayNow = async (invoice: Invoice) => {
       throw new Error(result.message || 'Payment initiation failed');
     }
 
-    // ✅ Extract data from the correct location
+    
     const paymentResult = result.data;
     
     if (!paymentResult) {
       throw new Error('No payment data received');
     }
 
-    // Store order info in localStorage
+    
     if (paymentResult.orderId) {
       localStorage.setItem('pendingOrderId', paymentResult.orderId);
       localStorage.setItem('pendingPayment', 'true');
@@ -553,9 +553,9 @@ const handlePayNow = async (invoice: Invoice) => {
 
     toast.success('Redirecting to payment...');
 
-    // ✅ Redirect to PayFast
+    
     if (paymentResult.paymentUrl && paymentResult.paymentData) {
-      // Try form POST first (PayFast requires POST)
+      
       try {
         const form = document.createElement('form');
         form.method = 'POST';
@@ -572,10 +572,10 @@ const handlePayNow = async (invoice: Invoice) => {
 
         document.body.appendChild(form);
         
-        // Submit the form
+        
         form.submit();
         
-        // Clean up after a delay
+        
         setTimeout(() => {
           if (document.body.contains(form)) {
             document.body.removeChild(form);
@@ -586,7 +586,7 @@ const handlePayNow = async (invoice: Invoice) => {
       } catch (formError) {
         console.warn('Form submission failed, trying redirect:', formError);
         
-        // ✅ Fallback: Build URL with query parameters
+        
         const queryParams = new URLSearchParams(paymentResult.paymentData);
         const redirectUrl = `${paymentResult.paymentUrl}?${queryParams.toString()}`;
         window.location.href = redirectUrl;
@@ -684,7 +684,7 @@ const handlePayNow = async (invoice: Invoice) => {
 
   return (
     <div className="min-h-screen bg-[#F9F7F4] p-6 space-y-5">
-      {/* Header */}
+      
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-1">
@@ -707,7 +707,7 @@ const handlePayNow = async (invoice: Invoice) => {
         </div>
       </div>
 
-      {/* Payment Error */}
+      
       {paymentError && (
         <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
           <p className="text-sm text-red-600 flex items-center gap-2">
@@ -717,7 +717,7 @@ const handlePayNow = async (invoice: Invoice) => {
         </div>
       )}
 
-      {/* Filters */}
+      
       <div className="flex gap-1 bg-white border border-gray-100 rounded-2xl p-1.5 shadow-sm flex-wrap">
         {filters.map((filter) => {
           const isActive = activeFilter === filter;
@@ -747,7 +747,7 @@ const handlePayNow = async (invoice: Invoice) => {
         })}
       </div>
 
-      {/* Invoice List */}
+      
       <div className="space-y-3">
         {filteredInvoices.map((invoice) => {
           const statusBadge = getStatusBadge(invoice.status);
@@ -764,12 +764,12 @@ const handlePayNow = async (invoice: Invoice) => {
                 isOverdue ? "border-red-100" : "border-gray-100"
               }`}
             >
-              {/* Icon */}
+              
               <div className="w-10 h-10 bg-[#f4f6fb] rounded-xl flex items-center justify-center flex-shrink-0">
                 <FileText className="w-[18px] h-[18px] text-[#0F2D63]" />
               </div>
 
-              {/* Content */}
+              
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <p className="font-bold text-[#0F2D63] text-sm">
@@ -802,7 +802,7 @@ const handlePayNow = async (invoice: Invoice) => {
                 </div>
               </div>
 
-              {/* Actions */}
+              
               <div className="flex items-center gap-3 flex-shrink-0">
                 <p className="text-lg font-bold text-[#0F2D63]">
                   R {invoice.amount.toLocaleString()}

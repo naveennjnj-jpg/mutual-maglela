@@ -1,4 +1,4 @@
-// pages/user/Ai-writing/AIWritingDetail.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -27,9 +27,9 @@ import {
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 
-// ============================================
-// ✅ TYPES - Matching Backend Response
-// ============================================
+
+
+
 
 interface Parameters {
   authority: number;
@@ -88,9 +88,9 @@ interface WritingData {
   updatedAt: string;
 }
 
-// ============================================
-// COMPONENT
-// ============================================
+
+
+
 
 const AIWritingDetail = () => {
   const navigate = useNavigate();
@@ -98,21 +98,21 @@ const AIWritingDetail = () => {
   const { user } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // State
+  
   const [documentData, setDocumentData] = useState<WritingData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // ✅ Get data from location state or fetch by ID
+  
   useEffect(() => {
     const data = location.state?.data;
     if (data) {
       setDocumentData(data);
       setIsLoading(false);
     } else {
-      // If no data, fetch by ID from URL params
+      
       const pathParts = location.pathname.split('/');
       const id = pathParts[pathParts.length - 1];
       if (id && id !== 'result') {
@@ -124,7 +124,7 @@ const AIWritingDetail = () => {
     }
   }, [location]);
 
-  // ✅ Fetch document by ID
+  
   const fetchDocumentById = async (id: string) => {
     setIsLoading(true);
     try {
@@ -155,9 +155,9 @@ const AIWritingDetail = () => {
     }
   };
 
-  // ============================================
-  // ✅ HANDLERS
-  // ============================================
+  
+  
+  
 
   const handleBack = () => {
     navigate('/user/narrative-engine');
@@ -212,9 +212,9 @@ const AIWritingDetail = () => {
     }
   };
 
-  // ============================================
-  // ✅ HELPERS
-  // ============================================
+  
+  
+  
 
   const getTypeLabel = (type: string): string => {
     const labelMap: Record<string, string> = {
@@ -302,9 +302,9 @@ const AIWritingDetail = () => {
     return 'bg-red-50 dark:bg-red-900/20';
   };
 
-  // ============================================
-  // ✅ RENDER
-  // ============================================
+  
+  
+  
 
   if (isLoading) {
     return (
@@ -346,7 +346,7 @@ const AIWritingDetail = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[900px] mx-auto">
-        {/* Header */}
+        
         <div className="flex items-center gap-3 mb-6 flex-wrap">
           <button
             onClick={handleBack}
@@ -360,7 +360,7 @@ const AIWritingDetail = () => {
             {doc.title}
           </span>
 
-          {/* Action Buttons */}
+          
           <div className="ml-auto flex items-center gap-2 flex-wrap">
             <button
               onClick={handleCopy}
@@ -402,9 +402,9 @@ const AIWritingDetail = () => {
           </div>
         </div>
 
-        {/* Main Content */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-8">
-          {/* Header Info */}
+          
           <div className="flex items-start gap-3 mb-6 pb-5 border-b border-gray-100 dark:border-gray-700">
             <div className="w-12 h-12 bg-[#FFF8F5] dark:bg-[#C85A32]/10 rounded-xl flex items-center justify-center flex-shrink-0">
               {getTypeIcon(doc.metadata?.type || '')}
@@ -451,7 +451,7 @@ const AIWritingDetail = () => {
             </div>
           </div>
 
-          {/* Provider & Cost Info */}
+          
           <div className="flex items-center gap-6 mb-4 pb-4 border-b border-gray-100 dark:border-gray-700 text-xs flex-wrap">
             <div>
               <span className="text-gray-400 dark:text-gray-500">Provider</span>
@@ -479,14 +479,14 @@ const AIWritingDetail = () => {
             </div>
           </div>
 
-          {/* Document Content */}
+          
           <div className="prose prose-sm dark:prose-invert max-w-none">
             <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-sans leading-relaxed">
               {doc.content}
             </pre>
           </div>
 
-          {/* Parameters Section */}
+          
           {doc.parameters && Object.values(doc.parameters).some(v => v > 0) && (
             <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
               <h4 className="text-sm font-semibold text-[#0F2D63] dark:text-white mb-3">
@@ -525,7 +525,7 @@ const AIWritingDetail = () => {
             </div>
           )}
 
-          {/* Outline Section (if available) */}
+          
           {doc.metadata?.outline && (
             <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
               <h4 className="text-sm font-semibold text-[#0F2D63] dark:text-white mb-3">
@@ -539,7 +539,7 @@ const AIWritingDetail = () => {
             </div>
           )}
 
-          {/* Metadata */}
+          
           <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
               <div>
@@ -569,7 +569,7 @@ const AIWritingDetail = () => {
             </div>
           </div>
         </div>
-        {/* Disclaimer */}
+        
         <div className="mt-6 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 flex items-start gap-3">
           <span className="text-amber-500 text-lg flex-shrink-0 mt-0.5">⚠️</span>
           <div>

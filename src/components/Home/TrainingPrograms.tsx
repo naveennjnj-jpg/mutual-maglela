@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, MessageSquare, Award, FileText } from "lucide-react";
 
 const TrainingPrograms = () => {
-  // Training programs data array
+  
   const programs = [
     {
       id: 1,
@@ -31,14 +31,14 @@ const TrainingPrograms = () => {
   return (
     <section className="py-20 lg:py-24 bg-[#F9F7F4]">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
-        {/* Header Section */}
+        
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-[40px] font-['Roboto'] text-[#0F2D63] leading-tight">
             Our Core Training Programs
           </h2>
         </div>
 
-        {/* Programs Grid */}
+        
         <div className="grid md:grid-cols-3 gap-6">
           {programs.map((program) => {
             const IconComponent = program.icon;
@@ -47,17 +47,17 @@ const TrainingPrograms = () => {
                 key={program.id}
                 className="bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
               >
-                {/* Icon Container */}
+                
                 <div className="w-12 h-12 rounded-xl bg-[#F3EDE6] flex items-center justify-center mb-5">
                   <IconComponent className="w-6 h-6 text-[#C85A32]" />
                 </div>
 
-                {/* Title */}
+                
                 <h3 className="font-semibold text-[#1C1C1C] text-base mb-3">
                   {program.title}
                 </h3>
 
-                {/* Description */}
+                
                 <p className="text-gray-500 text-sm leading-relaxed">
                   {program.description}
                 </p>
@@ -66,7 +66,7 @@ const TrainingPrograms = () => {
           })}
         </div>
 
-        {/* CTA Button */}
+        
         <div className="flex justify-center mt-10">
           <Link
             to="/services"

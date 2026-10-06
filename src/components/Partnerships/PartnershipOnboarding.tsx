@@ -54,7 +54,7 @@ const PartnershipOnboarding = ({
   return (
     <section className="py-20 bg-[#F5F0EA]">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
-        {/* Header */}
+        
         <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-4">
           {badge}
         </p>
@@ -65,7 +65,7 @@ const PartnershipOnboarding = ({
           {description}
         </p>
 
-        {/* Steps Grid */}
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {steps.map((step) => (
             <div

@@ -61,7 +61,7 @@ export default function FooterMenu() {
   return (
   
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_2.5fr] gap-8 lg:gap-6">
-          {/* Logo and Contact Info */}
+          
           <div className="flex flex-col gap-4">
             <img src={FooterLogo} alt="vCare Logo" className="w-[70px]" />
             
@@ -92,7 +92,7 @@ export default function FooterMenu() {
             <SocialIcons />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-[1fr_1fr_1fr_1fr] gap-8 lg:gap-6">
-          {/* Company Links */}
+          
           <div className="flex flex-col gap-4">
             <h3 className="text-primary_blue text-base font-medium">Company</h3>
             <ul className="flex flex-col gap-3">
@@ -104,7 +104,7 @@ export default function FooterMenu() {
             </ul>
           </div>
 
-          {/* Links */}
+          
           <div className="flex flex-col gap-4">
               <h3 className="text-primary_blue text-base font-medium">Links</h3>
             <ul className="flex flex-col gap-3">
@@ -116,7 +116,7 @@ export default function FooterMenu() {
             </ul>
           </div>
 
-          {/* Resources */}
+          
           <div className="flex flex-col gap-4">
               <h3 className="text-primary_blue text-base font-medium">Resources</h3>
             <ul className="flex flex-col gap-3">
@@ -128,7 +128,7 @@ export default function FooterMenu() {
             </ul>
           </div>
 
-          {/* Exam Prep Training */}
+          
           <div className="flex flex-col gap-4">
              <h3 className="text-primary_blue text-base font-medium">Exam Prep Training</h3>
             <ul className="flex flex-col gap-3">

@@ -1,4 +1,4 @@
-// pages/admin/AdminDashboard.tsx
+
 import React, { useState, useEffect } from 'react';
 import {
   Users,
@@ -75,7 +75,7 @@ interface PieData {
   value: number;
 }
 
-// Map icon strings to components
+
 const iconMap: Record<string, any> = {
   Users: Users,
   FolderKanban: FolderKanban,
@@ -141,28 +141,28 @@ const AdminDashboard = () => {
       if (response.data.success) {
         const data = response.data.data;
         
-        // Set stats
+        
         setStats(data.stats);
         
-        // Set chart data
+        
         if (data.chartData && data.chartData.length > 0) {
           setChartData(data.chartData);
         } else {
-          // Fallback: generate mock data if none from API
+          
           setChartData(generateMockChartData());
         }
         
-        // Set recent activities
+        
         if (data.recentActivities && data.recentActivities.length > 0) {
           setRecentActivities(data.recentActivities);
         } else {
           setRecentActivities([]);
         }
         
-        // Set status cards
+        
         setStatusCards(data.statusCards);
         
-        // Set pie data
+        
         if (data.pieData && data.pieData.length > 0) {
           setPieData(data.pieData);
         }
@@ -178,7 +178,7 @@ const AdminDashboard = () => {
       setError(errorMsg);
       toast.error(errorMsg);
       
-      // Fallback: use mock data if API fails
+      
       setChartData(generateMockChartData());
       setRecentActivities(getMockActivities());
     } finally {
@@ -233,14 +233,14 @@ const AdminDashboard = () => {
     fetchDashboardData();
   };
 
-  // ============================================
-  // EXPORT FUNCTIONS
-  // ============================================
+  
+  
+  
 
-  // Export as CSV
+  
   const exportAsCSV = () => {
     try {
-      // Prepare data for export
+      
       const exportData = {
         'Dashboard Stats': {
           'Total Users': stats.totalUsers,
@@ -271,7 +271,7 @@ const AdminDashboard = () => {
         }, {} as Record<string, any>)
       };
 
-      // Convert to CSV
+      
       let csv = 'Category,Key,Value\n';
       
       Object.entries(exportData).forEach(([category, data]) => {
@@ -282,14 +282,14 @@ const AdminDashboard = () => {
         }
       });
 
-      // Add recent activities
+      
       csv += '\nRecent Activities\n';
       csv += 'Title,Description,Time\n';
       recentActivities.forEach(activity => {
         csv += `"${activity.title}","${activity.description}","${activity.time}"\n`;
       });
 
-      // Download CSV
+      
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
@@ -308,7 +308,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Export as JSON
+  
   const exportAsJSON = () => {
     try {
       const exportData = {
@@ -339,7 +339,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Export as HTML Report
+  
   const exportAsHTML = () => {
     try {
       const html = `
@@ -534,7 +534,7 @@ const AdminDashboard = () => {
     }
   ];
 
-  // Render activity with dynamic icon
+  
   const renderActivityIcon = (activity: Activity) => {
     const IconComponent = iconMap[activity.icon] || Activity;
     return <IconComponent className="w-[13px] h-[13px]" style={{ color: activity.color }} />;
@@ -567,7 +567,7 @@ const AdminDashboard = () => {
     }
   ];
 
-  // Custom tooltip for charts
+  
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -584,7 +584,7 @@ const AdminDashboard = () => {
     return null;
   };
 
-  // Colors for pie chart
+  
   const COLORS = ['#4F6EF7', '#22C9A5', '#F59E0B', '#E05C97'];
 
   if (loading) {
@@ -618,7 +618,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6FB] dark:bg-gray-900 p-6 space-y-6">
-      {/* Header */}
+      
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-[#C85A32] mb-1">
@@ -639,7 +639,7 @@ const AdminDashboard = () => {
             Refresh
           </button>
           
-          {/* Export Button with Dropdown */}
+          
           <div className="relative">
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
@@ -678,7 +678,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Stats Grid */}
+      
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat, index) => (
           <div
@@ -713,9 +713,9 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      {/* Chart and Activity */}
+      
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Chart Section */}
+        
         <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <h2 className="font-semibold text-[#0F2D63] dark:text-white text-sm">Platform Growth</h2>
@@ -815,7 +815,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Recent Activity */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
           <div className="flex items-center gap-2 mb-4">
             <Activity className="w-[15px] h-[15px] text-[#C85A32]" />
@@ -858,7 +858,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Status Cards */}
+      
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {statusCardConfigs.map((card, index) => (
           <div

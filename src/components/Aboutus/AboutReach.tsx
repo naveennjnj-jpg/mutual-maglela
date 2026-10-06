@@ -36,7 +36,6 @@ const AboutReach = () => {
     <section className="py-20 bg-[#0F2D63]">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-14 items-center">
-          {/* Left Column - Content */}
           <div className="lg:w-[45%]">
             <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-4">
               Our Reach
@@ -74,7 +73,6 @@ const AboutReach = () => {
             </div>
           </div>
 
-          {/* Right Column - Image & Stats */}
           <div className="lg:w-[55%]">
             <div className="relative rounded-2xl overflow-hidden mb-4">
               <img

@@ -1,4 +1,3 @@
-// components/settings/ProfileTab.tsx
 import React, { useState, useRef, useEffect } from "react";
 import { Camera, Save, Loader2, AlertCircle, CheckCircle, X } from "lucide-react";
 import axios from "axios";
@@ -48,7 +47,7 @@ const ProfileTab = () => {
         if (pic.startsWith('http://') || pic.startsWith('https://')) {
           profilePicUrl = pic;
         } else {
-          const cleanPath = pic.replace(/^public\//, '');
+          const cleanPath = pic.replace(/^public\
           profilePicUrl = `${API_URL}/${cleanPath}`;
         }
       }
@@ -129,7 +128,7 @@ const ProfileTab = () => {
           uploadResponse.data.data?.url;
 
         if (imageUrl && !imageUrl.startsWith('http')) {
-          const cleanPath = imageUrl.replace(/^public\//, '');
+          const cleanPath = imageUrl.replace(/^public\
           imageUrl = `${API_URL}/${cleanPath}`;
         }
 
@@ -249,7 +248,6 @@ const ProfileTab = () => {
 
   return (
     <div className="space-y-6">
-      {/* Success Message */}
       {success && (
         <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
           <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -263,7 +261,6 @@ const ProfileTab = () => {
         </div>
       )}
 
-      {/* Error Message */}
       {error && (
         <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -277,7 +274,6 @@ const ProfileTab = () => {
         </div>
       )}
 
-      {/* Profile Photo Section */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
         <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
           Profile Photo
@@ -334,7 +330,6 @@ const ProfileTab = () => {
         </div>
       </div>
 
-      {/* Personal Information Section */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
         <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
           Personal Information

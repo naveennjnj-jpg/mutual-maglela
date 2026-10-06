@@ -1,4 +1,3 @@
-// components/settings/TwoFactorTab.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { Loader2, AlertCircle, CheckCircle, Shield, Smartphone, X, Copy, Check } from "lucide-react";
 import axios from "axios";
@@ -19,7 +18,6 @@ const TwoFactorTab = () => {
   const [twoFactorAuth, setTwoFactorAuth] = useState(false);
   const [twoFactorLoading, setTwoFactorLoading] = useState(false);
   
-  // Setup states
   const [showSetup, setShowSetup] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
   const [secretKey, setSecretKey] = useState("");
@@ -30,22 +28,20 @@ const TwoFactorTab = () => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Load 2FA status from user data
   useEffect(() => {
     if (user) {
       setTwoFactorAuth((user as any).twoFactorAuth || false);
     }
   }, [user]);
 
-  // Generate QR code when setup is triggered
   const generateQRCode = async (secret: string) => {
     try {
-      // Generate QR code data URL
+
       const appName = "Magalela";
       const email = user?.email || "user@example.com";
       const otpauthUrl = `otpauth://totp/${appName}:${email}?secret=${secret}&issuer=${appName}`;
       
-      // Generate QR code as data URL
+
       const qrDataUrl = await QRCode.toDataURL(otpauthUrl, {
         width: 200,
         margin: 2,
@@ -58,12 +54,10 @@ const TwoFactorTab = () => {
       setQrCodeUrl(qrDataUrl);
     } catch (err) {
       console.error("Error generating QR code:", err);
-      // Fallback: generate a simple placeholder
       setQrCodeUrl("");
     }
   };
 
-  // Generate 2FA setup
   const handleSetup2FA = async () => {
     setTwoFactorLoading(true);
     setError(null);
@@ -71,7 +65,6 @@ const TwoFactorTab = () => {
     try {
       const token = localStorage.getItem("token");
       
-      // Generate secret key
       const response = await axios.post<ApiResponse>(
         `${API_URL}/api/auth/2fa/setup`,
         {},
@@ -90,7 +83,6 @@ const TwoFactorTab = () => {
         await generateQRCode(secret);
         setShowSetup(true);
       } else {
-        // Fallback: generate locally
         const secret = generateRandomSecret();
         setSecretKey(formatSecretKey(secret));
         await generateQRCode(secret);
@@ -98,7 +90,6 @@ const TwoFactorTab = () => {
       }
     } catch (err: any) {
       console.error("2FA setup error:", err);
-      // Fallback: generate locally
       const secret = generateRandomSecret();
       setSecretKey(formatSecretKey(secret));
       await generateQRCode(secret);
@@ -108,7 +99,6 @@ const TwoFactorTab = () => {
     }
   };
 
-  // Generate random secret for fallback
   const generateRandomSecret = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
     let secret = '';
@@ -118,13 +108,11 @@ const TwoFactorTab = () => {
     return secret;
   };
 
-  // Format secret key with spaces
   const formatSecretKey = (secret: string) => {
     const formatted = secret.match(/.{1,4}/g)?.join(' ') || secret;
     return formatted;
   };
 
-  // Verify 2FA code
   const handleVerify2FA = async () => {
     if (!verificationCode || verificationCode.length !== 6) {
       setError("Please enter a valid 6-digit verification code");
@@ -156,7 +144,6 @@ const TwoFactorTab = () => {
         setVerificationCode("");
         setSuccess(true);
         
-        // Update user context
         if (updateDetails) {
           await updateDetails({ twoFactorAuth: true } as any);
         }
@@ -173,7 +160,6 @@ const TwoFactorTab = () => {
     }
   };
 
-  // Disable 2FA
   const handleDisable2FA = async () => {
     setTwoFactorLoading(true);
     setError(null);
@@ -211,7 +197,6 @@ const TwoFactorTab = () => {
     }
   };
 
-  // Copy secret key
   const handleCopyKey = async () => {
     try {
       await navigator.clipboard.writeText(secretKey);
@@ -222,7 +207,6 @@ const TwoFactorTab = () => {
     }
   };
 
-  // Cancel setup
   const handleCancelSetup = () => {
     setShowSetup(false);
     setVerificationCode("");
@@ -232,7 +216,6 @@ const TwoFactorTab = () => {
   return (
     <div className="flex-1 min-w-0 space-y-0">
       <div className="space-y-6">
-        {/* Success Message */}
         {success && (
           <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
             <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -250,7 +233,6 @@ const TwoFactorTab = () => {
           </div>
         )}
 
-        {/* Error Message */}
         {error && (
           <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -264,7 +246,6 @@ const TwoFactorTab = () => {
           </div>
         )}
 
-        {/* Two-Factor Authentication */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
           <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
             Two-Factor Authentication
@@ -291,7 +272,6 @@ const TwoFactorTab = () => {
             </div>
           </div>
 
-          {/* Setup Form - Opens when "Set Up 2FA" is clicked */}
           {showSetup ? (
             <div className="mt-5 space-y-4 max-w-sm">
               <div className="bg-[#f9fafb] rounded-2xl p-4 space-y-3">
@@ -299,7 +279,7 @@ const TwoFactorTab = () => {
                   1. Open your authenticator app and scan the QR code, or enter the key manually:
                 </p>
 
-                {/* QR Code */}
+                
                 <div className="w-32 h-32 bg-white border border-gray-200 rounded-xl flex items-center justify-center mx-auto overflow-hidden">
                   {qrCodeUrl ? (
                     <img 
@@ -324,7 +304,6 @@ const TwoFactorTab = () => {
                   )}
                 </div>
 
-                {/* Secret Key */}
                 <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2">
                   <code className="flex-1 text-xs font-mono text-gray-700 tracking-widest">
                     {secretKey}
@@ -342,7 +321,6 @@ const TwoFactorTab = () => {
                 </div>
               </div>
 
-              {/* Verification Code Input */}
               <div>
                 <p className="text-xs font-semibold text-gray-600 mb-1.5">
                   2. Enter the 6-digit code shown in your app:
@@ -362,7 +340,6 @@ const TwoFactorTab = () => {
                 />
               </div>
 
-              {/* Action Buttons */}
               <div className="flex gap-2">
                 <button
                   onClick={handleCancelSetup}
@@ -387,7 +364,6 @@ const TwoFactorTab = () => {
               </div>
             </div>
           ) : (
-            // Show button based on 2FA status
             <button
               onClick={twoFactorAuth ? handleDisable2FA : handleSetup2FA}
               disabled={twoFactorLoading}

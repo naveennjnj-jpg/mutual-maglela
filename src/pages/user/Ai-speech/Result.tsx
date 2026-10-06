@@ -1,4 +1,4 @@
-// pages/user/Ai-speech/Result.tsx
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -25,9 +25,9 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 
-// ============================================
-// TYPES - Matching Backend API Response
-// ============================================
+
+
+
 
 interface AnalysisData {
   authority: number;
@@ -79,16 +79,16 @@ interface UserData {
   initials?: string;
 }
 
-// ============================================
-// COMPONENT
-// ============================================
+
+
+
 
 const AISpeechResult = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // State
+  
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
@@ -96,16 +96,16 @@ const AISpeechResult = () => {
   const [error, setError] = useState<string | null>(null);
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   
-  // Edit mode states - Frontend only
+  
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   
-  // Local copy of result data (for frontend edits)
+  
   const [localResultData, setLocalResultData] = useState<SpeechData | null>(null);
   
-  // User credits state
+  
   const [userData, setUserData] = useState<UserData>({
     id: '',
     name: 'User',
@@ -115,14 +115,14 @@ const AISpeechResult = () => {
     initials: 'U'
   });
   
-  // Refs
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // ✅ Get data from location state
+  
   const resultData = location.state?.data as SpeechData;
 
-  // ✅ Set local data when result loads
+  
   useEffect(() => {
     if (resultData) {
       setLocalResultData({ ...resultData });
@@ -131,7 +131,7 @@ const AISpeechResult = () => {
     }
   }, [resultData]);
 
-  // ✅ Fetch updated user data
+  
   const fetchUpdatedUserData = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -169,12 +169,12 @@ const AISpeechResult = () => {
     }
   };
 
-  // ✅ Fetch user data on mount
+  
   useEffect(() => {
     fetchUpdatedUserData();
   }, []);
 
-  // ✅ Update credits from location state if available
+  
   useEffect(() => {
     if (location.state?.data?.creditsRemaining !== undefined) {
       const credits = location.state.data.creditsRemaining;
@@ -183,7 +183,7 @@ const AISpeechResult = () => {
     }
   }, [location.state]);
 
-  // ✅ Set audio source
+  
   useEffect(() => {
     if (localResultData?.audioUrl) {
       if (localResultData.audioUrl.startsWith('data:audio')) {
@@ -198,14 +198,14 @@ const AISpeechResult = () => {
     }
   }, [localResultData, API_URL]);
 
-  // ✅ Redirect if no data
+  
   useEffect(() => {
     if (!resultData) {
       navigate('/user/voice-calibrator');
     }
   }, [resultData, navigate]);
 
-  // Cleanup audio on unmount
+  
   useEffect(() => {
     return () => {
       if (progressIntervalRef.current) {
@@ -218,7 +218,7 @@ const AISpeechResult = () => {
     };
   }, []);
 
-  // Handle audio end
+  
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
@@ -235,9 +235,9 @@ const AISpeechResult = () => {
     }
   }, []);
 
-  // ============================================
-  // AUDIO PLAYBACK
-  // ============================================
+  
+  
+  
 
   const togglePlayAudio = () => {
     if (audioRef.current && audioSrc) {
@@ -280,9 +280,9 @@ const AISpeechResult = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // ============================================
-  // HANDLE COPY
-  // ============================================
+  
+  
+  
 
   const handleCopy = async () => {
     const textToCopy = isEditing ? editContent : localResultData?.text;
@@ -296,9 +296,9 @@ const AISpeechResult = () => {
     }
   };
 
-  // ============================================
-  // HANDLE DOWNLOAD TEXT
-  // ============================================
+  
+  
+  
 
   const handleDownloadText = () => {
     const textToDownload = isEditing ? editContent : localResultData?.text;
@@ -316,9 +316,9 @@ const AISpeechResult = () => {
     }
   };
 
-  // ============================================
-  // HANDLE DOWNLOAD AUDIO
-  // ============================================
+  
+  
+  
 
   const handleDownloadAudio = async () => {
     if (!localResultData?.audioUrl) {
@@ -355,18 +355,18 @@ const AISpeechResult = () => {
     }
   };
 
-  // ============================================
-  // EDIT HANDLERS - FRONTEND ONLY
-  // ============================================
+  
+  
+  
 
   const handleEditToggle = () => {
     if (isEditing) {
-      // Cancel edit - revert to original
+      
       setEditTitle(localResultData?.metadata?.title || '');
       setEditContent(localResultData?.text || '');
       setIsEditing(false);
     } else {
-      // Start edit
+      
       setEditTitle(localResultData?.metadata?.title || '');
       setEditContent(localResultData?.text || '');
       setIsEditing(true);
@@ -376,7 +376,7 @@ const AISpeechResult = () => {
   const handleSaveEdit = () => {
     setIsSavingEdit(true);
     setTimeout(() => {
-      // ✅ Update local state only - NO DB SAVE
+      
       if (localResultData) {
         const updatedData = {
           ...localResultData,
@@ -390,18 +390,18 @@ const AISpeechResult = () => {
         setLocalResultData(updatedData);
       }
       
-      // ✅ Exit edit mode after save
+      
       setIsEditing(false);
       setIsSavingEdit(false);
       
-      // ✅ Show success message
-      // alert('Changes saved locally! Click "Copy" or "Export Text" to save it permanently.');
+      
+      
     }, 500);
   };
 
-  // ============================================
-  // NAVIGATION
-  // ============================================
+  
+  
+  
 
   const handleBack = () => {
     navigate('/user/voice-calibrator');
@@ -411,9 +411,9 @@ const AISpeechResult = () => {
     navigate('/user/voice-calibrator/create');
   };
 
-  // ============================================
-  // HELPERS
-  // ============================================
+  
+  
+  
 
   const getParameterColor = (value: number) => {
     if (value >= 80) return 'text-green-600 dark:text-green-400';
@@ -431,9 +431,9 @@ const AISpeechResult = () => {
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
   };
 
-  // ============================================
-  // RENDER - Loading State
-  // ============================================
+  
+  
+  
 
   if (!resultData || !localResultData) {
     return (
@@ -446,9 +446,9 @@ const AISpeechResult = () => {
     );
   }
 
-  // ============================================
-  // RENDER - Main
-  // ============================================
+  
+  
+  
 
   const paramLabels: Record<string, string> = {
     authority: 'Authority',
@@ -480,37 +480,10 @@ const AISpeechResult = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[1000px] mx-auto">
-        {/* ✅ Credits Display Banner */}
-        {/* <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#F9F7F4] dark:bg-gray-700 rounded-full flex items-center justify-center">
-              <Coins className="w-5 h-5 text-[#C85A32]" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Available Credits</p>
-              <p className="text-xl font-bold text-[#0F2D63] dark:text-white">
-                {userData.credits}
-              </p>
-            </div>
-          </div>
-          {localResultData.creditsUsed !== undefined && (
-            <div className="text-right">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Credits Used</p>
-              <p className="text-sm font-semibold text-[#C85A32]">
-                -{localResultData.creditsUsed} credits
-              </p>
-            </div>
-          )}
-          <button
-            onClick={() => navigate('/user/add-credits')}
-            className="flex items-center gap-2 px-4 py-2 bg-[#C85A32] hover:bg-[#a8472a] text-white text-sm font-semibold rounded-xl transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Add Credits
-          </button>
-        </div> */}
+        
+        
 
-        {/* Error Message */}
+        
         {error && (
           <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-4">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -518,7 +491,7 @@ const AISpeechResult = () => {
           </div>
         )}
 
-        {/* Header */}
+        
         <div className="flex items-center gap-3 mb-6">
           <button
             onClick={handleBack}
@@ -533,7 +506,7 @@ const AISpeechResult = () => {
           </span>
         </div>
 
-        {/* Action Bar */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm px-5 py-3 mb-5 flex items-center gap-2 flex-wrap">
           <button
             onClick={handleSaveEdit}
@@ -606,9 +579,9 @@ const AISpeechResult = () => {
           </div>
         </div>
 
-        {/* Content Grid */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Speech Content */}
+          
           <div className="lg:col-span-2">
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
               <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100 dark:border-gray-700">
@@ -636,10 +609,7 @@ const AISpeechResult = () => {
                       <Zap className="w-3 h-3" />
                       Score: {avgScore}/100
                     </span>
-                    {/* <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                      <DollarSign className="w-3 h-3" />
-                      ${localResultData.cost.usd.toFixed(4)}
-                    </span> */}
+                    
                     <span className="text-xs text-gray-500 dark:text-gray-400">
                       {localResultData.provider}
                     </span>
@@ -691,7 +661,7 @@ const AISpeechResult = () => {
                 )}
               </div>
               
-              {/* ✅ Content with Markdown Rendering */}
+              
               <div className="prose prose-sm max-w-none dark:prose-invert">
                 {isEditing ? (
                   <textarea
@@ -723,7 +693,7 @@ const AISpeechResult = () => {
                 )}
               </div>
             </div>
-             {/* Disclaimer */}
+             
             <div className="mt-6 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 flex items-start gap-3">
               <span className="text-amber-500 text-lg flex-shrink-0 mt-0.5">⚠️</span>
               <div>
@@ -735,7 +705,7 @@ const AISpeechResult = () => {
             </div>  
           </div>
              
-          {/* Parameters Sidebar */}
+          
           <div className="flex flex-col gap-4">
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
               <h2 className="text-sm font-semibold text-[#0F2D63] dark:text-white mb-4">
@@ -796,7 +766,7 @@ const AISpeechResult = () => {
               </div>
             </div>
 
-            {/* Quick Stats */}
+            
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
               <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
                 Quick Stats

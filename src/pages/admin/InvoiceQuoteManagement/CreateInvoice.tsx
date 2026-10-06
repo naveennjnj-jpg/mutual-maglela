@@ -1,4 +1,4 @@
-// pages/admin/CreateInvoice.tsx
+
 import React, { useState, useEffect } from "react";
 import {
   ArrowLeft,
@@ -80,7 +80,7 @@ const CreateInvoice = () => {
     ],
   });
 
-  // Fetch users on mount
+  
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -107,7 +107,7 @@ const CreateInvoice = () => {
     }
   };
 
-  // Clear messages after 5 seconds
+  
   React.useEffect(() => {
     if (success || error) {
       const timer = setTimeout(() => {
@@ -380,7 +380,7 @@ const CreateInvoice = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6FB]">
-      {/* Sticky Header */}
+      
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4 sticky top-0 z-20 shadow-sm">
         <button
           onClick={handleBack}
@@ -420,7 +420,7 @@ const CreateInvoice = () => {
         </div>
       </div>
 
-      {/* Success/Error Messages */}
+      
       {success && (
         <div className="max-w-[1200px] mx-auto px-6 pt-4">
           <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
@@ -445,11 +445,11 @@ const CreateInvoice = () => {
         </div>
       )}
 
-      {/* Form Content */}
+      
       <div className="max-w-[1200px] mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Main Form - 2 columns */}
+        
         <div className="lg:col-span-2 space-y-5">
-          {/* Invoice Details */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
             <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
               Invoice Details
@@ -559,7 +559,7 @@ const CreateInvoice = () => {
             </div>
           </div>
 
-          {/* Service & Items */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
             <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
               Service & Items
@@ -698,7 +698,7 @@ const CreateInvoice = () => {
             </div>
           </div>
 
-          {/* Additional Notes */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
             <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
               Additional Notes
@@ -719,9 +719,9 @@ const CreateInvoice = () => {
           </div>
         </div>
 
-        {/* Sidebar - 1 column */}
+        
         <div className="space-y-4">
-          {/* Invoice Summary */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
             <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
               Invoice Summary
@@ -784,7 +784,7 @@ const CreateInvoice = () => {
             </div>
           </div>
 
-          {/* Line Items Count */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 flex items-center justify-between">
             <span className="text-sm text-gray-500">Line Items</span>
             <span className="font-bold text-[#0F2D63]">{formData.items.length}</span>

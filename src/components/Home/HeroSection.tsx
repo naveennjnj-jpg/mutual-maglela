@@ -5,14 +5,14 @@ import homehero from "@/assets/home/homehero.png";
 const HeroSection = () => {
   return (
     <section className="relative h-[780px] overflow-hidden -mt-20">
-      {/* Background Image */}
+      
       <img
         src={homehero}
         alt="Johannesburg"
         className="absolute inset-0 w-full h-full object-cover"
       />
 
-      {/* Overlays */}
+      
       <div className="absolute inset-0 bg-gradient-to-r from-[#1C1C1C]/92 via-[#1C1C1C]/75 to-transparent"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/50 via-transparent to-transparent"></div>
       <div
@@ -23,10 +23,10 @@ const HeroSection = () => {
         }}
       ></div>
 
-      {/* Content */}
+      
       <div className="relative h-full max-w-[1500px] mx-auto px-6 flex flex-col justify-center pt-20">
         <div className="max-w-2xl">
-          {/* Google Reviews Badge */}
+          
           <div className="inline-flex items-center gap-2.5 bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-full mb-5">
             <svg width="16" height="16" viewBox="0 0 48 48">
               <path
@@ -52,7 +52,7 @@ const HeroSection = () => {
             </span>
           </div>
 
-          {/* Heading */}
+          
           <h1 className="text-3xl md:text-[40px] font-['Roboto'] text-white mb-4 leading-[1.2]">
             Magalela Media is a Strategic
             <br />
@@ -61,14 +61,14 @@ const HeroSection = () => {
             based in Johannesburg.
           </h1>
 
-          {/* Description */}
+          
           <p className="text-white/70 text-sm md:text-base leading-relaxed mb-7 max-w-xl">
             We transform complex communications into clear, compelling
             narratives that empower governments, institutions and organisations
             to achieve strategic objectives and build public trust.
           </p>
 
-          {/* Buttons */}
+          
           <div className="flex flex-wrap gap-3 mb-8">
             <Link
               to="/contact"
@@ -85,7 +85,7 @@ const HeroSection = () => {
             </Link>
           </div>
 
-          {/* Stats */}
+          
           <div className="flex flex-wrap gap-6">
             <div>
               <p className="text-white font-bold text-base leading-none">100+</p>

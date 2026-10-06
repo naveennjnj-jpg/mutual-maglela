@@ -77,7 +77,7 @@ const Challenge = ({
   return (
     <section className={`${padding} ${bgColor}`}>
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
-        {/* Header */}
+        
         <div className="mb-12">
           <p className={`${accentColor} text-xs font-semibold tracking-[0.15em] uppercase mb-3`}>
             {badge}
@@ -90,7 +90,7 @@ const Challenge = ({
           </p>
         </div>
 
-        {/* Challenges Grid */}
+        
         <div className={`grid ${gridCols} ${gap}`}>
           {challenges.map((challenge) => (
             <div

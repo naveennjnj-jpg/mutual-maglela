@@ -1,4 +1,4 @@
-// pages/admin/InvoiceQuoteManagement.tsx
+
 import React, { useState, useEffect } from "react";
 import {
   Plus,
@@ -28,9 +28,9 @@ import {
   pdf,
 } from "@react-pdf/renderer";
 
-// ============================================
-// INTERFACES
-// ============================================
+
+
+
 
 interface InvoiceQuoteItem {
   _id: string;
@@ -105,9 +105,9 @@ interface ApiQuote {
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-// ============================================
-// PDF STYLES
-// ============================================
+
+
+
 
 const styles = StyleSheet.create({
   page: {
@@ -248,9 +248,9 @@ const styles = StyleSheet.create({
   },
 });
 
-// ============================================
-// INVOICE PDF COMPONENT
-// ============================================
+
+
+
 
 const InvoicePDF = ({ data }: { data: any }) => (
   <Document>
@@ -335,9 +335,9 @@ const InvoicePDF = ({ data }: { data: any }) => (
   </Document>
 );
 
-// ============================================
-// QUOTE PDF COMPONENT
-// ============================================
+
+
+
 
 const QuotePDF = ({ data }: { data: any }) => (
   <Document>
@@ -426,9 +426,9 @@ const QuotePDF = ({ data }: { data: any }) => (
   </Document>
 );
 
-// ============================================
-// PDF MODAL COMPONENT
-// ============================================
+
+
+
 
 const PDFModal = ({ 
   data, 
@@ -499,7 +499,7 @@ const PDFModal = ({
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Header */}
+        
         <div className="flex items-center justify-between p-4 border-b border-gray-100 flex-shrink-0">
           <div>
             <h3 className="font-bold text-[#0F2D63] text-lg">
@@ -533,7 +533,7 @@ const PDFModal = ({
           </div>
         </div>
 
-        {/* PDF Viewer */}
+        
         <div className={`flex-1 p-4 bg-gray-100 overflow-auto ${isFullscreen ? "p-0" : ""}`}>
           {pdfUrl ? (
             <iframe
@@ -556,9 +556,9 @@ const PDFModal = ({
   );
 };
 
-// ============================================
-// MAIN COMPONENT
-// ============================================
+
+
+
 
 const InvoiceQuoteManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -573,12 +573,12 @@ const InvoiceQuoteManagement = () => {
     type: string;
   } | null>(null);
 
-  // Fetch data on mount
+  
   useEffect(() => {
     fetchData();
   }, []);
 
-  // Close dropdown when clicking outside
+  
   useEffect(() => {
     const handleClickOutside = () => {
       setShowDropdown(null);
@@ -776,9 +776,9 @@ const InvoiceQuoteManagement = () => {
 
   const stats = getStats();
 
-  // ============================================
-  // PDF HANDLERS
-  // ============================================
+  
+  
+  
 
   const handleViewPDF = (item: InvoiceQuoteItem, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -849,7 +849,7 @@ const InvoiceQuoteManagement = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6FB] p-6 space-y-5">
-      {/* Header */}
+      
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-[#C85A32] mb-1">
@@ -880,7 +880,7 @@ const InvoiceQuoteManagement = () => {
         </div>
       </div>
 
-      {/* Stats */}
+      
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
           <div
@@ -936,7 +936,7 @@ const InvoiceQuoteManagement = () => {
         </div>
       </div>
 
-      {/* Filters */}
+      
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -977,7 +977,7 @@ const InvoiceQuoteManagement = () => {
         </button>
       </div>
 
-      {/* Table */}
+      
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -1098,7 +1098,7 @@ const InvoiceQuoteManagement = () => {
         </div>
       </div>
 
-      {/* PDF Modal */}
+      
       {pdfModalData && (
         <PDFModal
           data={pdfModalData.data}

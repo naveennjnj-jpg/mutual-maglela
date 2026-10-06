@@ -111,7 +111,7 @@ const Home = () => {
 
   return (
     <>
-      {/* Hero Section */}
+      
       <section className="relative h-[560px] overflow-hidden -mt-20">
         <img
           src="https://images.unsplash.com/photo-1638342863994-ae4eee256688?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1400&q=80"
@@ -155,10 +155,10 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Blog Listing Section */}
+      
       <section className="py-16 lg:py-20 bg-[#F9F7F4]">
         <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
-          {/* Header */}
+          
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12">
             <div>
               <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-2">
@@ -185,7 +185,7 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Blog Grid */}
+          
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPosts.map((post) => (
               <Link
@@ -227,7 +227,7 @@ const Home = () => {
             ))}
           </div>
 
-          {/* No Results */}
+          
           {filteredPosts.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">No articles found matching your search.</p>

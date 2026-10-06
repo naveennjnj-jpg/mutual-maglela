@@ -1,4 +1,4 @@
-// pages/admin/SubscriptionManagement.tsx
+
 import React, { useState, useEffect } from "react";
 import {
   Plus,
@@ -81,12 +81,12 @@ const SubscriptionManagement = () => {
     isActive: true,
   });
 
-  // Fetch plans on mount
+  
   useEffect(() => {
     fetchPlans();
   }, []);
 
-  // Clear messages after 5 seconds
+  
   useEffect(() => {
     if (success || error) {
       const timer = setTimeout(() => {
@@ -97,9 +97,9 @@ const SubscriptionManagement = () => {
     }
   }, [success, error]);
 
-  // ============================================
-  // API CALLS
-  // ============================================
+  
+  
+  
 
   const fetchPlans = async () => {
     setLoading(true);
@@ -209,9 +209,9 @@ const SubscriptionManagement = () => {
     }
   };
 
-  // ============================================
-  // HANDLERS
-  // ============================================
+  
+  
+  
 
   const getFeatureDisplay = (features: string[]) => {
     const displayCount = 3;
@@ -488,7 +488,7 @@ const SubscriptionManagement = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6FB] p-6 space-y-6">
-      {/* Header */}
+      
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-[#C85A32] mb-1">
@@ -514,7 +514,7 @@ const SubscriptionManagement = () => {
         </button>
       </div>
 
-      {/* Success/Error Messages - Shows API response message */}
+      
       {success && (
         <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
           <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -535,7 +535,7 @@ const SubscriptionManagement = () => {
         </div>
       )}
 
-      {/* Stats */}
+      
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
           <p className="text-2xl font-bold text-[#0F2D63]">{plans.length}</p>
@@ -555,7 +555,7 @@ const SubscriptionManagement = () => {
         </div>
       </div>
 
-      {/* Plans List */}
+      
       {plans.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
           <Coins className="w-12 h-12 text-gray-300 mx-auto mb-3" />
@@ -578,14 +578,14 @@ const SubscriptionManagement = () => {
               >
                 {isPopular && <div className="h-1 bg-[#C85A32]" />}
                 <div className="p-5 flex gap-5 items-start">
-                  {/* Drag Handle */}
+                  
                   <div className="mt-1 text-gray-200 cursor-grab flex-shrink-0">
                     <GripVertical className="w-[18px] h-[18px]" />
                   </div>
 
-                  {/* Plan Content */}
+                  
                   <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Left Column - Plan Info */}
+                    
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
@@ -606,7 +606,7 @@ const SubscriptionManagement = () => {
                       </p>
                     </div>
 
-                    {/* Middle Column - Pricing */}
+                    
                     <div className="space-y-2">
                       <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">
                         Pricing & Credits
@@ -640,7 +640,7 @@ const SubscriptionManagement = () => {
                       </p>
                     </div>
 
-                    {/* Right Column - Features */}
+                    
                     <div>
                       <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">
                         {(plan.features || []).length} Features
@@ -664,7 +664,7 @@ const SubscriptionManagement = () => {
                     </div>
                   </div>
 
-                  {/* Actions */}
+                  
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                       onClick={() => handleTogglePopular(plan._id || plan.id, isPopular)}
@@ -712,11 +712,11 @@ const SubscriptionManagement = () => {
         </div>
       )}
 
-      {/* New/Edit Plan Modal */}
+      
       {showNewPlanModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
+            
             <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
               <h3 className="font-bold text-[#0F2D63] text-lg">
                 {editingPlan ? "Edit Plan" : "Add New Plan"}
@@ -732,9 +732,9 @@ const SubscriptionManagement = () => {
               </button>
             </div>
 
-            {/* Modal Body */}
+            
             <div className="p-6 space-y-5">
-              {/* Success/Error Messages in Modal - Shows API response */}
+              
               {success && (
                 <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
                   <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -748,7 +748,7 @@ const SubscriptionManagement = () => {
                 </div>
               )}
 
-              {/* Plan Identity */}
+              
               <div>
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
                   Plan Identity
@@ -783,8 +783,8 @@ const SubscriptionManagement = () => {
                 </div>
               </div>
 
-              {/* Rest of the modal stays the same... */}
-              {/* Target Audience */}
+              
+              
               <div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
@@ -801,7 +801,7 @@ const SubscriptionManagement = () => {
                 </div>
               </div>
 
-              {/* Who It's For */}
+              
               <div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
@@ -818,7 +818,7 @@ const SubscriptionManagement = () => {
                 </div>
               </div>
 
-              {/* Pricing & Credits */}
+              
               <div>
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
                   Pricing & Credits
@@ -892,7 +892,7 @@ const SubscriptionManagement = () => {
                 </div>
               </div>
 
-              {/* Call to Action */}
+              
               <div>
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
                   Call to Action
@@ -927,7 +927,7 @@ const SubscriptionManagement = () => {
                 </div>
               </div>
 
-              {/* Features */}
+              
               <div>
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
                   Features <span className="text-gray-300 font-normal normal-case tracking-normal">
@@ -943,7 +943,7 @@ const SubscriptionManagement = () => {
                 />
               </div>
 
-              {/* Checkboxes */}
+              
               <div className="flex items-center gap-6 pt-1">
                 <label className="flex items-center gap-2.5 cursor-pointer">
                   <input
@@ -971,7 +971,7 @@ const SubscriptionManagement = () => {
                 </label>
               </div>
 
-              {/* Actions */}
+              
               <div className="flex gap-3 pt-2 border-t border-gray-100">
                 <button
                   onClick={() => {

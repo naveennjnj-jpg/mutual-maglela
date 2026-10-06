@@ -61,7 +61,7 @@ const Challenge = ({
   return (
     <section className="py-20 lg:py-24 bg-[#F9F7F4]">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
-        {/* Header */}
+        
         <div className="mb-12">
           <p className="text-[#C85A32] text-xs font-semibold tracking-[0.15em] uppercase mb-3">
             {badge}
@@ -74,7 +74,7 @@ const Challenge = ({
           </p>
         </div>
 
-        {/* Challenges Grid */}
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {challenges.map((challenge) => (
             <div

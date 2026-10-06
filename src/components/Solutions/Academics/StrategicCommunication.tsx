@@ -74,7 +74,7 @@ const StrategicCommunication = ({
   return (
     <section className="py-20 lg:py-24 bg-white">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
-        {/* Header */}
+        
         <div className="mb-12">
           <h2 className="text-3xl lg:text-[40px] font-['Roboto'] text-[#0F2D63] mb-4 leading-tight">
             {title}
@@ -84,7 +84,7 @@ const StrategicCommunication = ({
           </p>
         </div>
 
-        {/* Services Grid */}
+        
         <div className="grid md:grid-cols-2 gap-6">
           {services.map((service) => {
             const IconComponent = service.icon;

@@ -1,4 +1,3 @@
-// components/admin/AddClientModal.tsx
 import React, { useState } from 'react';
 import {
   ArrowLeft, Loader2, AlertCircle, User, Mail,
@@ -106,7 +105,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
+
         <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4 sticky top-0 z-20">
           <button
             onClick={onClose}
@@ -128,7 +127,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
         </div>
 
         <div className="px-6 py-7 space-y-5">
-          {/* Client Information */}
+       
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
               <User className="w-3.5 h-3.5 text-[#C85A32]" />
@@ -163,7 +162,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
             </div>
           </div>
 
-          {/* Engagement Metrics */}
+   
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-[#C85A32]" />
@@ -205,7 +204,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
             </div>
           </div>
 
-          {/* Retainer Type */}
+  
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-3">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5 text-[#C85A32]" />
@@ -240,7 +239,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
             </div>
           </div>
 
-          {/* Internal Notes */}
+      
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5 text-[#C85A32]" />

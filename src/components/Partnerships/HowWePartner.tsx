@@ -210,7 +210,7 @@ const HowWePartner = ({
                 section.reverse ? "lg:flex-row-reverse" : "lg:flex-row"
               } gap-12 items-stretch`}
             >
-              {/* Image */}
+              
               <div className="w-full lg:w-[45%] shrink-0 min-h-[360px]">
                 <div className="rounded-2xl overflow-hidden h-full min-h-[360px]">
                   <img
@@ -221,7 +221,7 @@ const HowWePartner = ({
                 </div>
               </div>
 
-              {/* Content */}
+              
               <div className="w-full lg:w-[55%]">
                 <span className="inline-flex items-center bg-[#F5F0EA] text-[#C85A32] text-[10px] font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-widest w-fit">
                   {section.badge}

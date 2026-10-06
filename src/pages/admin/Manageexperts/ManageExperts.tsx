@@ -1,4 +1,4 @@
-// pages/admin/ManageExperts.tsx
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Plus, Pencil, Trash2, Mail, X, Loader2, AlertCircle, CheckCircle, Users, User } from 'lucide-react';
 import { WhatsappChat, LinkedInChat } from "@/utils/svgicons";
@@ -31,7 +31,7 @@ interface ApiResponse {
   data?: any;
 }
 
-// Default avatar as inline SVG or data URL to avoid network requests
+
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e5e7eb'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.35em' font-size='40' fill='%239ca3af' font-family='sans-serif'%3E%3C/text%3E%3C/svg%3E";
 
 const ManageExperts = () => {
@@ -40,7 +40,7 @@ const ManageExperts = () => {
   const { user } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // State
+  
   const [experts, setExperts] = useState<Expert[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,21 +51,21 @@ const ManageExperts = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [fetchAttempted, setFetchAttempted] = useState(false);
 
-  // Use ref to prevent multiple API calls
+  
   const fetchCalled = useRef(false);
 
-  // Check for success message from navigation state
+  
   useEffect(() => {
     const state = location.state as { success?: boolean; message?: string } | null;
     if (state?.success && state?.message) {
       setSuccessMessage(state.message);
       setTimeout(() => setSuccessMessage(null), 5000);
-      // Clear navigation state
+      
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
 
-  // Fetch experts from API - only once
+  
   useEffect(() => {
     if (!fetchCalled.current) {
       fetchCalled.current = true;
@@ -73,21 +73,21 @@ const ManageExperts = () => {
     }
   }, []);
 
-  // Get image URL with fallback
+  
   const getImageUrl = (imagePath: string | null | undefined): string => {
     if (!imagePath) return DEFAULT_AVATAR;
 
-    // If it's already a full URL or data URL, return as is
+    
     if (imagePath.startsWith('http') || imagePath.startsWith('data:')) {
       return imagePath;
     }
 
-    // If it's a relative path, prepend API_URL
+    
     if (imagePath.startsWith('/')) {
       return `${API_URL}${imagePath}`;
     }
 
-    // If it's a relative path without leading slash
+    
     return `${API_URL}/${imagePath}`;
   };
 
@@ -167,7 +167,7 @@ const ManageExperts = () => {
     }
   };
 
-  // Mock data for fallback with proper image handling
+  
   const getMockExperts = (): Expert[] => {
     return [
       {
@@ -207,7 +207,7 @@ const ManageExperts = () => {
     ];
   };
 
-  // Toggle read more
+  
   const toggleReadMore = (id: string | number) => {
     setIsReadMore(prev => ({
       ...prev,
@@ -215,7 +215,7 @@ const ManageExperts = () => {
     }));
   };
 
-  // Handle edit
+  
   const handleEdit = (expert: Expert) => {
     console.log('Navigating to edit expert:', expert);
     navigate('/admin/experts/edit', {
@@ -227,18 +227,18 @@ const ManageExperts = () => {
     });
   };
 
-  // Handle add
+  
   const handleAdd = () => {
     navigate('/admin/experts/create');
   };
 
-  // Handle delete click
+  
   const handleDeleteClick = (expert: Expert) => {
     setExpertToDelete(expert);
     setShowDeleteModal(true);
   };
 
-  // Handle confirm delete
+  
   const handleConfirmDelete = async () => {
     if (!expertToDelete) return;
 
@@ -280,13 +280,13 @@ const ManageExperts = () => {
     }
   };
 
-  // Handle cancel delete
+  
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
     setExpertToDelete(null);
   };
 
-  // Open social link
+  
   const openLink = (url?: string) => {
     if (url) {
       if (url.startsWith('mailto:')) {
@@ -297,7 +297,7 @@ const ManageExperts = () => {
     }
   };
 
-  // Get availability badge
+  
   const getAvailabilityBadge = (status?: string) => {
     switch (status) {
       case 'available':
@@ -311,7 +311,7 @@ const ManageExperts = () => {
     }
   };
 
-  // Image component with error handling
+  
   const ExpertImage = ({ src, alt, className }: { src: string; alt: string; className: string }) => {
     const [imgError, setImgError] = useState(false);
 
@@ -334,7 +334,7 @@ const ManageExperts = () => {
     );
   };
 
-  // Delete Confirmation Modal
+  
   const DeleteConfirmationModal = () => {
     if (!showDeleteModal) return null;
 
@@ -409,7 +409,7 @@ const ManageExperts = () => {
     );
   };
 
-  // Loading state
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6 flex items-center justify-center" >
@@ -424,7 +424,7 @@ const ManageExperts = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6" >
       <div className="max-w-[1500px] mx-auto space-y-6" >
-        {/* Header */}
+        
         < div className="flex items-start justify-between" >
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-[#C85A32] mb-1" >
@@ -444,7 +444,7 @@ const ManageExperts = () => {
           </button>
         </div>
 
-        {/* Success Message */}
+        
         {
           successMessage && (
             <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm" >
@@ -454,7 +454,7 @@ const ManageExperts = () => {
           )
         }
 
-        {/* Error Message */}
+        
         {
           error && (
             <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm" >
@@ -464,7 +464,7 @@ const ManageExperts = () => {
           )
         }
 
-        {/* Experts Grid */}
+        
         {
           experts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-2" >
@@ -474,7 +474,7 @@ const ManageExperts = () => {
                     key={expert.id}
                     className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 w-full max-w-[480px]"
                   >
-                    {/* Action Buttons */}
+                    
                     < div className="flex items-center justify-end gap-1 mb-3" >
                       <button
                         onClick={() => handleEdit(expert)}
@@ -493,7 +493,7 @@ const ManageExperts = () => {
                       </button>
                     </div>
 
-                    {/* Expert Profile */}
+                    
                     <div className="flex items-center gap-3 mb-4" >
                       <div className="relative flex-shrink-0" >
                         <ExpertImage
@@ -527,7 +527,7 @@ const ManageExperts = () => {
                       </div>
                     </div>
 
-                    {/* Bio */}
+                    
                     <div className="mb-1" >
                       <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed" >
                         {
@@ -552,7 +552,7 @@ const ManageExperts = () => {
 
                     <div className="border-t border-gray-200 dark:border-gray-700 mb-4" > </div>
 
-                    {/* Social Action Buttons */}
+                    
                     <div className="flex items-center gap-2" >
                       <button
                         onClick={() => openLink(expert.socialLinks.linkedin)}
@@ -586,7 +586,7 @@ const ManageExperts = () => {
                 ))}
             </div>
           ) : (
-            /* Empty State */
+            
             <div className="text-center py-12" >
               <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4" >
                 <Users className="w-10 h-10 text-gray-400" />
@@ -608,7 +608,7 @@ const ManageExperts = () => {
           )}
       </div>
 
-      {/* Delete Confirmation Modal */}
+      
       <DeleteConfirmationModal />
     </div>
   );

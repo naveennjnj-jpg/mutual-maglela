@@ -1,4 +1,4 @@
-// components/auth/AccountTypeStep.tsx
+
 import React from 'react';
 import { User, Building2 } from 'lucide-react';
 

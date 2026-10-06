@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, MessageSquare, Briefcase, BookOpen } from "lucide-react";
 
 const ExpertWorkshops = () => {
-  // Workshop items data
+  
   const workshops = [
     {
       id: 1,
@@ -29,16 +29,16 @@ const ExpertWorkshops = () => {
     <section className="py-20 lg:py-24 bg-[#0F2D63]">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-14 items-center">
-          {/* Left Content */}
+          
           <div>
-            {/* Heading */}
+            
             <h2 className="text-3xl lg:text-[40px] font-['Roboto'] text-white leading-tight mb-5">
               Expert-Led Communication Workshops:
               <br />
               Upskill Your Team for Maximum Impact
             </h2>
 
-            {/* Description */}
+            
             <p className="text-white/70 text-base leading-relaxed mb-8">
               Build institutional capacity through specialized training programs
               — from media relations to executive messaging. Our workshops
@@ -46,7 +46,7 @@ const ExpertWorkshops = () => {
               how your team communicates.
             </p>
 
-            {/* CTA Button */}
+            
             <Link
               to="/onboarding"
               className="inline-flex items-center gap-2 bg-[#C85A32] hover:bg-[#a8472a] text-white px-7 py-3.5 rounded-xl font-semibold text-sm transition-colors shadow-lg shadow-[#C85A32]/30"
@@ -56,7 +56,7 @@ const ExpertWorkshops = () => {
             </Link>
           </div>
 
-          {/* Right Content - Workshop Cards */}
+          
           <div className="relative">
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 shadow-2xl">
               <div className="space-y-4">

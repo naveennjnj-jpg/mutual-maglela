@@ -1,4 +1,3 @@
-// components/settings/ApiTab.tsx
 import React, { useState, useEffect } from "react";
 import { 
   Eye, 
@@ -41,7 +40,6 @@ const Integrations = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // Connected services state
   const [services, setServices] = useState<ConnectedService[]>([
     {
       id: 'slack',
@@ -109,7 +107,7 @@ const Integrations = () => {
     }
   ]);
 
-  // Fetch API key on mount
+
   useEffect(() => {
     fetchApiKey();
   }, []);
@@ -184,7 +182,6 @@ const Integrations = () => {
       const token = localStorage.getItem("token");
       const service = services.find(s => s.id === serviceId);
       
-      // Toggle connection status
       const response = await axios.post<ApiResponse>(
         `${API_URL}/api/auth/connect-service`,
         {
@@ -218,12 +215,10 @@ const Integrations = () => {
     }
   };
 
-  // Mask API key for display
   const getDisplayKey = () => {
     if (showApiKey) {
       return apiKey;
     }
-    // Show masked version
     if (apiKey.length > 20) {
       return apiKey.slice(0, 12) + '••••••••••••••••••••••••';
     }
@@ -232,7 +227,6 @@ const Integrations = () => {
 
   return (
     <div className="space-y-6">
-      {/* Success Message */}
       {success && (
         <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
           <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -246,7 +240,6 @@ const Integrations = () => {
         </div>
       )}
 
-      {/* Error Message */}
       {error && (
         <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -260,7 +253,6 @@ const Integrations = () => {
         </div>
       )}
 
-      {/* API Key Section */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
         <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
           API Key
@@ -301,7 +293,6 @@ const Integrations = () => {
         </div>
       </div>
 
-      {/* Connected Services Section */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
         <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
           Connected Services

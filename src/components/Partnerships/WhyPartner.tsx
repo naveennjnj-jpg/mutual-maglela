@@ -130,7 +130,7 @@ const WhyPartner = () => {
   return (
     <section className="py-20 bg-[#F5F0EA]">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
-        {/* Header */}
+        
         <div className="text-center mb-10">
           <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-4">
             Why Choose Us
@@ -144,9 +144,9 @@ const WhyPartner = () => {
           </p>
         </div>
 
-        {/* Content */}
+        
         <div className="flex flex-col lg:flex-row gap-6 items-start">
-          {/* Left Side - Tabs */}
+          
           <div className="w-full lg:w-72 shrink-0 flex flex-col gap-1.5">
             {tabs.map((tab, index) => {
               const IconComponent = tab.icon;
@@ -174,7 +174,7 @@ const WhyPartner = () => {
             })}
           </div>
 
-          {/* Right Side - Content */}
+          
           <div className="flex-1 bg-white rounded-2xl border-l-4 border-[#C85A32] shadow-sm overflow-hidden">
             <div className="px-8 pt-8 pb-8">
               <div className="flex items-center gap-3 mb-5">

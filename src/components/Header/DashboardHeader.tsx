@@ -1,4 +1,4 @@
-// components/Header/DashboardHeader.tsx
+
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -33,7 +33,7 @@ interface DashboardHeaderProps {
   userEmail?: string;
   userInitials?: string;
   userAvatar?: string;
-  isSidebarOpen?: boolean; // ✅ Add this prop
+  isSidebarOpen?: boolean; 
 }
 
 const DashboardHeader = ({ 
@@ -43,7 +43,7 @@ const DashboardHeader = ({
   userEmail = "ronald@gmail.com",
   userInitials = "RS",
   userAvatar,
-  isSidebarOpen = true // ✅ Default to true
+  isSidebarOpen = true 
 }: DashboardHeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,7 +54,7 @@ const DashboardHeader = ({
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdowns on outside click
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
@@ -74,7 +74,7 @@ const DashboardHeader = ({
     navigate("/login");
   };
 
-  // Sample notifications
+  
   const notifications = [
     {
       id: 1,
@@ -120,7 +120,7 @@ const DashboardHeader = ({
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  // Role-based navigation items
+  
   const userNavItems = [
     { title: "Dashboard", path: "/user", icon: LayoutDashboard },
     { title: "Profile", path: "/user/profile", icon: UserCog },
@@ -151,9 +151,9 @@ const DashboardHeader = ({
       }`}
     >
       <div className="flex items-center justify-between h-full px-4 lg:px-8">
-        {/* Left Section */}
+        
         <div className="flex items-center gap-3">
-          {/* Mobile Menu Button */}
+          
           <button
             onClick={onMenuClick}
             className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
@@ -162,13 +162,13 @@ const DashboardHeader = ({
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Page Title */}
+          
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-semibold text-[#0F2D63] hidden sm:block">
               {getPageTitle()}
             </h1>
             
-            {/* Role Badge */}
+            
             <span className={`text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
               role === "admin" 
                 ? "bg-[#C85A32]/10 text-[#C85A32]" 
@@ -178,7 +178,7 @@ const DashboardHeader = ({
             </span>
           </div>
 
-          {/* Search Bar - Desktop */}
+          
           <div className="hidden md:flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 w-72 focus-within:border-[#C85A32] focus-within:ring-2 focus-within:ring-[#C85A32]/10 transition-all">
             <Search className="w-4 h-4 text-gray-400" />
             <input
@@ -192,9 +192,9 @@ const DashboardHeader = ({
           </div>
         </div>
 
-        {/* Right Section */}
+        
         <div className="flex items-center gap-2">
-          {/* Mobile Search Button */}
+          
           <button
             onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
             className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
@@ -202,7 +202,7 @@ const DashboardHeader = ({
             <Search className="w-5 h-5" />
           </button>
 
-          {/* Notification Button */}
+          
           <div className="relative" ref={notificationRef}>
             <button
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
@@ -215,7 +215,7 @@ const DashboardHeader = ({
               )}
             </button>
 
-            {/* Notification Dropdown */}
+            
             {isNotificationsOpen && (
               <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
@@ -271,7 +271,7 @@ const DashboardHeader = ({
             )}
           </div>
 
-          {/* Help Button */}
+          
           <Link
             to="/help"
             className="hidden sm:flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#C85A32] transition-colors px-2 py-1.5 rounded-lg hover:bg-gray-50"
@@ -280,7 +280,7 @@ const DashboardHeader = ({
             <span className="hidden lg:inline">Help</span>
           </Link>
 
-          {/* User Profile */}
+          
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -306,7 +306,7 @@ const DashboardHeader = ({
               <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* Profile Dropdown */}
+            
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
                 <div className="px-4 py-3 border-b border-gray-100">
@@ -341,7 +341,7 @@ const DashboardHeader = ({
         </div>
       </div>
 
-      {/* Mobile Search Bar */}
+      
       {isMobileSearchOpen && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-b border-gray-100 p-3 shadow-lg">
           <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">

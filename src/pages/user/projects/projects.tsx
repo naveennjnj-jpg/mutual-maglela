@@ -1,4 +1,4 @@
-// pages/user/Projects.tsx
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -30,9 +30,9 @@ import {
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 
-// ============================================
-// INTERFACES / TYPES
-// ============================================
+
+
+
 
 interface Project {
   _id: string;
@@ -59,17 +59,17 @@ interface ApiResponse {
   data?: Project[];
 }
 
-// ============================================
-// MAIN COMPONENT
-// ============================================
+
+
+
 
 const Projects = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // ============================================
-  // STATE MANAGEMENT
-  // ============================================
+  
+  
+  
 
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("ai-writing");
@@ -89,9 +89,9 @@ const Projects = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // ============================================
-  // TABS CONFIGURATION
-  // ============================================
+  
+  
+  
 
   const mainTabs = [
     { id: "ai-writing", label: "AI Writing", icon: WandSparkles, iconColor: "text-purple-600" },
@@ -105,9 +105,9 @@ const Projects = () => {
     { id: "completed", label: "Completed", icon: CircleCheck },
   ];
 
-  // ============================================
-  // FETCH PROJECTS
-  // ============================================
+  
+  
+  
 
   useEffect(() => {
     fetchProjects();
@@ -151,9 +151,9 @@ const Projects = () => {
     }
   };
 
-  // ============================================
-  // UPLOAD DOCUMENT
-  // ============================================
+  
+  
+  
 
   const uploadDocument = async (file: File): Promise<string> => {
     try {
@@ -195,9 +195,9 @@ const Projects = () => {
     }
   };
 
-  // ============================================
-  // UPDATE PROJECT STATUS API
-  // ============================================
+  
+  
+  
 
   const updateProjectStatus = async (
     projectId: string, 
@@ -219,7 +219,7 @@ const Projects = () => {
 
       let attachmentUrl = "";
 
-      // Upload attachment first if provided
+      
       if (attachment) {
         try {
           attachmentUrl = await uploadDocument(attachment);
@@ -230,7 +230,7 @@ const Projects = () => {
         }
       }
 
-      // Prepare the update payload
+      
       const payload: any = {
         status: newStatus,
       };
@@ -255,13 +255,13 @@ const Projects = () => {
       );
 
       if (response.data.success) {
-        // Refresh projects after update
+        
         await fetchProjects();
-        // Close modals
+        
         setShowFeedbackModal(false);
         setShowDetailView(false);
         setSelectedProject(null);
-        // Reset form
+        
         setFeedbackNote("");
         setFeedbackAttachment(null);
         setFeedbackAction(null);
@@ -280,9 +280,9 @@ const Projects = () => {
     }
   };
 
-  // ============================================
-  // HANDLERS
-  // ============================================
+  
+  
+  
 
   const handleCreateProject = () => {
     navigate("/user/projects/create");
@@ -307,7 +307,7 @@ const Projects = () => {
     setSelectedProject(null);
   };
 
-  // Status action handlers
+  
   const handleApprove = () => {
     if (selectedProject) {
       updateProjectStatus(selectedProject._id, "Completed");
@@ -327,7 +327,7 @@ const Projects = () => {
   const handleSubmitFeedback = async () => {
     if (!selectedProject || !feedbackAction) return;
 
-    // Validate note
+    
     if (!feedbackNote.trim()) {
       setError("Please enter a note");
       return;
@@ -351,12 +351,12 @@ const Projects = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // Validate file size (max 10MB)
+      
       if (file.size > 10 * 1024 * 1024) {
         setError("File size must be less than 10MB");
         return;
       }
-      // Validate file type
+      
       const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
       if (!allowedTypes.includes(file.type)) {
         setError("Please upload a valid file (JPG, PNG, GIF, WebP, PDF, DOC, DOCX)");
@@ -372,17 +372,17 @@ const Projects = () => {
     setUploadProgress(0);
   };
 
-  // ============================================
-  // FILTER PROJECTS
-  // ============================================
+  
+  
+  
 
   const getFilteredProjects = () => {
     let filtered = projects;
 
-    // Filter by proceedOption (main tab)
+    
     filtered = filtered.filter(p => p.proceedOption === activeTab);
 
-    // Filter by status (status sub-tab)
+    
     if (statusFilter === "active") {
       filtered = filtered.filter(p => 
         p.status === "Pending" || 
@@ -395,7 +395,7 @@ const Projects = () => {
       filtered = filtered.filter(p => p.status === "Completed" || p.status === "publish");
     }
 
-    // Filter by search term
+    
     if (searchTerm) {
       filtered = filtered.filter((project) =>
         project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -409,9 +409,9 @@ const Projects = () => {
 
   const filteredProjects = getFilteredProjects();
 
-  // ============================================
-  // GET COUNTS
-  // ============================================
+  
+  
+  
 
   const getMainTabCount = (tabId: string) => {
     return projects.filter(p => p.proceedOption === tabId).length;
@@ -434,9 +434,9 @@ const Projects = () => {
     return 0;
   };
 
-  // ============================================
-  // HELPER FUNCTIONS
-  // ============================================
+  
+  
+  
 
   const getFullAttachmentUrl = (attachmentPath: string | null) => {
     if (!attachmentPath) return null;
@@ -582,9 +582,9 @@ const Projects = () => {
     };
   };
 
-  // ============================================
-  // FEEDBACK MODAL
-  // ============================================
+  
+  
+  
 
   const FeedbackModal = () => {
     if (!showFeedbackModal) return null;
@@ -739,13 +739,13 @@ const Projects = () => {
     );
   };
 
-  // ============================================
-  // DETAIL VIEW COMPONENT
-  // ============================================
+  
+  
+  
 
-// ============================================
-// DETAIL VIEW COMPONENT
-// ============================================
+
+
+
 
 const ProjectDetailView = () => {
   if (!selectedProject) return null;
@@ -766,7 +766,7 @@ const ProjectDetailView = () => {
     <>
       <div className="min-h-screen bg-[#F9F7F4] p-6">
         <div className="max-w-[700px] mx-auto space-y-5">
-          {/* Back Button */}
+          
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#0F2D63] transition-colors"
@@ -775,7 +775,7 @@ const ProjectDetailView = () => {
             Back to My Projects
           </button>
 
-          {/* Header Card */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${statusInfo.className} mb-3`}>
               {statusInfo.icon}
@@ -787,7 +787,7 @@ const ProjectDetailView = () => {
             <p className="text-sm text-gray-400">{selectedProject.type || "No type"}</p>
           </div>
 
-          {/* Description */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Project Description</p>
             <p className="text-sm text-gray-700 leading-relaxed">
@@ -795,7 +795,7 @@ const ProjectDetailView = () => {
             </p>
           </div>
 
-          {/* Priority & Deadline */}
+          
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Priority</p>
@@ -812,7 +812,7 @@ const ProjectDetailView = () => {
             </div>
           </div>
 
-          {/* User Attached Files */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <div className="flex items-center gap-2 mb-3">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Attached Files</p>
@@ -854,14 +854,14 @@ const ProjectDetailView = () => {
             )}
           </div>
 
-          {/* Admin Section - For Revision or Completed */}
+          
           {(isRevision || isCompleted) && (selectedProject.adminnote || selectedProject.adminattachment) && (
             <div className={`rounded-2xl border p-5 ${
               isRevision 
                 ? 'bg-blue-50 border-blue-200' 
                 : 'bg-green-50 border-green-200'
             }`}>
-              {/* Admin Section Header */}
+              
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-lg">
                   {isRevision ? '📋' : '✅'}
@@ -878,7 +878,7 @@ const ProjectDetailView = () => {
                 </span>
               </div>
 
-              {/* Admin Note */}
+              
               {selectedProject.adminnote && (
                 <div className="mb-4">
                   <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Note from Admin</p>
@@ -890,7 +890,7 @@ const ProjectDetailView = () => {
                 </div>
               )}
 
-              {/* Admin Attachment */}
+              
               {selectedProject.adminattachment && (
                 <div>
                   <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Admin Attachment</p>
@@ -941,7 +941,7 @@ const ProjectDetailView = () => {
             </div>
           )}
 
-          {/* Action Buttons - For Revision */}
+          
           {isRevision && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-3">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">What would you like to do?</p>
@@ -994,7 +994,7 @@ const ProjectDetailView = () => {
             </div>
           )}
 
-          {/* Action Buttons - For Completed */}
+          
           {isCompleted && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-3">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Project Completed</p>
@@ -1014,9 +1014,9 @@ const ProjectDetailView = () => {
   );
 };
 
-  // ============================================
-  // RENDER
-  // ============================================
+  
+  
+  
 
   if (showDetailView && selectedProject) {
     return <ProjectDetailView />;
@@ -1025,7 +1025,7 @@ const ProjectDetailView = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] p-6">
       <div className="max-w-[1200px] mx-auto">
-        {/* HEADER */}
+        
         <div className="flex items-start justify-between mb-6">
           <div>
             <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-1">Workspace</p>
@@ -1040,7 +1040,7 @@ const ProjectDetailView = () => {
           </button>
         </div>
 
-        {/* ERROR */}
+        
         {error && (
           <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-xl text-sm mb-4">
             <AlertCircle className="w-4 h-4" />
@@ -1048,7 +1048,7 @@ const ProjectDetailView = () => {
           </div>
         )}
 
-        {/* MAIN TABS - AI Writing, AI Speech, Hire Expert */}
+        
         <div className="flex gap-1 bg-white border border-gray-100 rounded-2xl p-1.5 shadow-sm mb-6">
           {mainTabs.map((tab) => {
             const Icon = tab.icon;
@@ -1092,7 +1092,7 @@ const ProjectDetailView = () => {
           })}
         </div>
 
-        {/* SEARCH */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-5">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -1106,7 +1106,7 @@ const ProjectDetailView = () => {
           </div>
         </div>
 
-        {/* STATUS TABS - Active, In Revision, Completed */}
+        
         <div className="flex gap-1.5 mb-5">
           {statusTabs.map((tab) => {
             const Icon = tab.icon;
@@ -1147,13 +1147,13 @@ const ProjectDetailView = () => {
           })}
         </div>
 
-        {/* LOADING */}
+        
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 text-[#C85A32] animate-spin" />
           </div>
         ) : (
-          /* PROJECTS GRID */
+          
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {filteredProjects.length > 0 ? (
               filteredProjects.map((project) => {
@@ -1193,7 +1193,7 @@ const ProjectDetailView = () => {
                         </span>
                       </div>
 
-                      {/* Admin Note Preview - For Revision */}
+                      
                       {isRevision && project.adminnote && (
                         <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 mb-3 text-xs">
                           <p className="font-semibold text-amber-700 mb-1">Admin submitted a revision</p>
@@ -1201,7 +1201,7 @@ const ProjectDetailView = () => {
                         </div>
                       )}
 
-                      {/* Admin Note Preview - For Completed */}
+                      
                       {isCompleted && project.adminnote && (
                         <div className="bg-green-50 border border-green-100 rounded-xl p-3 mb-3 text-xs">
                           <p className="font-semibold text-green-700 mb-1">✅ Admin final submission</p>

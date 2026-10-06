@@ -109,14 +109,14 @@ const ContactForm = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate API call
+    
     setTimeout(() => {
       console.log("Form submitted:", formData);
       setIsSubmitting(false);
       if (onSubmit) {
         onSubmit(formData);
       }
-      // Reset form
+      
       setFormData({
         firstName: "",
         lastName: "",
@@ -138,7 +138,7 @@ const ContactForm = ({
     <section id="form" className={`${padding} ${bgColor}`}>
       <div className={`${maxWidth} mx-auto px-6 lg:px-8`}>
         <div className="flex flex-col lg:flex-row gap-10 items-start">
-          {/* Form Column */}
+          
           <div className={`lg:w-[58%] ${cardBgColor} rounded-2xl border ${cardBorderColor} shadow-sm p-8`}>
             {badge && (
               <p className={`${badgeColor} text-xs font-semibold uppercase tracking-widest mb-3`}>
@@ -255,9 +255,9 @@ const ContactForm = ({
             </form>
           </div>
 
-          {/* Sidebar Column */}
+          
           <div className="lg:w-[42%] flex flex-col gap-5">
-            {/* Contact Information */}
+            
             <div className={`${cardBgColor} rounded-2xl border ${cardBorderColor} shadow-sm p-6`}>
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4">
                 Contact Information
@@ -293,7 +293,7 @@ const ContactForm = ({
               </div>
             </div>
 
-            {/* Response Time */}
+            
             <div className={`${cardBgColor} rounded-2xl border ${cardBorderColor} shadow-sm p-6`}>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-8 h-8 bg-[#F5F0EA] rounded-lg flex items-center justify-center shrink-0">
@@ -309,7 +309,7 @@ const ContactForm = ({
               </p>
             </div>
 
-            {/* Existing Clients */}
+            
             <div className="bg-[#0F2D63] rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center shrink-0">

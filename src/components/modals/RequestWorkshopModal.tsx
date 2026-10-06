@@ -1,12 +1,12 @@
-// components/modals/RequestWorkshopModal.tsx
+
 import React from 'react';
 import { X, Sparkles, Mic, ArrowRight, UserPlus, CircleUserRound } from 'lucide-react';
 
 interface RequestWorkshopModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onGuestContinue?: () => void;    // ✅ Opens GuestWorkshopModal
-    onCreateAccount?: () => void;    // ✅ Redirects to login
+    onGuestContinue?: () => void;    
+    onCreateAccount?: () => void;    
 }
 
 const RequestWorkshopModal: React.FC<RequestWorkshopModalProps> = ({
@@ -20,7 +20,7 @@ const RequestWorkshopModal: React.FC<RequestWorkshopModalProps> = ({
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-[480px] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
-                {/* Modal Header */}
+                
                 <div className="bg-[#0F2D63] px-6 py-4 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-2">
                         <div className="w-7 h-7 bg-[#C85A32] rounded-lg flex items-center justify-center">
@@ -38,10 +38,10 @@ const RequestWorkshopModal: React.FC<RequestWorkshopModalProps> = ({
                     </button>
                 </div>
 
-                {/* Modal Body */}
+                
                 <div className="px-6 py-6 overflow-y-auto max-h-[80vh]">
                     <div>
-                        {/* Icon & Title */}
+                        
                         <div className="text-center mb-7">
                             <div className="w-12 h-12 bg-[#F5F0EA] dark:bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
                                 <Mic className="w-6 h-6 text-[#C85A32]" />
@@ -54,9 +54,9 @@ const RequestWorkshopModal: React.FC<RequestWorkshopModalProps> = ({
                             </p>
                         </div>
 
-                        {/* Options */}
+                        
                         <div className="flex flex-col gap-3">
-                            {/* ✅ Option 1: Continue as Guest */}
+                            
                             <button
                                 onClick={onGuestContinue}
                                 className="group flex items-center gap-4 w-full border-2 border-gray-200 dark:border-gray-700 hover:border-[#0F2D63] hover:bg-[#0F2D63]/2 dark:hover:bg-[#0F2D63]/10 rounded-2xl p-4 text-left transition-all"
@@ -77,7 +77,7 @@ const RequestWorkshopModal: React.FC<RequestWorkshopModalProps> = ({
                                 </div>
                             </button>
 
-                            {/* ✅ Option 2: Create Account */}
+                            
                             <button
                                 onClick={onCreateAccount}
                                 className="group flex items-center gap-4 w-full border-2 border-gray-200 dark:border-gray-700 hover:border-[#C85A32] hover:bg-[#C85A32]/2 dark:hover:bg-[#C85A32]/10 rounded-2xl p-4 text-left transition-all"

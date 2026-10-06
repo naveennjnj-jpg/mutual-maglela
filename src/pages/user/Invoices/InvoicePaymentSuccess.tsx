@@ -1,4 +1,4 @@
-// pages/user/InvoicePaymentSuccess.tsx
+
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
@@ -54,7 +54,7 @@ const InvoicePaymentSuccess: React.FC = () => {
 
       if (data.success) {
         setOrderData(data.data);
-        // Clear pending data
+        
         localStorage.removeItem('pendingInvoiceId');
         localStorage.removeItem('pendingPayment');
         localStorage.removeItem('invoiceReturnUrl');
@@ -111,7 +111,7 @@ const InvoicePaymentSuccess: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F2D63]">
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-y-auto max-h-[90vh] animate-in fade-in zoom-in duration-300">
-        {/* Header */}
+        
         <div className="sticky top-0 z-10 bg-[#0F2D63] px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 bg-[#C85A32] rounded-lg flex items-center justify-center">
@@ -135,10 +135,10 @@ const InvoicePaymentSuccess: React.FC = () => {
           </Link>
         </div>
 
-        {/* Content */}
+        
         <div className="px-8 py-8">
           <div className="text-center">
-            {/* Icon */}
+            
             <div className="relative w-20 h-20 mx-auto mb-6">
               <div className="absolute inset-0 bg-green-100 rounded-full animate-ping opacity-30"></div>
               <div className="relative w-20 h-20 bg-green-50 rounded-full flex items-center justify-center border-2 border-green-100">
@@ -153,7 +153,7 @@ const InvoicePaymentSuccess: React.FC = () => {
               Your invoice has been paid successfully. Thank you for your business!
             </p>
 
-            {/* Invoice Summary */}
+            
             <div className="bg-[#F5F0EA] rounded-xl p-4 mb-6 text-left">
               <p className="text-[#C85A32] text-xs font-bold uppercase tracking-widest mb-3">
                 Payment Summary
@@ -199,7 +199,7 @@ const InvoicePaymentSuccess: React.FC = () => {
               </div>
             </div>
 
-            {/* What's Next */}
+            
             <div className="bg-[#F5F0EA] rounded-xl p-4 mb-6 text-left">
               <p className="text-[#C85A32] text-xs font-bold uppercase tracking-widest mb-2">
                 What's next?
@@ -220,7 +220,7 @@ const InvoicePaymentSuccess: React.FC = () => {
               </ul>
             </div>
 
-            {/* Buttons */}
+            
             <div className="flex flex-col gap-3">
               <Link
                 to="/user/invoices"

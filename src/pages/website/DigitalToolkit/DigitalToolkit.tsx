@@ -1,4 +1,4 @@
-// DigitalToolkit.tsx - Updated with payment processing
+
 import React, { useState, useEffect } from 'react';
 import {
     Download, Zap, CheckCircle, ShoppingCart, Star,
@@ -6,7 +6,7 @@ import {
     Loader2
 } from 'lucide-react';
 
-// Types
+
 interface Product {
     id: number;
     title: string;
@@ -34,11 +34,11 @@ interface BillingInfo {
     country: string;
 }
 
-// API Base URL
+
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// Main Digital Toolkit Component
+
 const DigitalToolkit: React.FC = () => {
     const [activeCategory, setActiveCategory] = useState<string>('All');
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -46,18 +46,18 @@ const DigitalToolkit: React.FC = () => {
     const [showCheckout, setShowCheckout] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    // Track which products have been added to cart for button state
+    
     const [addedToCart, setAddedToCart] = useState<Set<number>>(new Set());
 
-    // Load cart from localStorage on mount
+    
     useEffect(() => {
         const savedCart = localStorage.getItem('cart');
         if (savedCart) {
             try {
-                const parsedCart: CartItem[] = JSON.parse(savedCart); // ✅ Type assertion added
+                const parsedCart: CartItem[] = JSON.parse(savedCart); 
                 setCartItems(parsedCart);
-                // Update addedToCart set with products in cart
-                const addedSet = new Set(parsedCart.map((item: CartItem) => item.product.id)); // ✅ Explicitly typed
+                
+                const addedSet = new Set(parsedCart.map((item: CartItem) => item.product.id)); 
                 setAddedToCart(addedSet);
             } catch (error) {
                 console.error('Error loading cart:', error);
@@ -65,10 +65,10 @@ const DigitalToolkit: React.FC = () => {
         }
     }, []);
 
-    // Save cart to localStorage whenever it changes
+    
     useEffect(() => {
         localStorage.setItem('cart', JSON.stringify(cartItems));
-        // Update addedToCart set when cart changes
+        
         const addedSet = new Set(cartItems.map(item => item.product.id));
         setAddedToCart(addedSet);
     }, [cartItems]);
@@ -214,7 +214,7 @@ const DigitalToolkit: React.FC = () => {
         ));
     };
 
-    // Show Cart View
+    
     if (showCart) {
         return (
             <CartView
@@ -231,7 +231,7 @@ const DigitalToolkit: React.FC = () => {
         );
     }
 
-    // Show Checkout View
+    
     if (showCheckout) {
         return (
             <CheckoutView
@@ -244,11 +244,11 @@ const DigitalToolkit: React.FC = () => {
         );
     }
 
-    // Main Product Grid View
+    
     return (
         <main className="flex-1 pt-0">
             <div className="bg-white">
-                {/* Hero Section */}
+                
                 <section className="relative h-[500px] overflow-hidden">
                     <img
                         src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1400&q=80"
@@ -289,7 +289,7 @@ const DigitalToolkit: React.FC = () => {
                     </div>
                 </section>
 
-                {/* Products Section */}
+                
                 <section className="py-14 bg-[#F5F0EA]">
                     <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
                         <div className="flex items-center justify-between flex-wrap gap-4 mb-10">
@@ -387,7 +387,7 @@ const DigitalToolkit: React.FC = () => {
     );
 };
 
-// Checkout View Component with Payment Processing
+
 interface CheckoutViewProps {
     cartItems: CartItem[];
     getTotalPrice: () => number;
@@ -419,7 +419,7 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({
     const [paymentSuccess, setPaymentSuccess] = useState<boolean>(false);
     const [orderId, setOrderId] = useState<string | null>(null);
 
-    // Constants
+    
     const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -427,13 +427,13 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    // Process payment and create order
+    
     const processPaymentAndSave = async () => {
         setPaymentProcessing(true);
         setPaymentError(null);
 
         try {
-            // Prepare order data
+            
             const orderData = {
                 userEmail: formData.email,
                 billingInfo: formData,
@@ -446,7 +446,7 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({
                 }))
             };
 
-            // Create order and initiate PayFast payment
+            
             const response = await fetch(`${API_BASE_URL}/api/toolkit/create-order`, {
                 method: 'POST',
                 headers: {
@@ -467,7 +467,7 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({
             }
 
 
-            // ✅ Store orderId in localStorage BEFORE redirect (like your example)
+            
             if (result.success && result.orderId) {
                 localStorage.setItem('pendingOrderId', result.orderId);
                 localStorage.setItem('pendingPayment', 'true');
@@ -475,14 +475,14 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({
             }
 
 
-            // Save order ID for reference
+            
             setOrderId(result.orderId || result.order?.id);
 
-            // ✅ Fix: Use paymentUrl (not payfastUrl)
+            
             if (result.paymentUrl && result.paymentData) {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = result.paymentUrl; // ✅ Changed from result.payfastUrl
+                form.action = result.paymentUrl; 
 
                 Object.keys(result.paymentData).forEach(key => {
                     const input = document.createElement('input');
@@ -502,7 +502,7 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({
         } catch (err) {
             console.error('❌ Payment error:', err);
             setPaymentError(err instanceof Error ? err.message : 'Payment processing failed');
-            setStep(1); // Go back to form if error
+            setStep(1); 
         } finally {
             setPaymentProcessing(false);
         }
@@ -510,17 +510,17 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Validate form
+        
         if (!formData.firstName || !formData.lastName || !formData.email ||
             !formData.streetAddress || !formData.city || !formData.postalCode) {
             setPaymentError('Please fill in all required fields');
             return;
         }
-        // Process payment
+        
         processPaymentAndSave();
     };
 
-    // Check order status on mount (if returning from PayFast)
+    
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const orderIdParam = urlParams.get('orderId');
@@ -548,7 +548,7 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({
                         <h1 className="text-2xl font-['Roboto'] font-bold text-[#1C1C1C]">Checkout</h1>
                     </div>
 
-                    {/* Progress Steps */}
+                    
                     <div className="flex items-center gap-0 mb-10">
                         <div className="flex items-center flex-1">
                             <div className="flex items-center gap-2 shrink-0">
@@ -573,14 +573,14 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({
                         </div>
                     </div>
 
-                    {/* Error Display */}
+                    
                     {paymentError && (
                         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6">
                             <p className="text-sm font-medium">{paymentError}</p>
                         </div>
                     )}
 
-                    {/* Success State */}
+                    
                     {paymentSuccess && step === 2 ? (
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
                             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -595,7 +595,7 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({
                             </p>
                             <button
                                 onClick={() => {
-                                    // Clear cart and redirect
+                                    
                                     localStorage.removeItem('cart');
                                     window.location.href = '/digital-toolkit';
                                 }}
@@ -749,7 +749,7 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({
                                 </form>
                             </div>
 
-                            {/* Order Summary */}
+                            
                             <div className="lg:w-72 shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                                 <h3 className="font-['Roboto'] font-bold text-[#1C1C1C] mb-5">Order Summary</h3>
                                 <div className="space-y-3 mb-5">
@@ -793,7 +793,7 @@ const CheckoutView: React.FC<CheckoutViewProps> = ({
     );
 };
 
-// Cart View Component (Keep as is)
+
 interface CartViewProps {
     cartItems: CartItem[];
     updateQuantity: (productId: number, newQuantity: number) => void;

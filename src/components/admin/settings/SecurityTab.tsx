@@ -1,4 +1,3 @@
-// components/settings/SecurityTab.tsx
 import React, { useState } from "react";
 import { Save, Loader2, AlertCircle, CheckCircle, Eye, EyeOff } from "lucide-react";
 import axios from "axios";
@@ -16,19 +15,19 @@ const SecurityTab = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Password fields
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   
-  // Show/hide password
+
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // Password validation
+
   const validatePassword = (password: string) => {
     const errors: string[] = [];
     if (password.length < 8) {
@@ -55,7 +54,7 @@ const SecurityTab = () => {
     setError(null);
     setSuccess(false);
 
-    // Validation
+
     if (!currentPassword) {
       setError("Please enter your current password");
       setLoading(false);
@@ -80,7 +79,7 @@ const SecurityTab = () => {
       return;
     }
 
-    // Validate password strength
+
     const passwordErrors = validatePassword(newPassword);
     if (passwordErrors.length > 0) {
       setError(passwordErrors[0]);
@@ -106,7 +105,7 @@ const SecurityTab = () => {
 
       if (response.data.success) {
         setSuccess(true);
-        // Clear password fields
+
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
@@ -126,7 +125,6 @@ const SecurityTab = () => {
     <div>
 
 
-      {/* Success/Error Messages */}
       {success && (
         <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm mb-4">
           <CheckCircle className="w-4 h-4" />
@@ -141,14 +139,12 @@ const SecurityTab = () => {
         </div>
       )}
 
-      {/* Change Password */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
         <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
           Change Password
         </p>
 
         <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
-          {/* Current Password */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
               Current Password
@@ -172,7 +168,6 @@ const SecurityTab = () => {
             </div>
           </div>
 
-          {/* New Password */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
               New Password
@@ -196,7 +191,7 @@ const SecurityTab = () => {
             </div>
           </div>
 
-          {/* Confirm Password */}
+
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
               Confirm New Password

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 const WhyMagalelaWorks = () => {
-  // Features data array
+  
   const features = [
     {
       id: 1,
@@ -84,7 +84,7 @@ const WhyMagalelaWorks = () => {
   return (
     <section className="py-20 lg:py-24 bg-[#F9F7F4]">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
-        {/* Header Section */}
+        
         <div className="mb-12">
           <h2 className="text-3xl lg:text-[40px] font-['Roboto'] text-[#0F2D63] mb-4 leading-tight">
             Why Magalela Media Works for You
@@ -95,24 +95,24 @@ const WhyMagalelaWorks = () => {
           </p>
         </div>
 
-        {/* Features Grid */}
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {features.map((feature) => (
             <div
               key={feature.id}
               className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
             >
-              {/* Icon Container */}
+              
               <div className="w-11 h-11 rounded-xl bg-[#F3EDE6] flex items-center justify-center mb-5">
                 {feature.icon}
               </div>
 
-              {/* Title */}
+              
               <h3 className="font-semibold text-[#1C1C1C] text-[15px] mb-2 leading-snug">
                 {feature.title}
               </h3>
 
-              {/* Description */}
+              
               <p className="text-gray-500 text-sm leading-relaxed">
                 {feature.description}
               </p>

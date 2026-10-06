@@ -1,4 +1,4 @@
-// pages/user/AddCredits.tsx
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,9 +12,9 @@ import {
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 
-// ============================================
-// INTERFACES / TYPES
-// ============================================
+
+
+
 
 interface PlanFeature {
   id: string;
@@ -84,17 +84,17 @@ interface UserData {
   initials?: string;
 }
 
-// ============================================
-// MAIN COMPONENT
-// ============================================
+
+
+
 
 const AddCredits = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // ============================================
-  // STATE MANAGEMENT
-  // ============================================
+  
+  
+  
 
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [currentBalance, setCurrentBalance] = useState(0);
@@ -107,9 +107,9 @@ const AddCredits = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // ============================================
-  // FETCH PLANS FROM API
-  // ============================================
+  
+  
+  
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -129,9 +129,9 @@ const AddCredits = () => {
     fetchPlans();
   }, [API_URL]);
 
-  // ============================================
-  // FETCH USER BILLING INFO
-  // ============================================
+  
+  
+  
 
   useEffect(() => {
     const fetchUserBillingInfo = async () => {
@@ -197,7 +197,7 @@ const AddCredits = () => {
     fetchUserBillingInfo();
   }, [user, API_URL]);
 
-  // User state
+  
   const [userData, setUserData] = useState<UserData>({
     id: '',
     name: 'User',
@@ -207,7 +207,7 @@ const AddCredits = () => {
     initials: 'U'
   });
 
-  // Fetch user data on mount
+  
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -266,12 +266,12 @@ const AddCredits = () => {
     fetchUserData();
   }, []);
 
-  // ============================================
-  // TRANSFORM API PLANS TO UI PLANS
-  // ============================================
+  
+  
+  
 
   const transformPlans = (): PricingPlan[] => {
-    // Group plans by name
+    
     const planGroups: Record<string, ApiPlan[]> = {};
     
     apiPlans.forEach(plan => {
@@ -288,7 +288,7 @@ const AddCredits = () => {
       const monthlyPlan = group.find(p => p.billingType === "Monthly" || p.billingType === "One-time");
       const yearlyPlan = group.find(p => p.billingType === "Yearly");
 
-      // Determine plan type
+      
       let type: "basic" | "pro" | "enterprise" = "basic";
       let subtitle = "Basic";
       let buttonVariant: "primary" | "outline" = "outline";
@@ -311,7 +311,7 @@ const AddCredits = () => {
         buttonText = "Get Started";
       }
 
-      // Create features with IDs
+      
       const features: PlanFeature[] = (monthlyPlan?.features || yearlyPlan?.features || []).map((text, index) => ({
         id: `f${index}`,
         text: text,
@@ -344,7 +344,7 @@ const AddCredits = () => {
       });
     });
 
-    // Sort: Popular first, then by price
+    
     result.sort((a, b) => {
       if (a.isPopular && !b.isPopular) return -1;
       if (!a.isPopular && b.isPopular) return 1;
@@ -356,9 +356,9 @@ const AddCredits = () => {
 
   const plans = transformPlans();
 
-  // ============================================
-  // HANDLERS
-  // ============================================
+  
+  
+  
 
   const handleBack = () => {
     navigate("/user");
@@ -369,7 +369,7 @@ const AddCredits = () => {
   };
 
   const handleGetStarted = async (planId: string) => {
-    // Enterprise plan redirects to contact
+    
     if (planId === "enterprise" || planId === "organisation") {
       navigate("/contact");
       return;
@@ -446,7 +446,7 @@ const AddCredits = () => {
           credits: currentBilling.credits,
         }));
 
-        // Redirect to PayFast
+        
         const form = document.createElement("form");
         form.method = "POST";
         form.action = paymentUrl;
@@ -476,15 +476,15 @@ const AddCredits = () => {
     navigate("/contact");
   };
 
-  // ============================================
-  // RENDER
-  // ============================================
+  
+  
+  
 
   const getCurrentBilling = (plan: PricingPlan) => {
     return billingCycle === "monthly" ? plan.monthly : plan.yearly;
   };
 
-  // Show loading state
+  
   if (fetchingUser || fetchingPlans) {
     return (
       <div className="min-h-screen bg-[#F9F7F4] flex items-center justify-center">
@@ -499,9 +499,7 @@ const AddCredits = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] p-6">
       <div className="max-w-[1200px] mx-auto space-y-8">
-        {/* ==========================================
-            HEADER
-            ========================================== */}
+        
         <div className="flex items-start gap-4">
           <button
             onClick={handleBack}
@@ -520,16 +518,14 @@ const AddCredits = () => {
           </div>
         </div>
 
-        {/* Error Message */}
+        
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
             {error}
           </div>
         )}
 
-        {/* ==========================================
-            USER BILLING INFO SUMMARY
-            ========================================== */}
+        
         {userBillingInfo && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex items-center gap-4">
             <div className="w-10 h-10 bg-[#EEF2FA] rounded-xl flex items-center justify-center">
@@ -548,9 +544,7 @@ const AddCredits = () => {
           </div>
         )}
 
-        {/* ==========================================
-            CURRENT BALANCE
-            ========================================== */}
+        
         <div className="inline-flex items-center gap-2.5 bg-white border border-gray-200 rounded-2xl px-5 py-3 shadow-sm">
           <div className="w-8 h-8 bg-[#fff4f0] rounded-xl flex items-center justify-center">
             <Coins className="w-4 h-4 text-[#C85A32]" />
@@ -561,9 +555,7 @@ const AddCredits = () => {
           </div>
         </div>
 
-        {/* ==========================================
-            BILLING CYCLE TOGGLE
-            ========================================== */}
+        
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
             <button
@@ -594,9 +586,7 @@ const AddCredits = () => {
           )}
         </div>
 
-        {/* ==========================================
-            PRICING PLANS
-            ========================================== */}
+        
         {plans.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center">
             <Coins className="w-12 h-12 text-gray-300 mx-auto mb-3" />
@@ -620,7 +610,7 @@ const AddCredits = () => {
                         : "border border-gray-200 shadow-sm hover:border-gray-300"
                     }`}
                 >
-                  {/* Popular Badge */}
+                  
                   {plan.isPopular && (
                     <>
                       <div className="h-1 bg-[#C85A32]"></div>
@@ -633,7 +623,7 @@ const AddCredits = () => {
                     </>
                   )}
 
-                  {/* Savings Badge for Yearly */}
+                  
                   {isYearly && plan.yearly.savings && (
                     <div className="absolute top-4 left-4">
                       <span className="flex items-center gap-1 bg-green-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest">
@@ -643,12 +633,12 @@ const AddCredits = () => {
                   )}
 
                   <div className="p-6 flex flex-col flex-1">
-                    {/* Plan Type */}
+                    
                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">
                       {plan.subtitle}
                     </p>
 
-                    {/* Plan Name */}
+                    
                     <h3 className="text-xl font-bold text-[#1C1C1C] mb-1">
                       {plan.name}
                     </h3>
@@ -659,7 +649,7 @@ const AddCredits = () => {
                       {plan.targetAudience}
                     </p>
 
-                    {/* Credits Display */}
+                    
                     <div className="flex items-center gap-1.5 bg-[#fff4f0] border border-[#f5c9b8] rounded-xl px-3 py-2 mb-4 w-fit">
                       <Coins className="w-3.5 h-3.5 text-[#C85A32]" />
                       <span className="text-sm font-bold text-[#C85A32]">
@@ -670,7 +660,7 @@ const AddCredits = () => {
                       </span>
                     </div>
 
-                    {/* Price */}
+                    
                     <div className="mb-6">
                       <p className="text-2xl font-bold text-[#1C1C1C] leading-tight">
                         {currentBilling.price}
@@ -685,7 +675,7 @@ const AddCredits = () => {
                       )}
                     </div>
 
-                    {/* Features */}
+                    
                     <ul className="space-y-2.5 mb-7 flex-1">
                       {plan.features.map((feature) => (
                         <li key={feature.id} className="flex items-start gap-2.5">
@@ -697,7 +687,7 @@ const AddCredits = () => {
                       ))}
                     </ul>
 
-                    {/* CTA Button */}
+                    
                     <button
                       onClick={() => handleGetStarted(plan.id)}
                       disabled={loading || !userBillingInfo}
@@ -726,9 +716,7 @@ const AddCredits = () => {
           </div>
         )}
 
-        {/* ==========================================
-            ENTERPRISE CTA
-            ========================================== */}
+        
         <div className="bg-[#0F2D63] rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p className="text-white font-bold mb-1">Need a custom volume deal?</p>

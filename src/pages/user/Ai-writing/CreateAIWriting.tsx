@@ -1,4 +1,4 @@
-// pages/user/CreateAIWriting.tsx
+
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -25,7 +25,7 @@ interface ApiResponse {
   data?: any;
 }
 
-// ✅ Define document types with value and label
+
 const DOCUMENT_TYPES = [
   { value: 'policy-brief', label: 'Policy Brief', icon: BookOpen },
   { value: 'op-ed', label: 'Op-Ed', icon: PenTool },
@@ -37,7 +37,7 @@ const DOCUMENT_TYPES = [
   { value: 'blog-post', label: 'Blog Post', icon: PenTool },
 ];
 
-// ✅ Define tones with value and label
+
 const TONE_OPTIONS = [
   { value: 'formal', label: 'Formal' },
   { value: 'authoritative', label: 'Clear & Authoritative' },
@@ -52,7 +52,7 @@ const CreateAIWriting = () => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // State
+  
   const [title, setTitle] = useState('');
   const [selectedType, setSelectedType] = useState('policy-brief');
   const [selectedTone, setSelectedTone] = useState('authoritative');
@@ -104,7 +104,7 @@ const CreateAIWriting = () => {
     }
   };
 
-  // Mock content for demo
+  
   const generateMockContent = () => {
     return `# ${title}
 
@@ -195,21 +195,21 @@ This strategic approach positions our organization to achieve meaningful impact 
         return;
       }
 
-      // ✅ Prepare form data with correct enum values
+      
       const formData = new FormData();
       formData.append('title', title);
-      formData.append('type', selectedType); // ✅ Now sends 'policy-brief' not 'Policy Brief'
-      formData.append('tone', selectedTone); // ✅ Now sends 'authoritative' not 'Clear & Authoritative'
+      formData.append('type', selectedType); 
+      formData.append('tone', selectedTone); 
       formData.append('includeOutline', String(includeOutline));
       formData.append('file', file);
 
-      // Simulate processing steps
+      
       for (let i = 0; i < processingSteps.length; i++) {
         setProcessingStep(i);
         await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 600));
       }
 
-      // Make API call
+      
       const response = await axios.post<ApiResponse>(
         `${API_URL}/api/ai-writing/generate`,
         formData,
@@ -255,7 +255,7 @@ This strategic approach positions our organization to achieve meaningful impact 
     navigate('/user/narrative-engine');
   };
 
-  // Processing Screen
+  
   const renderProcessing = () => (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 flex items-center justify-center p-6">
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xl p-10 w-full max-w-sm text-center">
@@ -299,11 +299,11 @@ This strategic approach positions our organization to achieve meaningful impact 
     </div>
   );
 
-  // Create Screen
+  
   const renderCreate = () => (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[680px] mx-auto">
-        {/* Header */}
+        
         <div className="flex items-center gap-3 mb-6">
           <button 
             onClick={handleBack}
@@ -319,7 +319,7 @@ This strategic approach positions our organization to achieve meaningful impact 
           </div>
         </div>
 
-        {/* Error Message */}
+        
         {error && (
           <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-4">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -328,7 +328,7 @@ This strategic approach positions our organization to achieve meaningful impact 
         )}
 
         <div className="flex flex-col gap-4">
-          {/* Step 1: Document Title */}
+          
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">
               <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">
@@ -345,7 +345,7 @@ This strategic approach positions our organization to achieve meaningful impact 
             />
           </div>
 
-          {/* Step 2: Desired Output */}
+          
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
               <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">
@@ -387,7 +387,7 @@ This strategic approach positions our organization to achieve meaningful impact 
             </div>
           </div>
 
-          {/* Step 3: Target Tone */}
+          
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
               <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">
@@ -412,7 +412,7 @@ This strategic approach positions our organization to achieve meaningful impact 
             </div>
           </div>
 
-          {/* Step 4: Upload Document */}
+          
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
               <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">
@@ -460,7 +460,7 @@ This strategic approach positions our organization to achieve meaningful impact 
             />
           </div>
 
-          {/* Step 5: Include AI Outline */}
+          
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <div className="flex items-center justify-between">
               <div>
@@ -487,7 +487,7 @@ This strategic approach positions our organization to achieve meaningful impact 
             </div>
           </div>
 
-          {/* Generate Button */}
+          
           <button
             onClick={handleGenerate}
             disabled={isSubmitting}
@@ -506,7 +506,7 @@ This strategic approach positions our organization to achieve meaningful impact 
             )}
           </button>
 
-          {/* Disclaimer */}
+          
           <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 flex items-start gap-3">
             <span className="text-amber-500 text-lg flex-shrink-0 mt-0.5">⚠️</span>
             <div>
@@ -523,7 +523,7 @@ This strategic approach positions our organization to achieve meaningful impact 
     </div>
   );
 
-  // Render based on current step
+  
   if (currentStep === 'processing') {
     return renderProcessing();
   }

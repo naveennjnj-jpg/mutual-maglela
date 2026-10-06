@@ -1,4 +1,4 @@
-// layouts/user/UserHeader.tsx
+
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -64,7 +64,7 @@ const UserHeader = ({
   const notificationRef = useRef<HTMLDivElement>(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   
-  // User state
+  
   const [userData, setUserData] = useState<UserData>({
     id: '',
     name: 'User',
@@ -77,7 +77,7 @@ const UserHeader = ({
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  // ✅ Function to fetch user data
+  
   const fetchUserData = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -96,7 +96,7 @@ const UserHeader = ({
       if (response.data.success && response.data.data) {
         const data = response.data.data;
         
-        // Generate initials from name
+        
         const nameParts = data.name?.split(' ') || ['U'];
         const initials = nameParts
           .map((part: string) => part.charAt(0).toUpperCase())
@@ -116,19 +116,19 @@ const UserHeader = ({
           initials: initials || 'U'
         });
 
-        // Update localStorage
+        
         localStorage.setItem('userCredits', credits.toString());
         localStorage.setItem('userName', data.name || 'User');
         localStorage.setItem('userEmail', data.email || '');
 
-        // Apply theme if needed
+        
         if (data.theme) {
           localStorage.setItem('theme', data.theme);
         }
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
-      // Fallback to localStorage or default values
+      
       const savedName = localStorage.getItem('userName') || 'User';
       const savedEmail = localStorage.getItem('userEmail') || 'user@email.com';
       const savedCredits = parseInt(localStorage.getItem('userCredits') || '0');
@@ -146,12 +146,12 @@ const UserHeader = ({
     }
   };
 
-  // ✅ Fetch user data on mount
+  
   useEffect(() => {
     fetchUserData();
   }, []);
 
-  // ✅ Listen for storage changes (when credits update from other tabs/pages)
+  
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'userCredits') {
@@ -170,7 +170,7 @@ const UserHeader = ({
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  // ✅ Listen for custom creditsUpdated event
+  
   useEffect(() => {
     const handleCreditsUpdate = (e: CustomEvent) => {
       if (e.detail?.credits !== undefined) {
@@ -197,7 +197,7 @@ const UserHeader = ({
     return () => window.removeEventListener('creditsUpdated', handleCreditsUpdate as EventListener);
   }, []);
 
-  // ✅ Function to refresh credits manually
+  
   const refreshCredits = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -214,7 +214,7 @@ const UserHeader = ({
         setUserData(prev => ({ ...prev, credits }));
         localStorage.setItem('userCredits', credits.toString());
         
-        // Dispatch event for other components
+        
         window.dispatchEvent(new CustomEvent('creditsUpdated', { 
           detail: { credits } 
         }));
@@ -224,7 +224,7 @@ const UserHeader = ({
     }
   };
 
-  // Click outside handlers
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
@@ -300,11 +300,7 @@ const UserHeader = ({
 
   return (
     <>
-      {/* <header
-        className={`bg-white border-b border-gray-100 h-16 fixed top-0 right-0 z-40 transition-all duration-300 ${
-          isSidebarOpen ? 'left-[260px]' : 'left-[72px]'
-        }`}
-      > */}
+      
       <header
       className={`bg-white border-b border-gray-100 h-16 fixed top-0 right-0 z-40 transition-all duration-300 ${
         isSidebarOpen 
@@ -313,7 +309,7 @@ const UserHeader = ({
       }`}
     >
         <div className="flex items-center justify-between h-full px-4 lg:px-8">
-          {/* Left Section */}
+          
           <div className="flex items-center gap-3">
             <button
               onClick={onMenuClick}
@@ -329,9 +325,9 @@ const UserHeader = ({
             </div>
           </div>
 
-          {/* Right Section */}
+          
           <div className="flex items-center gap-2">
-            {/* Credits Section */}
+            
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5 bg-[#F9F7F4] border border-gray-200 rounded-xl px-3 py-1.5">
                 <Coins className="w-3.5 h-3.5 text-[#C85A32]" />
@@ -356,7 +352,7 @@ const UserHeader = ({
               <Search className="w-5 h-5" />
             </button>
 
-            {/* Notifications */}
+            
             <div className="relative" ref={notificationRef}>
               <button
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
@@ -416,7 +412,7 @@ const UserHeader = ({
               )}
             </div>
 
-            {/* Profile */}
+            
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -490,7 +486,7 @@ const UserHeader = ({
           </div>
         </div>
 
-        {/* Mobile Search */}
+        
         {isMobileSearchOpen && (
           <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-b border-gray-100 p-3 shadow-lg">
             <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
@@ -509,7 +505,7 @@ const UserHeader = ({
         )}
       </header>
 
-      {/* Logout Modal */}
+      
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-7 w-full max-w-sm shadow-xl">

@@ -1,4 +1,4 @@
-// pages/user/Ai-writing/Result.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -50,7 +50,7 @@ const Result = () => {
     location.state?.data as ResultData || getMockResult()
   );
   
-  // ✅ User credits state
+  
   const [userData, setUserData] = useState<UserData>({
     id: '',
     name: 'User',
@@ -63,13 +63,13 @@ const Result = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  // Edit mode states
+  
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(resultData.title);
   const [editContent, setEditContent] = useState(resultData.content);
   const [isSaving, setIsSaving] = useState(false);
 
-  // ✅ Fetch updated user data (to get latest credits)
+  
   const fetchUpdatedUserData = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -98,7 +98,7 @@ const Result = () => {
           initials: initials || 'U'
         });
 
-        // ✅ Update localStorage for header
+        
         localStorage.setItem('userCredits', credits.toString());
         localStorage.setItem('userName', data.name || 'User');
         localStorage.setItem('userEmail', data.email || '');
@@ -110,15 +110,15 @@ const Result = () => {
     }
   };
 
-  // ✅ Fetch user data on mount
+  
   useEffect(() => {
     fetchUpdatedUserData();
   }, []);
 
-  // ✅ Also check if result has credits info from API response
+  
   useEffect(() => {
     if (location.state?.data?.creditsRemaining !== undefined) {
-      // Update local state with credits from API response
+      
       const credits = location.state.data.creditsRemaining;
       setUserData(prev => ({ ...prev, credits }));
       localStorage.setItem('userCredits', credits.toString());
@@ -181,7 +181,7 @@ const Result = () => {
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
   };
 
-  // ✅ Convert outline to markdown string
+  
   const getOutlineMarkdown = () => {
     const outline = resultData.outline;
     if (!outline) return null;
@@ -204,7 +204,7 @@ const Result = () => {
     return items.map((item, index) => `${index + 1}. ${item}`).join('\n');
   };
 
-  // ✅ Combined content with outline + main content
+  
   const getFullMarkdownContent = () => {
     let fullContent = '';
     
@@ -237,7 +237,7 @@ const Result = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[1000px] mx-auto">
-        {/* ✅ Credits Display Banner */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#F9F7F4] dark:bg-gray-700 rounded-full flex items-center justify-center">
@@ -267,7 +267,7 @@ const Result = () => {
           </button>
         </div>
 
-        {/* Header */}
+        
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <button
@@ -323,7 +323,7 @@ const Result = () => {
           </div>
         </div>
 
-        {/* Document Info */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 mb-6">
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -368,7 +368,7 @@ const Result = () => {
           </div>
         </div>
 
-        {/* Full Content */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
           <div className="p-6">
             <div className="prose prose-sm max-w-none dark:prose-invert">
@@ -412,7 +412,7 @@ const Result = () => {
           </div>
         </div>
 
-        {/* Disclaimer */}
+        
         <div className="mt-6 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 flex items-start gap-3">
           <span className="text-amber-500 text-lg flex-shrink-0 mt-0.5">⚠️</span>
           <div>
@@ -423,7 +423,7 @@ const Result = () => {
           </div>
         </div>
 
-        {/* Bottom Actions */}
+        
         <div className="flex gap-3 mt-6">
           <button
             onClick={handleBack}
@@ -456,7 +456,7 @@ const Result = () => {
   );
 };
 
-// Mock data for fallback
+
 const getMockResult = (): ResultData => {
   return {
     title: 'Annual Report Executive Summary',

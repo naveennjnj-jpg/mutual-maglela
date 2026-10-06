@@ -1,4 +1,4 @@
-// components/settings/SecurityTab.tsx
+
 import React, { useState, useEffect } from "react";
 import { Lock, Shield, Save, Loader2, AlertCircle, CheckCircle, Eye, EyeOff, Clock } from "lucide-react";
 import axios from "axios";
@@ -16,30 +16,30 @@ const SecurityTab = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Password fields
+  
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   
-  // Show/hide password
+  
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Two-factor authentication
+  
   const [twoFactorAuth, setTwoFactorAuth] = useState(false);
   const [twoFactorLoading, setTwoFactorLoading] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // Load 2FA status from user data
+  
   useEffect(() => {
     if (user) {
       setTwoFactorAuth((user as any).twoFactorAuth || false);
     }
   }, [user]);
 
-  // Password validation
+  
   const validatePassword = (password: string) => {
     const errors: string[] = [];
     if (password.length < 8) {
@@ -66,7 +66,6 @@ const SecurityTab = () => {
     setError(null);
     setSuccess(false);
 
-    // Validation
     if (!currentPassword) {
       setError("Please enter your current password");
       setLoading(false);
@@ -91,7 +90,6 @@ const SecurityTab = () => {
       return;
     }
 
-    // Validate password strength
     const passwordErrors = validatePassword(newPassword);
     if (passwordErrors.length > 0) {
       setError(passwordErrors[0]);
@@ -117,7 +115,6 @@ const SecurityTab = () => {
 
       if (response.data.success) {
         setSuccess(true);
-        // Clear password fields
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
@@ -157,7 +154,6 @@ const SecurityTab = () => {
         const newStatus = !twoFactorAuth;
         setTwoFactorAuth(newStatus);
         
-        // Update user context
         if (updateDetails) {
           await updateDetails({ twoFactorAuth: newStatus } as any);
         }
@@ -181,7 +177,7 @@ const SecurityTab = () => {
         Security Settings
       </h2>
 
-      {/* Success/Error Messages */}
+      
       {success && (
         <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm mb-4">
           <CheckCircle className="w-4 h-4" />
@@ -197,7 +193,7 @@ const SecurityTab = () => {
       )}
 
       <div className="space-y-4">
-        {/* Password Change */}
+        
         <div className="p-4 border border-gray-100 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-8 bg-[#F3EDE6] dark:bg-gray-700 rounded-lg flex items-center justify-center">
@@ -210,7 +206,7 @@ const SecurityTab = () => {
           </div>
 
           <form onSubmit={handlePasswordChange} className="space-y-3">
-            {/* Current Password */}
+            
             <div>
               <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5 block">
                 Current Password
@@ -234,7 +230,7 @@ const SecurityTab = () => {
               </div>
             </div>
 
-            {/* New Password */}
+            
             <div>
               <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5 block">
                 New Password
@@ -261,7 +257,7 @@ const SecurityTab = () => {
               </div>
             </div>
 
-            {/* Confirm Password */}
+            
             <div>
               <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5 block">
                 Confirm New Password
@@ -305,7 +301,7 @@ const SecurityTab = () => {
           </form>
         </div>
 
-        {/* Two-Factor Authentication */}
+        
         <div className="p-4 border border-gray-100 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

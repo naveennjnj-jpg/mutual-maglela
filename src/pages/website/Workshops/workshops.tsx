@@ -1,4 +1,4 @@
-// pages/Workshop.tsx
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import HeroSection from "@/components/Common/WorkshopHeroSection";
@@ -10,7 +10,7 @@ import Testimonial from "@/components/Common/TestimonialQuote";
 import WorkshopCTA from "@/components/Workshop/workshopcta";
 import FacilitatorsSection from "@/components/Workshop/FacilitatorsSection";
 import RequestWorkshopModal from '@/components/modals/RequestWorkshopModal';
-import GuestWorkshopModal from '@/components/modals/GuestWorkshopModal'; // ✅ New component
+import GuestWorkshopModal from '@/components/modals/GuestWorkshopModal'; 
 import workbanner from "@/assets/workshop/work_banner.jpeg";
 
 import {
@@ -23,33 +23,33 @@ import {
 const WorkshopPage = () => {
     const navigate = useNavigate();
 
-    // Step 1: Request Modal
+    
     const [showRequestModal, setShowRequestModal] = useState(false);
 
-    // Step 2 & 3: Guest Workshop Modal
+    
     const [showGuestModal, setShowGuestModal] = useState(false);
 
-    // Step 1: Open Request Modal
+    
     const handleRequestWorkshop = () => {
         setShowRequestModal(true);
     };
 
-    // Step 2: From Request Modal -> Guest Workshop Modal
+    
     const handleGuestContinue = () => {
         setShowRequestModal(false);
         setShowGuestModal(true);
     };
 
-    // Step 2: From Request Modal -> Create Account (External)
+    
     const handleCreateAccount = () => {
         setShowRequestModal(false);
         window.location.href = 'https://magalela-media.figma.site/login';
     };
 
-    // Step 4: Workshop Created Successfully
+    
     const handleGuestSuccess = () => {
         setShowGuestModal(false);
-        //  navigate('/user/workshops');
+        
     };
 
     return (
@@ -185,7 +185,7 @@ const WorkshopPage = () => {
                 }}
             />
 
-            {/* Step 1: Request Workshop Modal */}
+            
             <RequestWorkshopModal
                 isOpen={showRequestModal}
                 onClose={() => setShowRequestModal(false)}
@@ -193,7 +193,7 @@ const WorkshopPage = () => {
                 onCreateAccount={handleCreateAccount}
             />
 
-            {/* Step 2 & 3: Guest Workshop Modal (Separate from Dashboard) */}
+            
             <GuestWorkshopModal
                 isOpen={showGuestModal}
                 onClose={() => setShowGuestModal(false)}

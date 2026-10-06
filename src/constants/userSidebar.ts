@@ -1,4 +1,4 @@
-// constants/userSidebar.ts
+
 export const userSidebar = [
   { title: "Dashboard", path: "/user", icon: null },
   { title: "My Projects", path: "/user/projects", icon: null },

@@ -1,4 +1,4 @@
-// pages/user/CreateProject.tsx
+
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -22,9 +22,9 @@ import {
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 
-// ============================================
-// INTERFACES / TYPES
-// ============================================
+
+
+
 
 interface ProjectFormData {
   title: string;
@@ -53,18 +53,18 @@ interface ApiResponse {
   data?: any;
 }
 
-// ============================================
-// MAIN COMPONENT
-// ============================================
+
+
+
 
 const CreateProject = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ============================================
-  // STATE MANAGEMENT
-  // ============================================
+  
+  
+  
 
   const [formData, setFormData] = useState<ProjectFormData>({
     title: "",
@@ -82,18 +82,18 @@ const CreateProject = () => {
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [showAvailabilityWarning, setShowAvailabilityWarning] = useState(false);
 
-  // ============================================
-  // AVAILABILITY STATE
-  // ============================================
+  
+  
+  
 
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
   const [blockedDatesFull, setBlockedDatesFull] = useState<BlockedDate[]>([]);
   const [showAvailabilityBanner, setShowAvailabilityBanner] = useState(true);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
 
-  // ============================================
-  // VALIDATION STATE
-  // ============================================
+  
+  
+  
 
   const [validationErrors, setValidationErrors] = useState<{
     title?: string;
@@ -114,9 +114,9 @@ const CreateProject = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // ============================================
-  // FETCH BLOCKED DATES
-  // ============================================
+  
+  
+  
 
   useEffect(() => {
     fetchBlockedDates();
@@ -148,7 +148,7 @@ const CreateProject = () => {
         const data = response.data.data || [];
         setBlockedDatesFull(data);
         
-        // Extract dates and format to YYYY-MM-DD for comparison with input
+        
         const blocked = data.map((item: BlockedDate) => {
           const date = new Date(item.date);
           return date.toISOString().split('T')[0];
@@ -159,15 +159,15 @@ const CreateProject = () => {
       }
     } catch (err: any) {
       console.error("Error fetching blocked dates:", err);
-      // Don't show error to user, just log it
+      
     } finally {
       setAvailabilityLoading(false);
     }
   };
 
-  // ============================================
-  // CHECK IF DATE IS BLOCKED
-  // ============================================
+  
+  
+  
 
   const isDateBlocked = (date: string): boolean => {
     if (!date) return false;
@@ -177,7 +177,7 @@ const CreateProject = () => {
   const checkDeadlineAvailability = (deadline: string) => {
     if (!deadline) return true;
     
-    // Only check for hire-expert option
+    
     if (formData.proceedOption !== 'hire-expert') return true;
     
     const isBlocked = isDateBlocked(deadline);
@@ -195,9 +195,9 @@ const CreateProject = () => {
     }
   };
 
-  // ============================================
-  // FORMAT BLOCKED DATES FOR DISPLAY
-  // ============================================
+  
+  
+  
 
   const formatDateForDisplay = (dateString: string) => {
     const date = new Date(dateString);
@@ -212,9 +212,9 @@ const CreateProject = () => {
     return blockedDatesFull.map(item => formatDateForDisplay(item.date)).join(', ');
   };
 
-  // ============================================
-  // PROJECT TYPES
-  // ============================================
+  
+  
+  
 
   const projectTypes = [
     "Research Paper",
@@ -229,9 +229,9 @@ const CreateProject = () => {
     "Other",
   ];
 
-  // ============================================
-  // PROCEED OPTIONS
-  // ============================================
+  
+  
+  
 
   const proceedOptions = [
     {
@@ -271,9 +271,9 @@ const CreateProject = () => {
     },
   ];
 
-  // ============================================
-  // VALIDATION FUNCTIONS
-  // ============================================
+  
+  
+  
 
   const validateField = (field: keyof typeof validationErrors) => {
     const errors: typeof validationErrors = {};
@@ -316,7 +316,7 @@ const CreateProject = () => {
   const validateForm = (): boolean => {
     const errors: typeof validationErrors = {};
     
-    // Validate all fields
+    
     Object.keys(formData).forEach(key => {
       if (key === 'priority' || key === 'proceedOption' || key === 'description') return;
       const fieldErrors = validateField(key as keyof typeof validationErrors);
@@ -327,9 +327,9 @@ const CreateProject = () => {
     return Object.keys(errors).length === 0;
   };
 
-  // ============================================
-  // HANDLERS
-  // ============================================
+  
+  
+  
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -342,15 +342,15 @@ const CreateProject = () => {
       [name]: value,
     }));
 
-    // Mark field as touched
+    
     if (name === 'title' || name === 'type' || name === 'deadline') {
       setTouched(prev => ({ ...prev, [name]: true }));
     }
 
-    // Clear validation error on change
+    
     setValidationErrors(prev => ({ ...prev, [name]: undefined }));
 
-    // Check deadline availability if deadline changes
+    
     if (name === 'deadline' && value) {
       checkDeadlineAvailability(value);
     }
@@ -371,12 +371,12 @@ const CreateProject = () => {
       proceedOption: option,
     }));
 
-    // Reset availability error when switching to AI options
+    
     if (option !== 'hire-expert') {
       setAvailabilityError(null);
       setShowAvailabilityWarning(false);
     } else if (formData.deadline) {
-      // Check availability if switching to hire-expert and deadline is set
+      
       checkDeadlineAvailability(formData.deadline);
     }
   };
@@ -392,9 +392,9 @@ const CreateProject = () => {
     }
   };
 
-  // ============================================
-  // FILE HANDLERS - SINGLE FILE ONLY
-  // ============================================
+  
+  
+  
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -402,7 +402,7 @@ const CreateProject = () => {
 
     const file = files[0];
 
-    // Valid file types
+    
     const validTypes = [
       "application/pdf",
       "application/msword",
@@ -416,9 +416,9 @@ const CreateProject = () => {
       "application/x-rar-compressed",
     ];
 
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 10 * 1024 * 1024; 
 
-    // Validate file type
+    
     if (!validTypes.includes(file.type)) {
       setError(`Invalid file type: ${file.name}. Please upload PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, or ZIP files.`);
       setValidationErrors(prev => ({ ...prev, attachment: 'Invalid file type' }));
@@ -428,7 +428,7 @@ const CreateProject = () => {
       return;
     }
 
-    // Validate file size
+    
     if (file.size > maxSize) {
       setError(`File ${file.name} exceeds 10MB limit.`);
       setValidationErrors(prev => ({ ...prev, attachment: 'File size exceeds 10MB' }));
@@ -438,7 +438,7 @@ const CreateProject = () => {
       return;
     }
 
-    // Set single file
+    
     setAttachment({
       id: Date.now() + "-" + Math.random().toString(36).substr(2, 9),
       file,
@@ -450,7 +450,7 @@ const CreateProject = () => {
     setError(null);
     setValidationErrors(prev => ({ ...prev, attachment: undefined }));
 
-    // Reset input
+    
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -470,14 +470,14 @@ const CreateProject = () => {
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
-  // ============================================
-  // FORM SUBMISSION
-  // ============================================
+  
+  
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check availability for hire-expert
+    
     if (formData.proceedOption === 'hire-expert' && formData.deadline) {
       if (isDateBlocked(formData.deadline)) {
         setAvailabilityError(
@@ -485,7 +485,7 @@ const CreateProject = () => {
         );
         setShowAvailabilityWarning(true);
         
-        // Scroll to the deadline field
+        
         const deadlineField = document.querySelector('[name="deadline"]');
         if (deadlineField) {
           deadlineField.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -494,18 +494,18 @@ const CreateProject = () => {
       }
     }
 
-    // Mark all fields as touched
+    
     setTouched({
       title: true,
       type: true,
       deadline: true,
     });
 
-    // Validate form
+    
     if (!validateForm()) {
       setError('Please fill all the fields');
       
-      // Scroll to first error
+      
       const firstErrorField = document.querySelector('[data-error="true"]');
       if (firstErrorField) {
         firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -527,7 +527,7 @@ const CreateProject = () => {
 
       let documentUrl = "";
 
-      // Upload document first
+      
       if (attachment?.file) {
         const uploadFormData = new FormData();
         uploadFormData.append("document", attachment.file);
@@ -552,7 +552,7 @@ const CreateProject = () => {
         documentUrl = uploadResponse.data.data.fileUrl;
       }
 
-      // Create project
+      
       const response = await axios.post(
         `${API_URL}/api/auth/projects`,
         {
@@ -593,23 +593,21 @@ const CreateProject = () => {
     navigate("/user/projects");
   };
 
-  // ============================================
-  // HELPER: Check if field has error
-  // ============================================
+  
+  
+  
 
   const hasError = (field: keyof typeof validationErrors) => {
     return touched[field as keyof typeof touched] && validationErrors[field];
   };
 
-  // ============================================
-  // RENDER
-  // ============================================
+  
+  
+  
 
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900">
-      {/* ==========================================
-          HEADER
-          ========================================== */}
+      
       <div className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
         <button
           onClick={handleBack}
@@ -646,9 +644,7 @@ const CreateProject = () => {
         </div>
       </div>
 
-      {/* ==========================================
-          AVAILABILITY BANNER
-          ========================================== */}
+      
       {showAvailabilityBanner && blockedDatesFull.length > 0 && (
         <div className="bg-amber-50 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-800 px-6 py-3">
           <div className="max-w-[1100px] mx-auto flex items-center justify-between flex-wrap gap-3">
@@ -663,21 +659,14 @@ const CreateProject = () => {
                 </span>
               </div>
             </div>
-            {/* <button
-              onClick={() => setShowAvailabilityBanner(false)}
-              className="text-amber-500 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition-colors text-sm"
-            >
-              Dismiss
-            </button> */}
+            
           </div>
         </div>
       )}
 
-      {/* ==========================================
-          MAIN CONTENT
-          ========================================== */}
+      
       <div className="max-w-[1100px] mx-auto px-6 py-8">
-        {/* Page Title */}
+        
         <div className="mb-8">
           <h1 className="text-2xl font-['Roboto'] font-bold text-[#0F2D63] dark:text-white mb-1">
             Create New Project
@@ -687,7 +676,7 @@ const CreateProject = () => {
           </p>
         </div>
 
-        {/* Availability Warning */}
+        
         {showAvailabilityWarning && availabilityError && (
           <div className="flex items-start gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-6">
             <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -695,7 +684,7 @@ const CreateProject = () => {
           </div>
         )}
 
-        {/* Success/Error Messages */}
+        
         {success && (
           <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm mb-6">
             <CheckCircle className="w-4 h-4" />
@@ -710,16 +699,12 @@ const CreateProject = () => {
           </div>
         )}
 
-        {/* ==========================================
-            FORM
-            ========================================== */}
+        
         <form onSubmit={handleSubmit} noValidate>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* ==========================================
-                LEFT COLUMN
-                ========================================== */}
+            
             <div className="lg:col-span-2 space-y-5">
-              {/* Step 1: Project Details */}
+              
               <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
                 <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-50 dark:border-gray-700">
                   <div className="w-7 h-7 rounded-full bg-[#0F2D63] dark:bg-[#1a3d7a] flex items-center justify-center flex-shrink-0">
@@ -736,7 +721,7 @@ const CreateProject = () => {
                 </div>
 
                 <div className="px-6 py-6 space-y-5">
-                  {/* Project Title */}
+                  
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">
                       Project Title <span className="text-[#C85A32]">*</span>
@@ -769,7 +754,7 @@ const CreateProject = () => {
                     </p>
                   </div>
 
-                  {/* Project Type */}
+                  
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">
                       Project Type <span className="text-[#C85A32]">*</span>
@@ -808,7 +793,7 @@ const CreateProject = () => {
                     )}
                   </div>
 
-                  {/* Project Description */}
+                  
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">
                       Project Description
@@ -829,7 +814,7 @@ const CreateProject = () => {
                 </div>
               </div>
 
-              {/* Step 2: Proceed Option */}
+              
               <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
                 <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-50 dark:border-gray-700">
                   <div className="w-7 h-7 rounded-full bg-[#0F2D63] dark:bg-[#1a3d7a] flex items-center justify-center flex-shrink-0">
@@ -862,21 +847,21 @@ const CreateProject = () => {
                               : `${option.borderColor} ${option.bgHover}`
                           } ${option.hoverBorder || ""}`}
                         >
-                          {/* Recommended Badge */}
+                          
                           {option.recommended && (
                             <span className="absolute -top-2.5 left-4 bg-[#C85A32] text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest">
                               Recommended
                             </span>
                           )}
 
-                          {/* Selected Checkmark */}
+                          
                           {isSelected && (
                             <div className="absolute top-3 right-3 w-5 h-5 bg-[#0F2D63] dark:bg-[#1a3d7a] rounded-full flex items-center justify-center">
                               <CheckCircle className="w-3 h-3 text-white" />
                             </div>
                           )}
 
-                          {/* Icon */}
+                          
                           <div
                             className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                               isSelected && option.id === "ai-writing"
@@ -897,7 +882,7 @@ const CreateProject = () => {
                             />
                           </div>
 
-                          {/* Label & Description */}
+                          
                           <div>
                             <p
                               className={`text-sm font-semibold ${
@@ -921,7 +906,7 @@ const CreateProject = () => {
                 </div>
               </div>
 
-              {/* Step 3: Attach File - SINGLE FILE ONLY */}
+              
               <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
                 <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-50 dark:border-gray-700">
                   <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
@@ -943,7 +928,7 @@ const CreateProject = () => {
                 </div>
 
                 <div className="px-6 py-6">
-                  {/* Upload Area */}
+                  
                   {!attachment ? (
                     <div
                       onClick={() => fileInputRef.current?.click()}
@@ -984,7 +969,7 @@ const CreateProject = () => {
                       </div>
                     </div>
                   ) : (
-                    // Show uploaded file
+                    
                     <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border-2 border-[#0F2D63] dark:border-[#C85A32]">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-[#0F2D63]/10 dark:bg-[#1a3d7a]/20 rounded-xl flex items-center justify-center">
@@ -1017,7 +1002,7 @@ const CreateProject = () => {
                     onChange={handleFileUpload}
                   />
 
-                  {/* Show file info when uploaded */}
+                  
                   {attachment && (
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 text-center">
                       ✓ File uploaded successfully. Click the X to remove and upload a different file.
@@ -1027,18 +1012,16 @@ const CreateProject = () => {
               </div>
             </div>
 
-            {/* ==========================================
-                RIGHT COLUMN - Sidebar
-                ========================================== */}
+            
             <div className="space-y-5">
-              {/* Project Settings */}
+              
               <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
                   Project Settings
                 </h3>
 
                 <div className="space-y-4">
-                  {/* Priority */}
+                  
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">
                       Priority
@@ -1082,7 +1065,7 @@ const CreateProject = () => {
                     </div>
                   </div>
 
-                  {/* Deadline */}
+                  
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">
                       Deadline <span className="text-[#C85A32]">*</span>
@@ -1112,7 +1095,7 @@ const CreateProject = () => {
                       </p>
                     )}
                     
-                    {/* Show availability status near deadline field */}
+                    
                     {formData.proceedOption === 'hire-expert' && formData.deadline && (
                       <>
                         {isDateBlocked(formData.deadline) ? (
@@ -1132,7 +1115,7 @@ const CreateProject = () => {
                 </div>
               </div>
 
-              {/* Info Box */}
+              
               <div className="bg-[#0F2D63] dark:bg-[#1a3d7a] rounded-2xl p-5">
                 <div className="flex items-start gap-2.5 mb-3">
                   <Shield className="w-4 h-4 text-white/70 flex-shrink-0 mt-0.5" />
@@ -1147,7 +1130,7 @@ const CreateProject = () => {
                 </p>
               </div>
 
-              {/* Submit Button (Mobile) */}
+              
               <button
                 type="submit"
                 disabled={loading}

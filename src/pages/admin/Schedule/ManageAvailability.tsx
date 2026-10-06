@@ -1,4 +1,4 @@
-// pages/user/ManageAvailability.tsx
+
 import React, { useState, useEffect } from "react";
 import {
   ArrowLeft,
@@ -74,7 +74,7 @@ const ManageAvailability = () => {
     "Asia/Dubai",
   ];
 
-  // Fetch existing availability on mount
+  
   useEffect(() => {
     fetchAvailability();
   }, []);
@@ -241,7 +241,7 @@ const ManageAvailability = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6FB]">
-      {/* Sticky Header */}
+      
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4 sticky top-0 z-20 shadow-sm">
         <button
           onClick={handleCancel}
@@ -273,9 +273,9 @@ const ManageAvailability = () => {
         </button>
       </div>
 
-      {/* Form Content */}
+      
       <div className="max-w-[720px] mx-auto px-4 py-7 space-y-5">
-        {/* Availability Mode */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-4">
             <Calendar className="w-3.5 h-3.5 text-[#C85A32]" />
@@ -355,7 +355,7 @@ const ManageAvailability = () => {
           </div>
         </div>
 
-        {/* Recurring Days */}
+        
         {formData.mode === "recurring" && (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
             <div>
@@ -415,7 +415,7 @@ const ManageAvailability = () => {
           </div>
         )}
 
-        {/* Date & Time Range */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-[#C85A32]" />
@@ -491,7 +491,7 @@ const ManageAvailability = () => {
           </div>
         </div>
 
-        {/* Time Slots */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-3">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-[#C85A32]" />
@@ -541,7 +541,7 @@ const ManageAvailability = () => {
           </button>
         </div>
 
-        {/* Block Dates */}
+        
         <div className="bg-white rounded-2xl border border-red-100 shadow-sm p-6 space-y-4">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-red-500" />
@@ -617,7 +617,7 @@ const ManageAvailability = () => {
           </div>
         </div>
 
-        {/* Action Buttons */}
+        
         <div className="flex gap-3 pb-6">
           <button
             onClick={handleCancel}

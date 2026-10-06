@@ -1,14 +1,14 @@
-// src/routes/AppRoutes.tsx
+
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
-// Layouts
+
 import WebsiteLayout from "@/layouts/WebsiteLayout";
 import AuthLayout from "@/layouts/AuthLayout";
 import UserLayout from "@/layouts/user/UserLayout";
 import AdminLayout from "@/layouts/admin/AdminLayout";
 
-// Website Pages
+
 import Home from "@/pages/website/Home";
 import AboutUs from "@/pages/website/AboutUs/AboutUs";
 import Contact from "@/pages/website/Contact/Contact";
@@ -29,13 +29,13 @@ import Careers from "@/pages/website/Careers/Careers";
 import DigitalToolkitweb from "@/pages/website/DigitalToolkit/DigitalToolkit";
 import Workshops from "@/pages/website/Workshops/workshops";
 
-// Auth Pages
+
 import Login from "@/pages/auth/Login";
 import CreateAccount from "@/pages/auth/CreateAccount";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
 
-// User Pages
+
 import UserDashboard from "@/pages/user/Dashboard";
 import Settings from "@/pages/user/Settings";
 import Projects from "@/pages/user/projects/projects";
@@ -65,7 +65,7 @@ import InvoicePaymentSuccess from '@/pages/user/Invoices/InvoicePaymentSuccess';
 import InvoicePaymentCancelled from '@/pages/user/Invoices/InvoicePaymentCancelled';
 
 
-// Admin Pages
+
 import AdminDashboard from "@/pages/admin/Dashboard";
 import Users from "@/pages/admin/Users";
 import ManageExperts from "@/pages/admin/Manageexperts/ManageExperts";
@@ -88,7 +88,7 @@ import CreateQuote from "@/pages/admin/InvoiceQuoteManagement/CreateQuote";
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* WEBSITE - Public */}
+      
       <Route path="/" element={<WebsiteLayout />}>
         <Route index element={<Home />} />
         <Route path="about" element={<AboutUs />} />
@@ -114,7 +114,7 @@ const AppRoutes = () => {
 
       </Route>
 
-      {/* AUTH - Public */}
+      
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/onboarding" element={<CreateAccount />} />
@@ -122,7 +122,7 @@ const AppRoutes = () => {
         <Route path="/reset-password" element={<ResetPassword />} />
       </Route>
 
-      {/* USER - Protected */}
+      
       <Route path="/user" element={
         <ProtectedRoute>
           <UserLayout />
@@ -155,7 +155,7 @@ const AppRoutes = () => {
         <Route path="invoice-cancelled" element={<InvoicePaymentCancelled />} />
       </Route>
 
-      {/* ADMIN - Protected (Admin Only) */}
+      
       <Route path="/admin" element={
         <ProtectedRoute adminOnly={true}>
           <AdminLayout />

@@ -1,4 +1,4 @@
-// pages/user/Quotes.tsx
+
 import React, { useState, useEffect } from "react";
 import {
   FileText,
@@ -69,7 +69,7 @@ const Quotes = () => {
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Fetch quotes on mount
+  
   useEffect(() => {
     if (user?.email) {
       fetchQuotes();
@@ -93,7 +93,7 @@ const Quotes = () => {
         return;
       }
 
-      // Fetch quotes by user email
+      
       const response = await axios.get(`${API_BASE_URL}/api/user/quotes`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -101,12 +101,12 @@ const Quotes = () => {
       });
 
       if (response.data.success) {
-        // Check if data is an array or single object
+        
         let quotesData = [];
         if (Array.isArray(response.data.data)) {
           quotesData = response.data.data;
         } else if (response.data.data) {
-          // If it's a single object, convert to array
+          
           quotesData = [response.data.data];
         }
 
@@ -123,13 +123,13 @@ const Quotes = () => {
 
           const status = statusMap[quote.status] || "Pending Review";
 
-          // Check if expiring soon (within 7 days)
+          
           const validUntil = new Date(quote.validUntil);
           const today = new Date();
           const daysDiff = Math.ceil((validUntil.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
           const isExpiringSoon = daysDiff <= 7 && daysDiff >= 0 && status === "Pending Review";
 
-          // Determine type from items or service type
+          
           let type: "Workshop" | "Project" | "AI Writing" | "AI Speech" | "Consulting" = "Project";
           if (quote.items && quote.items.length > 0) {
             const serviceType = quote.items[0]?.serviceType || "";
@@ -276,7 +276,7 @@ const Quotes = () => {
         toast.success("Quote approved successfully");
         setIsModalOpen(false);
         setSelectedQuote(null);
-        await fetchQuotes(); // Refresh the list
+        await fetchQuotes(); 
       } else {
         toast.error(response.data.message || "Failed to approve quote");
       }
@@ -291,7 +291,7 @@ const Quotes = () => {
     setIsModalOpen(true);
   };
 
-  // Quote Detail Modal Component
+  
   const QuoteDetailModal = () => {
     if (!selectedQuote || !selectedQuote.rawData) return null;
 
@@ -299,7 +299,7 @@ const Quotes = () => {
     const statusBadge = getStatusBadge(selectedQuote.status);
     const isPending = selectedQuote.status === "Pending Review" || selectedQuote.status === "sent";
 
-    // Format currency
+    
     const formatCurrency = (amount: number) => {
       return new Intl.NumberFormat("en-ZA", {
         style: "currency",
@@ -312,7 +312,7 @@ const Quotes = () => {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-          {/* Header */}
+          
           <div className="flex items-start justify-between p-6 border-b border-gray-100">
             <div>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
@@ -336,9 +336,9 @@ const Quotes = () => {
             </button>
           </div>
 
-          {/* Body */}
+          
           <div className="p-6 space-y-5">
-            {/* Status and Valid Until */}
+            
             <div className="flex items-center gap-2">
               <span
                 className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${statusBadge.bg} ${statusBadge.text} ${statusBadge.border}`}
@@ -351,7 +351,7 @@ const Quotes = () => {
               </span>
             </div>
 
-            {/* Services */}
+            
             <div>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">
                 Services
@@ -385,7 +385,7 @@ const Quotes = () => {
               </div>
             </div>
 
-            {/* Totals */}
+            
             <div className="border-t border-gray-100 pt-4 space-y-2 text-sm">
               <div className="flex justify-between text-gray-500">
                 <span>Subtotal</span>
@@ -415,7 +415,7 @@ const Quotes = () => {
               </div>
             </div>
 
-            {/* Notes */}
+            
             {quoteData.additionalNotes && (
               <div className="bg-[#f4f6fb] rounded-xl p-4">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
@@ -427,7 +427,7 @@ const Quotes = () => {
               </div>
             )}
 
-            {/* Action Buttons */}
+            
             <div className="flex flex-col gap-2">
               {isPending && (
                 <button
@@ -476,7 +476,7 @@ const Quotes = () => {
 
   return (
     <div className="min-h-screen bg-[#F9F7F4] p-6 space-y-5">
-      {/* Header */}
+      
       <div>
         <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-1">
           Quotes
@@ -489,7 +489,7 @@ const Quotes = () => {
         </p>
       </div>
 
-      {/* Filters */}
+      
       <div className="flex gap-1 bg-white border border-gray-100 rounded-2xl p-1.5 shadow-sm flex-wrap">
         {filters.map((filter) => {
           const isActive = activeFilter === filter;
@@ -519,7 +519,7 @@ const Quotes = () => {
         })}
       </div>
 
-      {/* Quote List */}
+      
       <div className="space-y-3">
         {filteredQuotes.map((quote) => {
           const statusBadge = getStatusBadge(quote.status);
@@ -534,12 +534,12 @@ const Quotes = () => {
               }`}
             >
               <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                {/* Icon */}
+                
                 <div className="w-10 h-10 bg-[#f4f6fb] rounded-xl flex items-center justify-center flex-shrink-0">
                   <FileText className="w-[18px] h-[18px] text-[#0F2D63]" />
                 </div>
 
-                {/* Content */}
+                
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <p className="font-bold text-[#0F2D63] text-sm">
@@ -580,7 +580,7 @@ const Quotes = () => {
                   </div>
                 </div>
 
-                {/* Actions */}
+                
                 <div className="flex items-center gap-3 flex-shrink-0">
                   <div className="text-right">
                     <p className="text-xs text-gray-400">Total</p>
@@ -623,7 +623,7 @@ const Quotes = () => {
         )}
       </div>
 
-      {/* Quote Detail Modal */}
+      
       {isModalOpen && <QuoteDetailModal />}
     </div>
   );

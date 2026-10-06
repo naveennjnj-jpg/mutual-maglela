@@ -1,4 +1,4 @@
-// components/auth/OrganisationTypeStep.tsx
+
 import React from 'react';
 
 interface OrganisationTypeStepProps {

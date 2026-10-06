@@ -97,7 +97,7 @@ const LifeAtMagalela = ({
   return (
     <section className={`${padding} ${bgColor}`}>
       <div className={`${maxWidth} mx-auto px-6 lg:px-8`}>
-        {/* Header */}
+        
         <div className="text-center mb-14">
           {badge && (
             <p className={`${badgeColor} text-xs font-semibold uppercase tracking-widest mb-4`}>
@@ -116,7 +116,7 @@ const LifeAtMagalela = ({
           )}
         </div>
 
-        {/* Benefits Grid */}
+        
         <div className={`grid ${gridCols} ${gap}`}>
           {benefits.map((benefit) => {
             const IconComponent = benefit.icon;

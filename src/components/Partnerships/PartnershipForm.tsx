@@ -80,14 +80,14 @@ const PartnershipForm = ({
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
+    
     setTimeout(() => {
       console.log("Form submitted:", formData);
       setIsSubmitting(false);
       if (onSubmit) {
         onSubmit(formData);
       }
-      // Reset form
+      
       setFormData({
         firstName: "",
         lastName: "",
@@ -103,7 +103,7 @@ const PartnershipForm = ({
     <section id="partner-form" className="py-20 bg-white">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-16 items-start">
-          {/* Left Column - Content */}
+          
           <div className="lg:w-2/5 shrink-0">
             <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-4">
               {badge}
@@ -125,10 +125,10 @@ const PartnershipForm = ({
             </div>
           </div>
 
-          {/* Right Column - Form */}
+          
           <div className="lg:w-3/5">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name Fields */}
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 mb-1.5">
@@ -167,7 +167,7 @@ const PartnershipForm = ({
                 </div>
               </div>
 
-              {/* Organisation */}
+              
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5">
                   Organisation
@@ -186,7 +186,7 @@ const PartnershipForm = ({
                 </div>
               </div>
 
-              {/* Email */}
+              
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5">
                   Email address
@@ -205,7 +205,7 @@ const PartnershipForm = ({
                 </div>
               </div>
 
-              {/* Partnership Type */}
+              
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5">
                   Partnership type
@@ -230,7 +230,7 @@ const PartnershipForm = ({
                 </div>
               </div>
 
-              {/* Message */}
+              
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5">
                   Tell us about your communication needs
@@ -249,7 +249,7 @@ const PartnershipForm = ({
                 </div>
               </div>
 
-              {/* Submit Button */}
+              
               <button
                 type="submit"
                 disabled={isSubmitting}

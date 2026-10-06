@@ -1,4 +1,4 @@
-// layouts/user/UserLayout.tsx
+
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import UserSidebar from "./UserSidebar";

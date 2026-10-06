@@ -1,4 +1,4 @@
-// components/auth/PrimaryGoalStep.tsx
+
 import React from 'react';
 
 interface PrimaryGoalStepProps {

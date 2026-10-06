@@ -1,4 +1,4 @@
-// pages/user/Plans.tsx
+
 import React, { useState, useEffect } from "react";
 import {
   Zap,
@@ -126,7 +126,7 @@ const Plans = () => {
 
   const getPriceForBilling = (plan: Plan) => {
     if (isAnnual) {
-      // For yearly billing, 20% discount (10 months for the price of 12)
+      
       return Math.round(plan.price * 10);
     }
     return plan.price;
@@ -149,7 +149,7 @@ const Plans = () => {
   };
 
   const handlePurchase = async (plan: Plan) => {
-    // Check if user is logged in
+    
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("Please login to purchase a plan");
@@ -157,7 +157,7 @@ const Plans = () => {
       return;
     }
 
-    // Check if billing info is available
+    
     if (!userBillingInfo || !userBillingInfo.email) {
       toast.error("Please update your profile with billing information");
       navigate("/user/profile");
@@ -218,7 +218,7 @@ const Plans = () => {
           amount: price,
         }));
 
-        // Redirect to PayFast
+        
         const form = document.createElement("form");
         form.method = "POST";
         form.action = paymentUrl;
@@ -255,17 +255,17 @@ const Plans = () => {
     );
   }
 
-  // Separate plans by billing type
+  
   const monthlyPlans = plans.filter(p => p.billingType === "Monthly" || p.billingType === "One-time");
   const yearlyPlans = plans.filter(p => p.billingType === "Yearly");
 
-  // Use all plans or filtered based on toggle
+  
   const displayPlans = isAnnual ? yearlyPlans : monthlyPlans;
 
   return (
     <div className="min-h-screen bg-[#F9F7F4] p-6">
       <div className="max-w-[1400px] mx-auto">
-        {/* Header */}
+        
         <div className="mb-6">
           <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-1">
             Subscription
@@ -278,7 +278,7 @@ const Plans = () => {
           </p>
         </div>
 
-        {/* User Info Warning */}
+        
         {!userBillingInfo?.email && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
             <p className="text-amber-700 text-sm">
@@ -293,7 +293,7 @@ const Plans = () => {
           </div>
         )}
 
-        {/* Billing Toggle */}
+        
         <div className="flex items-center justify-center gap-3 mb-8">
           <span
             className={`text-sm font-medium ${
@@ -326,7 +326,7 @@ const Plans = () => {
           </span>
         </div>
 
-        {/* Plans Grid */}
+        
         {displayPlans.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
             <Zap className="w-12 h-12 text-gray-300 mx-auto mb-3" />
@@ -360,7 +360,7 @@ const Plans = () => {
                   <h3 className="font-bold text-[#0F2D63] mb-1">{plan.name}</h3>
                   <p className="text-xs text-gray-500 mb-4">{plan.description}</p>
                   
-                  {/* Credits Display */}
+                  
                   <div className="flex items-center gap-1.5 bg-[#fff4f0] border border-[#f5c9b8] rounded-xl px-3 py-2 mb-4 w-fit">
                     <Coins className="w-3.5 h-3.5 text-[#C85A32]" />
                     <span className="text-sm font-bold text-[#C85A32]">
@@ -371,7 +371,7 @@ const Plans = () => {
                     </span>
                   </div>
 
-                  {/* Price */}
+                  
                   <div className="mb-5">
                     <span className="text-3xl font-bold text-[#0F2D63]">
                       {price === 0 ? "Free" : `R${Math.round(price).toLocaleString()}`}
@@ -388,7 +388,7 @@ const Plans = () => {
                     )}
                   </div>
 
-                  {/* Features */}
+                  
                   <ul className="space-y-2 mb-6 flex-1">
                     {plan.features && plan.features.map((feature, index) => (
                       <li
@@ -401,7 +401,7 @@ const Plans = () => {
                     ))}
                   </ul>
 
-                  {/* Action Button */}
+                  
                   <button
                     onClick={() => handlePurchase(plan)}
                     disabled={isPurchasing || !userBillingInfo?.email}
@@ -429,7 +429,7 @@ const Plans = () => {
           </div>
         )}
 
-        {/* Enterprise CTA */}
+        
         <div className="bg-[#0F2D63] rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p className="text-white font-bold mb-1">Need a custom volume deal?</p>

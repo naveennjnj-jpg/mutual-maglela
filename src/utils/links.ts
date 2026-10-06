@@ -9,5 +9,5 @@ export const SHOPIFY_TRAINING_LINKS = {
 };
 
 export const isExternalUrl = (url: string): boolean => {
-  return /^https?:\/\//i.test(url);
+  return /^https?:\/\
 };

@@ -1,4 +1,4 @@
-// components/Common/WorkshopCTA.tsx
+
 import React from "react";
 import { ArrowRight } from "lucide-react";
 
@@ -22,7 +22,7 @@ const WorkshopCTA: React.FC<WorkshopCTAProps> = ({
   className = "",
 }) => {
   const handleButtonClick = () => {
-    console.log("🔵 WorkshopCTA Button Clicked"); // ✅ Debug log
+    console.log("🔵 WorkshopCTA Button Clicked"); 
     if (primaryButton.onClick) {
       console.log("🟢 Calling onClick...");
       primaryButton.onClick();
@@ -36,7 +36,7 @@ const WorkshopCTA: React.FC<WorkshopCTAProps> = ({
     <section className={`bg-[#F5F0EA] py-6 ${className}`}>
       <div className="mx-auto max-w-[1200px] px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between gap-8 rounded-2xl bg-[#0F2D63] px-10 py-12 md:flex-row">
-          {/* Content */}
+          
           <div className="max-w-xl">
             <h2 className="mb-3 text-2xl font-['Roboto'] leading-[1.2] text-white md:text-[28px]">
               {title}
@@ -47,7 +47,7 @@ const WorkshopCTA: React.FC<WorkshopCTAProps> = ({
             </p>
           </div>
 
-          {/* Button */}
+          
           <div className="shrink-0">
             <button
               onClick={handleButtonClick}

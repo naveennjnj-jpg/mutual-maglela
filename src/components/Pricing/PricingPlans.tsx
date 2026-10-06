@@ -1,4 +1,4 @@
-// components/PricingPlans.tsx
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Check, ArrowRight, Loader2 } from "lucide-react";
@@ -93,7 +93,7 @@ const PricingPlans = ({
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  // Fetch plans from API
+  
   useEffect(() => {
     if (useApi) {
       fetchPlans();
@@ -128,9 +128,9 @@ const PricingPlans = ({
     }
   };
 
-  // Transform API data to component format
+  
   const transformApiPlans = (apiPlans: any[]): PricingPlan[] => {
-    // Group plans by name/tier
+    
     const groupedPlans: Record<string, any> = {};
 
     apiPlans.forEach((plan) => {
@@ -155,32 +155,32 @@ const PricingPlans = ({
           creditsYearly: plan.creditsYearly || (plan.credits || 0) * 12 || 0,
           tier: plan.tier,
           billingType: plan.billingType,
-          // Store the plan data directly
+          
           monthlyPrice: plan.monthlyPrice || `R ${plan.price?.toLocaleString() || 0}`,
           yearlyPrice: plan.yearlyPrice || (plan.price ? `R ${(plan.price * 10).toLocaleString()}` : "R 0"),
         };
       } else {
-        // Update existing grouped plan with data from this plan
+        
         const existing = groupedPlans[key];
         
-        // Update monthly data if this plan has it
+        
         if (plan.monthlyPrice || plan.price) {
           existing.monthlyPrice = plan.monthlyPrice || `R ${plan.price?.toLocaleString() || 0}`;
           existing.creditsMonthly = plan.creditsMonthly || plan.credits || 0;
         }
         
-        // Update yearly data if this plan has it
+        
         if (plan.yearlyPrice || plan.price) {
           existing.yearlyPrice = plan.yearlyPrice || `R ${(plan.price * 10).toLocaleString()}`;
           existing.creditsYearly = plan.creditsYearly || (plan.credits || 0) * 12 || 0;
         }
         
-        // Update features if this plan has more
+        
         if (plan.features && plan.features.length > 0) {
           existing.features = plan.features;
         }
         
-        // Update other fields
+        
         if (plan.isPopular) existing.isPopular = plan.isPopular;
         if (plan.buttonLabel) existing.buttonText = plan.buttonLabel;
         if (plan.buttonLink) existing.buttonLink = plan.buttonLink;
@@ -190,7 +190,7 @@ const PricingPlans = ({
       }
     });
 
-    // Convert to array and sort
+    
     return Object.values(groupedPlans).sort((a, b) => {
       if (a.isPopular && !b.isPopular) return -1;
       if (!a.isPopular && b.isPopular) return 1;
@@ -255,7 +255,7 @@ const PricingPlans = ({
   return (
     <section className={`${padding} ${bgColor}`}>
       <div className={`${maxWidth} mx-auto px-6 lg:px-8`}>
-        {/* Header */}
+        
         <div className="text-center mb-14">
           {badge && (
             <p className={`${badgeColor} text-xs font-semibold uppercase tracking-widest mb-4`}>
@@ -274,7 +274,7 @@ const PricingPlans = ({
           )}
         </div>
 
-        {/* Billing Toggle */}
+        
         {showToggle && displayPlans.length > 0 && (
           <div className="flex justify-center mb-10">
             <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 w-fit">
@@ -302,7 +302,7 @@ const PricingPlans = ({
           </div>
         )}
 
-        {/* Plans Grid */}
+        
         {displayPlans.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500">No plans available</p>
@@ -318,7 +318,7 @@ const PricingPlans = ({
                     : "border-gray-200 shadow-sm"
                 }`}
               >
-                {/* Popular Badge */}
+                
                 {plan.isPopular && (
                   <div className="absolute -top-3.5 right-5">
                     <span
@@ -329,27 +329,27 @@ const PricingPlans = ({
                   </div>
                 )}
 
-                {/* Plan Name */}
+                
                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
                   {plan.name}
                 </p>
 
-                {/* Plan Title */}
+                
                 <h3 className="text-xl font-['Roboto'] font-bold text-[#1C1C1C] mb-1">
                   {plan.title}
                 </h3>
 
-                {/* Plan Subtitle */}
+                
                 <p className="text-xs font-medium text-gray-500 mb-1">
                   {plan.subtitle}
                 </p>
 
-                {/* Plan Description */}
+                
                 <p className="text-xs text-gray-400 leading-relaxed mb-5">
                   {plan.description}
                 </p>
 
-                {/* Credits */}
+                
                 {getCredits(plan) > 0 && (
                   <div className="mb-3">
                     <span className="text-xs font-semibold text-[#C85A32] bg-[#fff4f0] px-3 py-1 rounded-full">
@@ -358,7 +358,7 @@ const PricingPlans = ({
                   </div>
                 )}
 
-                {/* Price */}
+                
                 <div className="mb-6">
                   <p className="text-2xl md:text-3xl font-bold text-[#1C1C1C] leading-tight">
                     {getPrice(plan)}
@@ -367,7 +367,7 @@ const PricingPlans = ({
                   <p className="text-xs text-gray-400 mt-1">per {billingCycle === "monthly" ? "month" : "year"}</p>
                 </div>
 
-                {/* Features */}
+                
                 <ul className="space-y-3 mb-8 flex-1">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start gap-2.5">
@@ -379,7 +379,7 @@ const PricingPlans = ({
                   ))}
                 </ul>
 
-                {/* Button */}
+                
                 <Link
                   to={plan.buttonLink}
                   className={`w-full py-3 rounded-xl font-semibold text-sm text-center transition-all ${

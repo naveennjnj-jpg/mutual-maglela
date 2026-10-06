@@ -1,4 +1,4 @@
-// layouts/admin/AdminSidebar.tsx
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -74,7 +74,7 @@ const AdminSidebar = ({
     navigate("/login");
   };
 
-  // Admin menu items
+  
   const sidebarItems: SidebarItem[] = [
     { title: "Dashboard", path: "/admin", icon: LayoutDashboard },
     { title: "Users", path: "/admin/users", icon: Users },
@@ -143,7 +143,7 @@ const AdminSidebar = ({
     <>
       <aside className={`hidden lg:flex lg:flex-col fixed left-0 top-0 bottom-0 z-30 bg-[#0F2D63] dark:bg-[#0F2D63] transition-all duration-300 ${isOpen ? 'w-[260px]' : 'w-[72px]'
         }`}>
-        {/* Logo */}
+        
         <div className={`flex items-center ${isOpen ? 'justify-center' : 'justify-center'} h-20 flex-shrink-0 px-4 border-b border-white/10`}>
           <Link to="/admin">
             {isOpen ? (
@@ -164,7 +164,7 @@ const AdminSidebar = ({
           </Link>
         </div>
 
-        {/* Navigation */}
+        
         <nav className={`flex-1 overflow-y-auto px-3 py-4 [scrollbar-width:none] ${!isOpen && 'px-2'}`}>
           {Object.entries(groupedItems).map(([key, items]) => {
             if (items.length === 0) return null;
@@ -232,7 +232,7 @@ const AdminSidebar = ({
             );
           })}
 
-          {/* Help Center */}
+          
           {isOpen && (
             <div className="mt-6 px-1">
               <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
@@ -250,7 +250,7 @@ const AdminSidebar = ({
           )}
         </nav>
 
-        {/* Admin Profile */}
+        
         <div className={`border-t border-white/10 p-4 flex items-center ${isOpen ? 'gap-3' : 'justify-center gap-0'}`}>
           {isOpen ? (
             <>
@@ -276,7 +276,7 @@ const AdminSidebar = ({
           )}
         </div>
 
-        {/* Toggle Button - Fixed position relative to sidebar */}
+        
         <button
           onClick={onToggle}
           className="hidden lg:flex absolute -right-4 top-[130px] items-center justify-center w-8 h-8 bg-[#C85A32] rounded-full shadow-lg hover:bg-[#a8472a] transition-all z-40"
@@ -293,7 +293,7 @@ const AdminSidebar = ({
         </button>
       </aside>
 
-      {/* Mobile Overlay */}
+      
       {isOpen && (
         <div
           className="lg:hidden fixed inset-0 z-20 bg-black/50 backdrop-blur-sm"
@@ -301,7 +301,7 @@ const AdminSidebar = ({
         ></div>
       )}
 
-      {/* Logout Modal */}
+      
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-7 w-full max-w-sm shadow-xl">

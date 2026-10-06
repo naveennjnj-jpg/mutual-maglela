@@ -1,4 +1,4 @@
-// pages/user/Workshops.tsx
+
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Plus, 
@@ -65,7 +65,7 @@ const Workshops = () => {
   const { user } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // State
+  
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +78,7 @@ const Workshops = () => {
 
   const fetchCalled = useRef(false);
 
-  // Fetch workshops
+  
   useEffect(() => {
     if (!fetchCalled.current) {
       fetchCalled.current = true;
@@ -113,23 +113,23 @@ const Workshops = () => {
       if (response.data.success) {
         const data = response.data.data;
         
-        // Check if data is an array or single object
+        
         let workshopsData: Workshop[] = [];
         
         if (Array.isArray(data)) {
-          // If data is already an array
+          
           workshopsData = data.map((item: any) => mapWorkshopData(item));
         } else if (data && typeof data === 'object') {
-          // If data is a single object, convert to array
+          
           workshopsData = [mapWorkshopData(data)];
         } else {
-          // Fallback to mock data
+          
           workshopsData = getMockWorkshops();
         }
         
         setWorkshops(workshopsData);
       } else {
-        // Use mock data as fallback
+        
         setWorkshops(getMockWorkshops());
       }
     } catch (err: any) {
@@ -140,9 +140,9 @@ const Workshops = () => {
     }
   };
 
-  // Map API data to Workshop interface
+  
   const mapWorkshopData = (item: any): Workshop => {
-    // Determine status mapping
+    
     let status: 'pending' | 'upcoming' | 'completed' | 'cancelled' = 'pending';
     if (item.status === 'upcoming' || item.status === 'pending') {
       status = 'pending';
@@ -152,7 +152,7 @@ const Workshops = () => {
       status = 'cancelled';
     }
 
-    // Determine category from serviceType
+    
     let category: 'media-training' | 'science-communication' | 'strategic-communication' | 'other' = 'other';
     if (item.serviceType === 'media-training') {
       category = 'media-training';
@@ -162,7 +162,7 @@ const Workshops = () => {
       category = 'strategic-communication';
     }
 
-    // Get color based on status
+    
     const getColor = (status: string) => {
       switch (status) {
         case 'pending':
@@ -177,7 +177,7 @@ const Workshops = () => {
       }
     };
 
-    // Get location based on attendanceType
+    
     const location = item.attendanceType === 'online' ? 'Online' : (item.location || 'In-Person');
 
     return {
@@ -209,7 +209,7 @@ const Workshops = () => {
     };
   };
 
-  // Mock data for fallback
+  
   const getMockWorkshops = (): Workshop[] => {
     return [
       {
@@ -309,7 +309,7 @@ const Workshops = () => {
     ];
   };
 
-  // Filter workshops based on tab and search
+  
   const getFilteredWorkshops = () => {
     let filtered = workshops;
 
@@ -332,13 +332,13 @@ const Workshops = () => {
 
   const filteredWorkshops = getFilteredWorkshops();
 
-  // Get status counts
+  
   const getStatusCount = (status: string) => {
     if (status === 'all') return workshops.length;
     return workshops.filter(w => w.status === status).length;
   };
 
-  // Format date
+  
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { 
@@ -349,7 +349,7 @@ const Workshops = () => {
     });
   };
 
-  // Format time
+  
   const formatTime = (timeStr: string) => {
     if (!timeStr) return 'N/A';
     const [hours, minutes] = timeStr.split(':');
@@ -359,7 +359,7 @@ const Workshops = () => {
     return `${hour12}:${minutes} ${ampm}`;
   };
 
-  // Get status badge
+  
   const getStatusBadge = (status: string) => {
     const configs = {
       pending: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-100', icon: Clock, label: 'Pending' },
@@ -378,7 +378,7 @@ const Workshops = () => {
     );
   };
 
-  // Get category icon
+  
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'media-training':
@@ -390,7 +390,7 @@ const Workshops = () => {
     }
   };
 
-  // Get category color
+  
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'media-training':
@@ -413,7 +413,7 @@ const Workshops = () => {
     setShowDetailsModal(true);
   };
 
-  // Loading state
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6 flex items-center justify-center">
@@ -428,7 +428,7 @@ const Workshops = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[1000px] mx-auto space-y-5">
-        {/* Header */}
+        
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-['Roboto'] font-bold text-[#0F2D63] dark:text-white">
@@ -447,7 +447,7 @@ const Workshops = () => {
           </button>
         </div>
 
-        {/* Tabs */}
+        
         <div className="flex gap-1 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-1.5 shadow-sm overflow-x-auto">
           {['all', 'pending', 'upcoming', 'completed', 'cancelled'].map((tab) => (
             <button
@@ -473,7 +473,7 @@ const Workshops = () => {
           ))}
         </div>
 
-        {/* Search */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -487,7 +487,7 @@ const Workshops = () => {
           </div>
         </div>
 
-        {/* Success Message */}
+        
         {successMessage && (
           <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm">
             <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -495,7 +495,7 @@ const Workshops = () => {
           </div>
         )}
 
-        {/* Error Message */}
+        
         {error && (
           <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -503,19 +503,19 @@ const Workshops = () => {
           </div>
         )}
 
-        {/* Workshops List */}
+        
         <div className="space-y-4">
           {filteredWorkshops.length > 0 ? (
             filteredWorkshops.map((workshop) => (
               <div 
                 key={workshop.id} 
                 className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-                // onClick={() => handleViewDetails(workshop)}
+                
               >
                 <div className={`h-1 ${workshop.color}`}></div>
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-4">
-                    {/* Date */}
+                    
                     <div className="w-14 h-14 bg-[#0F2D63] dark:bg-[#0F2D63] rounded-2xl flex flex-col items-center justify-center text-white flex-shrink-0">
                       <span className="text-[10px] font-semibold uppercase opacity-60">
                         {new Date(workshop.date).toLocaleDateString('en-US', { month: 'short' })}
@@ -525,7 +525,7 @@ const Workshops = () => {
                       </span>
                     </div>
 
-                    {/* Content */}
+                    
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${getCategoryColor(workshop.category)}`}>
@@ -535,7 +535,7 @@ const Workshops = () => {
                         {getStatusBadge(workshop.status)}
                       </div>
 
-                      {/* Contact Info */}
+                      
                       {(workshop.firstName || workshop.lastName) && (
                         <div className="flex items-center gap-2 mb-1.5">
                           <User className="w-3 h-3 text-gray-400" />
@@ -577,7 +577,7 @@ const Workshops = () => {
                         </span>
                       </div>
 
-                      {/* Special Requests */}
+                      
                       {workshop.specialRequests && (
                         <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-1.5 truncate max-w-md">
                           <MessageSquare className="w-3 h-3 inline mr-1" />
@@ -585,7 +585,7 @@ const Workshops = () => {
                         </p>
                       )}
 
-                      {/* Cancelled reason */}
+                      
                       {workshop.status === 'cancelled' && (
                         <p className="mt-2 text-xs text-red-500 bg-red-50 dark:bg-red-900/30 rounded-lg px-3 py-1.5">
                           Rescheduled due to speaker unavailability.
@@ -593,7 +593,7 @@ const Workshops = () => {
                       )}
                     </div>
 
-                    {/* View Details Arrow */}
+                    
                     <div className="flex-shrink-0 self-center">
                       <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600" />
                     </div>
@@ -626,20 +626,20 @@ const Workshops = () => {
         </div>
       </div>
 
-      {/* Create Workshop Modal */}
+      
       <CreateWorkshopModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSuccess={handleModalSuccess}
       />
 
-      {/* Workshop Details Modal */}
+      
       {showDetailsModal && selectedWorkshop && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-xl">
             <div className={`h-1.5 ${selectedWorkshop.color} rounded-t-2xl`}></div>
             <div className="p-6">
-              {/* Header */}
+              
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="text-xl font-bold text-[#0F2D63] dark:text-white">
@@ -661,9 +661,9 @@ const Workshops = () => {
                 </button>
               </div>
 
-              {/* Details */}
+              
               <div className="space-y-3">
-                {/* Date & Time */}
+                
                 <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
                   <Calendar className="w-5 h-5 text-[#C85A32] mt-0.5" />
                   <div>
@@ -676,7 +676,7 @@ const Workshops = () => {
                   </div>
                 </div>
 
-                {/* Location */}
+                
                 <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
                   {selectedWorkshop.location.includes('Online') ? (
                     <Monitor className="w-5 h-5 text-[#C85A32] mt-0.5" />
@@ -693,7 +693,7 @@ const Workshops = () => {
                   </div>
                 </div>
 
-                {/* Participants */}
+                
                 <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
                   <Users className="w-5 h-5 text-[#C85A32] mt-0.5" />
                   <div>
@@ -706,7 +706,7 @@ const Workshops = () => {
                   </div>
                 </div>
 
-                {/* Contact Person */}
+                
                 {(selectedWorkshop.firstName || selectedWorkshop.lastName) && (
                   <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
                     <User className="w-5 h-5 text-[#C85A32] mt-0.5" />
@@ -733,7 +733,7 @@ const Workshops = () => {
                   </div>
                 )}
 
-                {/* Special Requests */}
+                
                 {selectedWorkshop.specialRequests && (
                   <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
                     <MessageSquare className="w-5 h-5 text-[#C85A32] mt-0.5" />
@@ -748,7 +748,7 @@ const Workshops = () => {
                   </div>
                 )}
 
-                {/* Additional Info */}
+                
                 {selectedWorkshop.createdAt && (
                   <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
                     <Clock className="w-5 h-5 text-[#C85A32] mt-0.5" />
@@ -764,7 +764,7 @@ const Workshops = () => {
                 )}
               </div>
 
-              {/* Actions */}
+              
               <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
                 <button
                   onClick={() => setShowDetailsModal(false)}

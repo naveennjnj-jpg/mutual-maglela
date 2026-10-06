@@ -1,4 +1,4 @@
-// components/auth/ProfileTypeStep.tsx
+
 import React from 'react';
 
 interface ProfileTypeStepProps {

@@ -20,12 +20,12 @@ const TestimonialQuote = ({
   return (
     <section className="py-16 lg:py-20 bg-[#F9F7F4]">
       <div className="max-w-[900px] mx-auto px-6 text-center">
-        {/* Quote */}
+        
         <blockquote className="text-gray-700 text-lg md:text-xl leading-relaxed mb-6 italic">
           {quote}
         </blockquote>
 
-        {/* Author */}
+        
         <div className="flex items-center justify-center gap-3">
           <div className={`w-12 h-12 rounded-xl ${bgColor} flex items-center justify-center`}>
             <span className={`font-bold ${textColor}`}>{initials}</span>

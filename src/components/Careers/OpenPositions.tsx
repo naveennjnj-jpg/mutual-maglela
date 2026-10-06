@@ -106,7 +106,7 @@ const OpenPositions = ({
   return (
     <section id="open-positions" className={`${padding} ${bgColor}`}>
       <div className={`${maxWidth} mx-auto px-6 lg:px-8`}>
-        {/* Header */}
+        
         <div className="mb-12">
           {badge && (
             <p className={`${badgeColor} text-xs font-semibold uppercase tracking-widest mb-4`}>
@@ -125,7 +125,7 @@ const OpenPositions = ({
           )}
         </div>
 
-        {/* Positions List */}
+        
         <div className="space-y-4">
           {positions.map((position) => (
             <div

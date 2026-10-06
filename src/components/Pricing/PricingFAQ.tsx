@@ -137,7 +137,7 @@ const PricingFAQ = ({
     <section className={`${padding} ${bgColor}`}>
       <div className={`${maxWidth} mx-auto px-6 lg:px-8`}>
         <div className="flex flex-col lg:flex-row gap-16">
-          {/* Left Column - FAQs */}
+          
           <div className="lg:w-1/2">
             {badge && (
               <p className={`${badgeColor} text-xs font-semibold uppercase tracking-widest mb-4`}>
@@ -181,7 +181,7 @@ const PricingFAQ = ({
             </div>
           </div>
 
-          {/* Right Column - Enterprise */}
+          
           <div className="lg:w-1/2">
             <div className={`${enterpriseBgColor} rounded-2xl p-8 h-full flex flex-col`}>
               {enterpriseBadge && (

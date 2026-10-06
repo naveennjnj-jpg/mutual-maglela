@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 const StrategicSolutions = () => {
-  // Solutions data array
+  
   const solutions = [
     {
       id: 1,
@@ -62,7 +62,7 @@ const StrategicSolutions = () => {
   return (
     <section className="py-20 lg:py-24 bg-white">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
-        {/* Header Section */}
+        
         <div className="text-center mb-12">
           <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-3">
             Tailored for Every Communication Need
@@ -74,24 +74,24 @@ const StrategicSolutions = () => {
           </h2>
         </div>
 
-        {/* Solutions Grid */}
+        
         <div className="grid md:grid-cols-2 gap-6">
           {solutions.map((solution) => (
             <div
               key={solution.id}
               className="bg-[#F9F7F4] rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
             >
-              {/* Title */}
+              
               <h3 className="font-semibold text-[#1C1C1C] text-lg mb-3">
                 {solution.title}
               </h3>
 
-              {/* Description */}
+              
               <p className="text-gray-600 text-sm leading-relaxed mb-4">
                 {solution.description}
               </p>
 
-              {/* Benefits List */}
+              
               <ul className="space-y-2 mb-5">
                 {solution.benefits.map((benefit, index) => (
                   <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
@@ -101,7 +101,7 @@ const StrategicSolutions = () => {
                 ))}
               </ul>
 
-              {/* Read More Link */}
+              
               <Link
                 to={solution.link}
                 className="inline-flex items-center gap-1 text-[#C85A32] font-semibold text-sm hover:gap-2 transition-all"

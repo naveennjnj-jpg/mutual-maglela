@@ -1,4 +1,4 @@
-// pages/user/DigitalToolkits.tsx
+
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Search,
@@ -40,7 +40,7 @@ const DigitalToolkits = () => {
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // State
+  
   const [toolkits, setToolkits] = useState<Toolkit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,10 +51,10 @@ const DigitalToolkits = () => {
 
   const fetchCalled = useRef(false);
 
-  // Filter options
+  
   const filterOptions = ['All', 'Template', 'Visual Kit', 'Guide', 'Video Course', 'Toolkit', 'Free Only'];
 
-  // Fetch toolkits
+  
   useEffect(() => {
     if (!fetchCalled.current) {
       fetchCalled.current = true;
@@ -102,7 +102,7 @@ const DigitalToolkits = () => {
     }
   };
 
-  // Get icon based on type
+  
   const getIconForType = (type: string): React.ReactNode => {
     const iconMap: Record<string, React.ReactNode> = {
       'Guide': <BookOpen className="w-5 h-5 text-[#C85A32]" />,
@@ -114,7 +114,7 @@ const DigitalToolkits = () => {
     return iconMap[type] || <FileText className="w-5 h-5 text-[#C85A32]" />;
   };
 
-  // Mock data with file info
+  
   const getMockToolkits = (): Toolkit[] => {
     return [
       {
@@ -232,7 +232,7 @@ const DigitalToolkits = () => {
     ];
   };
 
-  // ✅ Create order and redirect to checkout
+  
   const handleAddToCart = async (toolkit: Toolkit) => {
     if (!user) {
       setError('Please login to purchase toolkits');
@@ -251,7 +251,7 @@ const DigitalToolkits = () => {
         return;
       }
 
-      // ✅ Prepare order data with user info - make all fields optional
+      
       const orderData = {
         userEmail: user.email,
         billingInfo: {
@@ -275,7 +275,7 @@ const DigitalToolkits = () => {
         }]
       };
 
-      // ✅ Create order and initiate PayFast payment
+      
       const response = await fetch(`${API_URL}/api/toolkit/create-order`, {
         method: 'POST',
         headers: {
@@ -296,19 +296,19 @@ const DigitalToolkits = () => {
         throw new Error(result.message || 'Payment initiation failed');
       }
 
-      // ✅ Store orderId in localStorage BEFORE redirect
+      
       if (result.success && result.orderId) {
         localStorage.setItem('pendingOrderId', result.orderId);
         localStorage.setItem('pendingPayment', 'true');
         localStorage.setItem('orderItems', JSON.stringify([toolkit]));
         console.log('✅ Order ID stored in localStorage:', result.orderId);
-          // Store the current page URL
+          
   localStorage.setItem('toolkitReturnUrl', window.location.href);
       }
 
       setSuccessMessage('Redirecting to payment...');
 
-      // ✅ Redirect to PayFast
+      
       if (result.paymentUrl && result.paymentData) {
         const form = document.createElement('form');
         form.method = 'POST';
@@ -338,14 +338,14 @@ const DigitalToolkits = () => {
     }
   };
 
-  // Handle free download
+  
   const handleFreeDownload = (toolkit: Toolkit) => {
     console.log('Downloading free toolkit:', toolkit.id);
     setSuccessMessage(`Downloading ${toolkit.title}...`);
     setTimeout(() => setSuccessMessage(null), 3000);
   };
 
-  // Filter toolkits
+  
   const getFilteredToolkits = () => {
     let filtered = toolkits;
 
@@ -382,7 +382,7 @@ const DigitalToolkits = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[1500px] mx-auto">
-        {/* Header with User Info */}
+        
         <div className="flex items-start justify-between mb-6">
           <div>
             <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-1">
@@ -396,7 +396,7 @@ const DigitalToolkits = () => {
             </p>
           </div>
 
-          {/* User Info Card */}
+          
           {user && (
             <div className="flex items-center gap-3 bg-white dark:bg-gray-800 rounded-xl px-4 py-2 border border-gray-100 dark:border-gray-700 shadow-sm">
               <div className="w-8 h-8 rounded-full bg-[#C85A32]/10 flex items-center justify-center">
@@ -414,7 +414,7 @@ const DigitalToolkits = () => {
           )}
         </div>
 
-        {/* Success Message */}
+        
         {successMessage && (
           <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm mb-4">
             <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -422,7 +422,7 @@ const DigitalToolkits = () => {
           </div>
         )}
 
-        {/* Error Message */}
+        
         {error && (
           <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-4">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -430,7 +430,7 @@ const DigitalToolkits = () => {
           </div>
         )}
 
-        {/* Search and Filter */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-6 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -459,7 +459,7 @@ const DigitalToolkits = () => {
           </div>
         </div>
 
-        {/* Toolkits Grid */}
+        
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
           {filteredToolkits.length > 0 ? (
             filteredToolkits.map((toolkit) => (
@@ -467,29 +467,29 @@ const DigitalToolkits = () => {
                 key={toolkit.id}
                 className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 flex flex-col hover:shadow-md transition-shadow"
               >
-                {/* Icon */}
+                
                 <div className="w-10 h-10 bg-[#FFF8F5] dark:bg-[#C85A32]/10 rounded-xl flex items-center justify-center mb-3">
                   {getIconForType(toolkit.type)}
                 </div>
 
-                {/* Title */}
+                
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <h3 className="text-sm font-semibold text-[#0F2D63] dark:text-white leading-snug flex-1">
                     {toolkit.title}
                   </h3>
                 </div>
 
-                {/* Type */}
+                
                 <span className="text-[10px] text-gray-400 dark:text-gray-500 mb-2">
                   {toolkit.type}
                 </span>
 
-                {/* Description */}
+                
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 flex-1">
                   {toolkit.description}
                 </p>
 
-                {/* Tags */}
+                
                 <div className="flex flex-wrap gap-1 mb-3">
                   {toolkit.tags.map((tag, index) => (
                     <span
@@ -501,7 +501,7 @@ const DigitalToolkits = () => {
                   ))}
                 </div>
 
-                {/* Rating and Downloads */}
+                
                 <div className="flex items-center gap-2 mb-3 text-xs text-gray-400 dark:text-gray-500">
                   <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
                   <span className="font-medium text-[#0F2D63] dark:text-white">{toolkit.rating}</span>
@@ -510,7 +510,7 @@ const DigitalToolkits = () => {
                   <span>{toolkit.downloads.toLocaleString()}</span>
                 </div>
 
-                {/* Price and Action */}
+                
                 <div className="flex items-center justify-between">
                   <span className={`text-sm font-semibold ${toolkit.isFree ? 'text-green-600 dark:text-green-400' : 'text-[#0F2D63] dark:text-white'}`}>
                     {toolkit.isFree ? 'Free' : `R${toolkit.price}`}
@@ -555,7 +555,7 @@ const DigitalToolkits = () => {
           )}
         </div>
 
-        {/* Footer */}
+        
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-4 px-1">
           {filteredToolkits.length} {filteredToolkits.length === 1 ? 'toolkit' : 'toolkits'} available
         </p>

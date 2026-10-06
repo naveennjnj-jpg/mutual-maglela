@@ -1,4 +1,4 @@
-// pages/admin/AddEditExpert.tsx
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { WhatsappChat, LinkedInChat } from "@/utils/svgicons";
@@ -56,7 +56,7 @@ const AddEditExpert = () => {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Get data from navigation state
+  
   const locationState = location.state as {
     expertData?: ExpertFormData;
     expertId?: string;
@@ -76,7 +76,7 @@ const AddEditExpert = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // Form state
+  
   const [formData, setFormData] = useState<ExpertFormData>({
     name: initialData?.name || '',
     title: initialData?.title || '',
@@ -99,7 +99,7 @@ const AddEditExpert = () => {
   const [newExpertise, setNewExpertise] = useState('');
   const [newCertification, setNewCertification] = useState('');
 
-  // Handle input changes
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -108,19 +108,19 @@ const AddEditExpert = () => {
     }));
   };
 
-  // Handle image upload
+  
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
+    
     const validTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!validTypes.includes(file.type)) {
       setError("Please upload a valid image (JPEG, PNG, or WEBP)");
       return;
     }
 
-    // Validate file size (max 5MB)
+    
     if (file.size > 5 * 1024 * 1024) {
       setError("Image size must be less than 5MB");
       return;
@@ -134,7 +134,7 @@ const AddEditExpert = () => {
       const uploadFormData = new FormData();
       uploadFormData.append("profileImage", file);
 
-      // First, upload the image
+      
       const uploadResponse = await axios.post<ApiResponse>(
         `${API_URL}/api/auth/update-profile-pic`,
         uploadFormData,
@@ -147,17 +147,17 @@ const AddEditExpert = () => {
       );
 
       if (uploadResponse.data.success) {
-        // Get the image URL from response
+        
         let imageUrl = uploadResponse.data.data?.imageUrl ||
           uploadResponse.data.data?.profilePic ||
           uploadResponse.data.data?.url;
 
-        // If imageUrl is relative, prepend API_URL
+        
         if (imageUrl && !imageUrl.startsWith("http")) {
           imageUrl = `${API_URL}/${imageUrl.replace(/^public\//, "")}`;
         }
 
-        // Update form data with new image URL
+        
         setFormData(prev => ({
           ...prev,
           profileImage: imageUrl
@@ -179,7 +179,7 @@ const AddEditExpert = () => {
     }
   };
 
-  // Add/Remove Expertise
+  
   const addExpertise = () => {
     if (newExpertise.trim() && !formData.expertise.includes(newExpertise.trim())) {
       setFormData(prev => ({
@@ -197,7 +197,7 @@ const AddEditExpert = () => {
     }));
   };
 
-  // Add/Remove Certification
+  
   const addCertification = () => {
     if (newCertification.trim() && !formData.certifications.includes(newCertification.trim())) {
       setFormData(prev => ({
@@ -215,7 +215,7 @@ const AddEditExpert = () => {
     }));
   };
 
-  // Navigation
+  
   const nextStep = () => {
     if (currentStep < 3) setCurrentStep(currentStep + 1);
   };
@@ -224,7 +224,7 @@ const AddEditExpert = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  // Validate current step
+  
   const validateStep = (step: number): boolean => {
     setError(null);
 
@@ -263,7 +263,7 @@ const AddEditExpert = () => {
     }
   };
 
-  // Submit form
+  
   const handleSubmit = async () => {
     if (!validateStep(1) || !validateStep(2) || !validateStep(3)) {
       return;
@@ -276,7 +276,7 @@ const AddEditExpert = () => {
     try {
       const token = localStorage.getItem("token");
 
-      // Prepare data
+      
       const submitData = {
         name: formData.name,
         title: formData.title,
@@ -300,7 +300,7 @@ const AddEditExpert = () => {
       let response: any;
 
       if (isEdit && expertId) {
-        // Update existing expert
+        
         response = await axios.patch<ApiResponse>(
           `${API_URL}/api/admin/experts/${expertId}`,
           submitData,
@@ -312,7 +312,7 @@ const AddEditExpert = () => {
           }
         );
       } else {
-        // Create new expert
+        
         response = await axios.post<ApiResponse>(
           `${API_URL}/api/admin/experts`,
           submitData,
@@ -352,10 +352,10 @@ const AddEditExpert = () => {
     { number: 3, label: 'Expertise & Bio' }
   ];
 
-  // Render step 1: Identity
+  
   const renderIdentityStep = () => (
     <div className="space-y-4">
-      {/* Profile Photo */}
+      
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
         <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-5 flex items-center gap-1.5">
           <Camera className="w-[13px] h-[13px] text-[#C85A32]" />
@@ -413,7 +413,7 @@ const AddEditExpert = () => {
         </div>
       </div>
 
-      {/* Basic Information */}
+      
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
         <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
           <User className="w-[13px] h-[13px] text-[#C85A32]" />
@@ -465,7 +465,7 @@ const AddEditExpert = () => {
     </div>
   );
 
-  // Render step 2: Contact & Links
+  
   const renderContactStep = () => (
     <div className="space-y-4">
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
@@ -536,7 +536,7 @@ const AddEditExpert = () => {
     </div>
   );
 
-  // Render step 3: Expertise & Bio
+  
   const renderExpertiseStep = () => (
     <div className="space-y-4">
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 space-y-4">
@@ -635,7 +635,7 @@ const AddEditExpert = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6FB] dark:bg-gray-900">
-      {/* Header */}
+      
       <div className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center gap-4 sticky top-0 z-20 shadow-sm">
         <button
           onClick={() => navigate('/admin/experts')}
@@ -667,7 +667,7 @@ const AddEditExpert = () => {
         </button>
       </div>
 
-      {/* Error Message */}
+      
       {error && (
         <div className="max-w-2xl mx-auto px-4 pt-4">
           <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
@@ -677,7 +677,7 @@ const AddEditExpert = () => {
         </div>
       )}
 
-      {/* Success Message */}
+      
       {success && (
         <div className="max-w-2xl mx-auto px-4 pt-4">
           <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-300 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
@@ -688,7 +688,7 @@ const AddEditExpert = () => {
       )}
 
       <div className="max-w-2xl mx-auto px-4 py-7 space-y-5">
-        {/* Steps */}
+        
         <div className="flex items-center gap-0">
           {steps.map((step, index) => (
             <React.Fragment key={step.number}>
@@ -725,7 +725,7 @@ const AddEditExpert = () => {
           ))}
         </div>
 
-        {/* Step Content */}
+        
         <div>
           {currentStep === 1 && renderIdentityStep()}
           {currentStep === 2 && renderContactStep()}

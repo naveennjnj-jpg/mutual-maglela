@@ -1,4 +1,4 @@
-// layouts/admin/AdminLayout.tsx
+
 import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
@@ -12,9 +12,9 @@ const AdminLayout = () => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const closeSidebar = () => setIsSidebarOpen(false);
 
-  // Apply admin theme if needed
+  
   useEffect(() => {
-    // Any admin-specific initialization
+    
   }, []);
 
   return (

@@ -1,4 +1,4 @@
-// pages/PaymentSuccess.tsx
+
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
@@ -51,7 +51,7 @@ const PaymentSuccess: React.FC = () => {
 
       if (data.success) {
         setOrderData(data.data);
-        // Clear cart and pending data
+        
         localStorage.removeItem('cart');
         localStorage.removeItem('pendingOrderId');
         localStorage.removeItem('pendingPayment');
@@ -160,7 +160,7 @@ const PaymentSuccess: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F2D63]">
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-y-auto max-h-[90vh] animate-in fade-in zoom-in duration-300">
-        {/* Header */}
+        
         <div className="sticky top-0 z-10 bg-[#0F2D63] px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 bg-[#C85A32] rounded-lg flex items-center justify-center">
@@ -184,7 +184,7 @@ const PaymentSuccess: React.FC = () => {
           </Link>
         </div>
 
-        {/* Content */}
+        
         <div className="px-8 py-8">
           <div className="text-center">
             <div className="relative w-20 h-20 mx-auto mb-6">
@@ -204,7 +204,7 @@ const PaymentSuccess: React.FC = () => {
               }
             </p>
 
-            {/* Order Summary */}
+            
             <div className="bg-[#F5F0EA] rounded-xl p-4 mb-6 text-left">
               <p className="text-[#C85A32] text-xs font-bold uppercase tracking-widest mb-2">
                 Order #{orderData.orderNumber}
@@ -229,7 +229,7 @@ const PaymentSuccess: React.FC = () => {
               </div>
             </div>
 
-            {/* Download Section - Only show if paid */}
+            
             {isPaid && (
               <div className="bg-[#F5F0EA] rounded-xl p-4 mb-6 text-left">
                 <p className="text-[#C85A32] text-xs font-bold uppercase tracking-widest mb-3">
@@ -283,7 +283,7 @@ const PaymentSuccess: React.FC = () => {
               </div>
             )}
 
-            {/* What's Next */}
+            
             <div className="bg-[#F5F0EA] rounded-xl p-4 mb-6 text-left">
               <p className="text-[#C85A32] text-xs font-bold uppercase tracking-widest mb-2">
                 What's next?
@@ -313,7 +313,7 @@ const PaymentSuccess: React.FC = () => {
               </ul>
             </div>
 
-            {/* Buttons */}
+            
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => {

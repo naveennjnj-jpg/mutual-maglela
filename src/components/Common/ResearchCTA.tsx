@@ -75,11 +75,11 @@ const ResearchCTA = ({
     }
   };
 
-  // Check if buttons have content
+  
   const hasPrimaryButton = primaryButton.text && primaryButton.text.trim() !== "";
   const hasSecondaryButton = secondaryButton.text && secondaryButton.text.trim() !== "";
 
-  // If no content, don't render anything
+  
   if (!title && !description && !hasPrimaryButton && !hasSecondaryButton) {
     return null;
   }
@@ -87,21 +87,21 @@ const ResearchCTA = ({
   return (
     <section className={`${padding} ${bgColor}`}>
       <div className={`${maxWidth} mx-auto px-6 ${getAlignmentClasses()}`}>
-        {/* Heading */}
+        
         {title && (
           <h2 className={`${titleSize} font-['Roboto'] font-semibold ${textColor} mb-5 leading-[1.2]`}>
             {title}
           </h2>
         )}
 
-        {/* Description */}
+        
         {description && (
           <p className={`${descriptionColor} text-base leading-relaxed mb-10 max-w-xl mx-auto ${alignment === "center" ? "mx-auto" : ""}`}>
             {description}
           </p>
         )}
 
-        {/* Buttons */}
+        
         {(hasPrimaryButton || hasSecondaryButton) && (
           <div className={`flex flex-col sm:flex-row items-center ${getButtonAlignment()} gap-3`}>
             {hasPrimaryButton && (

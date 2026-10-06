@@ -44,7 +44,7 @@ const SuccessDialog = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="md:gap-4">
-          {/* Icon or Image */}
+          
           {(icon || image) && (
             <div className="flex justify-center mb-4">
               {icon ? (

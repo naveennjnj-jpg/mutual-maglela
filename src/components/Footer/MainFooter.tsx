@@ -6,9 +6,9 @@ const MainFooter = () => {
   return (
     <footer className="bg-[#0F2D63] text-white pt-16 pb-8">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
-        {/* Footer Grid */}
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-10 gap-y-12 mb-12">
-          {/* Column 1 - Logo & Address */}
+          
           <div className="lg:col-span-1">
             <div className="mb-5">
               <img
@@ -43,7 +43,7 @@ const MainFooter = () => {
             </div>
           </div>
 
-          {/* Column 2 - Company */}
+          
           <div>
             <h4 className="font-semibold text-white text-[15px] mb-4">
               Company
@@ -84,7 +84,7 @@ const MainFooter = () => {
             </ul>
           </div>
 
-          {/* Column 3 - Solutions */}
+          
           <div>
             <h4 className="font-semibold text-white text-[15px] mb-4">
               Solutions
@@ -149,7 +149,7 @@ const MainFooter = () => {
             </ul>
           </div>
 
-          {/* Column 4 - Resources */}
+          
           <div>
             <h4 className="font-semibold text-white text-[15px] mb-4">
               Resources
@@ -182,7 +182,7 @@ const MainFooter = () => {
             </ul>
           </div>
 
-          {/* Column 5 - Legal */}
+          
           <div>
             <h4 className="font-semibold text-white text-[15px] mb-4">
               Legal
@@ -216,16 +216,16 @@ const MainFooter = () => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        
         <div className="border-t border-white/20 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-[13px] text-white/60">
             © 2026, Magalela Media Services. Company number: 2023/996006/07 All
             Rights Reserved.
           </p>
 
-          {/* Social Icons */}
+          
           <div className="flex items-center gap-3">
-            {/* LinkedIn */}
+            
             <a
               href="https://www.linkedin.com/company/magalela-media-services/"
               target="_blank"
@@ -251,7 +251,7 @@ const MainFooter = () => {
               </svg>
             </a>
 
-            {/* X (Twitter) */}
+            
             <a
               href="https://x.com/magalelamedia_"
               target="_blank"
@@ -264,7 +264,7 @@ const MainFooter = () => {
               </svg>
             </a>
 
-            {/* Instagram */}
+            
             <a
               href="https://www.instagram.com/magalelamedia_"
               target="_blank"
@@ -290,7 +290,7 @@ const MainFooter = () => {
               </svg>
             </a>
 
-            {/* Facebook */}
+            
             <a
               href="https://www.facebook.com/profile.php?id=61589354015218"
               target="_blank"
@@ -314,7 +314,7 @@ const MainFooter = () => {
               </svg>
             </a>
 
-            {/* WhatsApp */}
+            
             <a
               href="https://wa.me/27645467068"
               target="_blank"

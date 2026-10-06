@@ -92,22 +92,22 @@ const MeasurableOutcomes = ({
     return (
       <section className={`${padding} ${bgColor}`}>
         <div className="max-w-[900px] mx-auto px-6 lg:px-8 text-center">
-          {/* Badge */}
+          
           <p className={`${badgeColor} text-xs font-semibold tracking-[0.15em] uppercase mb-4`}>
             {badge}
           </p>
 
-          {/* Title */}
+          
           <h2 className={`${titleSize} font-['Roboto'] ${titleColor} leading-tight mb-5`}>
             {title}
           </h2>
 
-          {/* Description */}
+          
           <p className={`${descriptionColor} text-base leading-relaxed max-w-2xl mx-auto mb-12`}>
             {description}
           </p>
 
-          {/* Outcomes Grid - Centered */}
+          
           <div className={`grid ${gridCols} ${gap}`}>
             {outcomes.map((outcome) => (
               <div
@@ -130,7 +130,7 @@ const MeasurableOutcomes = ({
     <section className={`${padding} ${bgColor}`}>
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
         <div className={`grid ${leftWidth} gap-12 lg:gap-16 items-start`}>
-          {/* Left Column - Content */}
+          
           <div>
             <p className={`${badgeColor} text-xs font-semibold tracking-[0.15em] uppercase mb-4`}>
               {badge}
@@ -143,7 +143,7 @@ const MeasurableOutcomes = ({
             </p>
           </div>
 
-          {/* Right Column - Outcomes Grid */}
+          
           <div className={`grid ${gridCols} ${gap}`}>
             {outcomes.map((outcome) => (
               <div

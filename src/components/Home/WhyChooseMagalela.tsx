@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 const WhyChooseMagalela = () => {
-  // Benefits data array
+  
   const benefits = [
     {
       id: 1,
@@ -41,28 +41,28 @@ const WhyChooseMagalela = () => {
     <section className="py-20 lg:py-24 bg-[#0F2D63]">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-14 items-center">
-          {/* Left Content */}
+          
           <div>
-            {/* Badge */}
+            
             <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-4">
               Our Commitment to You
             </p>
 
-            {/* Heading */}
+            
             <h2 className="text-3xl lg:text-[40px] font-['Roboto'] text-white leading-tight mb-5">
               Why Choose
               <br />
               Magalela Media
             </h2>
 
-            {/* Description */}
+            
             <p className="text-white/70 text-base leading-relaxed mb-8">
               We combine institutional knowledge, journalistic discipline, and
               advanced AI to deliver communication that commands attention,
               builds trust, and drives impact.
             </p>
 
-            {/* CTA Buttons */}
+            
             <div className="flex flex-wrap gap-3">
               <Link
                 to="/contact"
@@ -80,19 +80,19 @@ const WhyChooseMagalela = () => {
             </div>
           </div>
 
-          {/* Right Content - Benefits List */}
+          
           <div className="space-y-3">
             {benefits.map((benefit) => (
               <div
                 key={benefit.id}
                 className="flex items-start gap-4 p-5 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors"
               >
-                {/* Check Icon */}
+                
                 <div className="w-6 h-6 rounded-full bg-white/10 border border-white/20 flex items-center justify-center shrink-0 mt-0.5">
                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-circle-check-big w-4 h-4 text-white"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>
                 </div>
 
-                {/* Content */}
+                
                 <div>
                   <p className="text-white font-semibold text-[15px] mb-1">
                     {benefit.title}

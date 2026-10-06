@@ -92,11 +92,11 @@ const ResearchCTA = ({
     }
   };
 
-  // Check if buttons have content
+  
   const hasPrimaryButton = primaryButton.text && primaryButton.text.trim() !== "";
   const hasSecondaryButton = secondaryButton.text && secondaryButton.text.trim() !== "";
 
-  // If no content, don't render anything
+  
   if (!badge && !title && !description && !hasPrimaryButton && !hasSecondaryButton) {
     return null;
   }
@@ -105,7 +105,7 @@ const ResearchCTA = ({
     <section className={`${padding} ${bgColor}`}>
       <div className={`${maxWidth} mx-auto px-6 lg:px-8 ${getAlignmentClasses()}`}>
         <div className={`${containerWidth} ${getContainerAlignment()}`}>
-          {/* Badge */}
+          
           {badge && (
             <div className="mb-3">
               <span className={`${badgeColor} text-xs font-semibold uppercase tracking-widest`}>
@@ -114,21 +114,21 @@ const ResearchCTA = ({
             </div>
           )}
 
-          {/* Title */}
+          
           {title && (
             <h2 className={`${titleSize} font-['Roboto'] ${textColor} leading-[1.2] mb-4`}>
               {title}
             </h2>
           )}
 
-          {/* Description */}
+          
           {description && (
             <p className={`${descriptionColor} text-sm md:text-base leading-relaxed ${containerWidth} ${getContainerAlignment()} mb-10`}>
               {description}
             </p>
           )}
 
-          {/* Buttons */}
+          
           {(hasPrimaryButton || hasSecondaryButton) && (
             <div className={`flex flex-wrap ${getButtonAlignment()} gap-4`}>
               {hasPrimaryButton && (

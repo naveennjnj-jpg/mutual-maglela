@@ -1,4 +1,4 @@
-// components/auth/PersonalInfoStep.tsx
+
 import React from 'react';
 
 interface PersonalInfoStepProps {

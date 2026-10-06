@@ -1,8 +1,8 @@
-// constants/adminSidebar.ts
+
 
 export const adminSidebar = [
   { title: "Dashboard", path: "/admin", icon: null },
-  // { title: "All Users", path: "/admin/users", icon: null },
+  
   { title: "Manage Projects", path: "/admin/projects", icon: null },
   { title: "Manage Experts", path: "/admin/experts", icon: null },
   { title: "My Schedule", path: "/admin/schedule", icon: null },

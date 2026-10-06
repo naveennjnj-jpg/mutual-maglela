@@ -1,4 +1,4 @@
-// pages/user/HireExperts.tsx
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Mail, Loader2, AlertCircle, Users, User, Calendar, Clock } from 'lucide-react';
 import { WhatsappChat, LinkedInChat } from "@/utils/svgicons";
@@ -30,24 +30,24 @@ interface ApiResponse {
   data?: any;
 }
 
-// Default avatar as inline SVG to avoid network requests
+
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e5e7eb'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.35em' font-size='40' fill='%239ca3af' font-family='sans-serif'%3E%3C/text%3E%3C/svg%3E";
 
 const HireExperts = () => {
   const { user } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // State
+  
   const [experts, setExperts] = useState<Expert[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isReadMore, setIsReadMore] = useState<{ [key: string]: boolean }>({});
   const [fetchAttempted, setFetchAttempted] = useState(false);
 
-  // Use ref to prevent multiple API calls
+  
   const fetchCalled = useRef(false);
 
-  // Fetch experts from API - only once
+  
   useEffect(() => {
     if (!fetchCalled.current) {
       fetchCalled.current = true;
@@ -55,7 +55,7 @@ const HireExperts = () => {
     }
   }, []);
 
-  // Get image URL with fallback
+  
   const getImageUrl = (imagePath: string | null | undefined): string => {
     if (!imagePath) return DEFAULT_AVATAR;
 
@@ -143,7 +143,7 @@ const HireExperts = () => {
     }
   };
 
-  // Mock data for fallback
+  
   const getMockExperts = (): Expert[] => {
     return [
       {
@@ -200,7 +200,7 @@ const HireExperts = () => {
     ];
   };
 
-  // Toggle read more
+  
   const toggleReadMore = (id: string | number) => {
     setIsReadMore(prev => ({
       ...prev,
@@ -208,7 +208,7 @@ const HireExperts = () => {
     }));
   };
 
-  // Open social link
+  
   const openLink = (url?: string) => {
     if (url) {
       if (url.startsWith('mailto:')) {
@@ -219,7 +219,7 @@ const HireExperts = () => {
     }
   };
 
-  // Get availability badge
+  
   const getAvailabilityBadge = (status?: string) => {
     switch (status) {
       case 'available':
@@ -233,7 +233,7 @@ const HireExperts = () => {
     }
   };
 
-  // Image component with error handling
+  
   const ExpertImage = ({ src, alt, className }: { src: string; alt: string; className: string }) => {
     const [imgError, setImgError] = useState(false);
 
@@ -255,7 +255,7 @@ const HireExperts = () => {
     );
   };
 
-  // Loading state
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6 flex items-center justify-center">
@@ -270,7 +270,7 @@ const HireExperts = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[1500px] mx-auto">
-        {/* Header */}
+        
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Schedule a call with an expert
@@ -280,7 +280,7 @@ const HireExperts = () => {
           </p>
         </div>
 
-        {/* Error Message */}
+        
         {error && (
           <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-6">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -288,7 +288,7 @@ const HireExperts = () => {
           </div>
         )}
 
-        {/* Experts Grid */}
+        
         {experts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {experts.map((expert) => (
@@ -296,7 +296,7 @@ const HireExperts = () => {
                 key={expert.id}
                 className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 w-full max-w-[480px]"
               >
-                {/* Expert Profile */}
+                
                 <div className="flex items-center gap-3 mb-4">
                   <div className="relative flex-shrink-0">
                     <ExpertImage
@@ -323,18 +323,11 @@ const HireExperts = () => {
                     {expert.title && (
                       <p className="text-xs text-gray-500 dark:text-gray-400">{expert.title}</p>
                     )}
-                    {/* <div className="flex items-center gap-2 mt-1">
-                      {expert.hourlyRate && expert.hourlyRate > 0 && (
-                        <span className="text-xs font-semibold text-[#C85A32]">
-                          R{expert.hourlyRate}/hr
-                        </span>
-                      )}
-                      {getAvailabilityBadge(expert.availability)}
-                    </div> */}
+                    
                   </div>
                 </div>
 
-                {/* Bio */}
+                
                 <div className="mb-1">
                   <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                     {isReadMore[expert.id.toString()]
@@ -354,7 +347,7 @@ const HireExperts = () => {
                   </button>
                 )}
 
-                {/* Expertise Tags */}
+                
                 {expert.expertise && expert.expertise.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-3">
                     {expert.expertise.slice(0, 3).map((skill, index) => (
@@ -375,7 +368,7 @@ const HireExperts = () => {
 
                 <div className="border-t border-gray-200 dark:border-gray-700 mb-4"></div>
 
-                {/* Social Action Buttons */}
+                
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => openLink(expert.socialLinks.linkedin)}
@@ -412,7 +405,7 @@ const HireExperts = () => {
             ))}
           </div>
         ) : (
-          /* Empty State */
+          
           <div className="text-center py-12">
             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
               <Users className="w-10 h-10 text-gray-400" />

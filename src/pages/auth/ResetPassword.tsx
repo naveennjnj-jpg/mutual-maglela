@@ -1,4 +1,4 @@
-// pages/auth/ResetPassword.tsx
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Lock, ArrowRight, ArrowLeft, Shield, AlertCircle, CheckCircle, Eye, EyeOff } from "lucide-react";
@@ -21,7 +21,7 @@ const ResetPassword = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // Validate token on mount
+  
   useEffect(() => {
     if (!token) {
       setIsTokenValid(false);
@@ -34,14 +34,14 @@ const ResetPassword = () => {
     setLoading(true);
     setError("");
 
-    // Validate passwords match
+    
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       setLoading(false);
       return;
     }
 
-    // Validate password strength
+    
     if (password.length < 8) {
       setError("Password must be at least 8 characters");
       setLoading(false);
@@ -57,7 +57,7 @@ const ResetPassword = () => {
 
       if (response.data.success) {
         setSuccess(true);
-        // Redirect to login after 2 seconds
+        
         setTimeout(() => {
           navigate("/login", { 
             state: { message: "Password reset successfully! Please login with your new password." } 

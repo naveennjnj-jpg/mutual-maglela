@@ -1,4 +1,4 @@
-// components/settings/SettingsLayout.tsx
+
 import React, { useState } from "react";
 import SettingsSidebar from "./SettingsSidebar";
 import ProfileTab from "./ProfileTab";
@@ -37,7 +37,7 @@ const SettingsLayout = ({
   return (
     <div className="min-h-screen bg-[#F9F7F4] p-6">
       <div className="max-w-[1000px] mx-auto">
-        {/* Header */}
+        
         <div className="mb-6">
           <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-1">
             Account
@@ -48,7 +48,7 @@ const SettingsLayout = ({
           <p className="text-gray-500 text-sm mt-1">{subtitle}</p>
         </div>
 
-        {/* Main Content */}
+        
         <div className="flex flex-col sm:flex-row gap-6">
           <SettingsSidebar
             activeTab={activeTab}

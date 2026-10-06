@@ -1,4 +1,4 @@
-// pages/user/Settings.tsx
+
 import React from "react";
 import SettingsLayout from "@/components/user/settings/SettingsLayout";
 

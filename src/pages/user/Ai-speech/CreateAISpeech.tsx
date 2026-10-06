@@ -1,4 +1,4 @@
-// pages/user/Ai-speech/CreateAISpeech.tsx
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -73,7 +73,7 @@ const CreateAISpeech = () => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // State
+  
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
   const [inputMethod, setInputMethod] = useState<'paste' | 'upload' | 'record'>('paste');
@@ -85,7 +85,7 @@ const CreateAISpeech = () => {
   const [currentStep, setCurrentStep] = useState<'create' | 'processing'>('create');
   const [processingStep, setProcessingStep] = useState(0);
 
-  // Recording State
+  
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -96,7 +96,7 @@ const CreateAISpeech = () => {
   const [recordingSize, setRecordingSize] = useState('');
   const [permissionDenied, setPermissionDenied] = useState(false);
 
-  // Voice Tone Parameters
+  
   const [parameters, setParameters] = useState({
     authority: 58,
     clarity: 95,
@@ -105,7 +105,7 @@ const CreateAISpeech = () => {
     narrativeDepth: 93,
   });
 
-  // Refs
+  
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -118,7 +118,7 @@ const CreateAISpeech = () => {
     { label: 'Finalising your speech…' },
   ];
 
-  // Cleanup on unmount
+  
   useEffect(() => {
     return () => {
       if (timerRef.current) {
@@ -169,9 +169,9 @@ const CreateAISpeech = () => {
     }
   };
 
-  // ============================================
-  // RECORDING FUNCTIONS
-  // ============================================
+  
+  
+  
 
   const startRecording = async () => {
     try {
@@ -195,7 +195,7 @@ const CreateAISpeech = () => {
         setRecordingSize((audioBlob.size / 1024).toFixed(1) + ' KB');
         setRecordingName(`Recording-${new Date().toLocaleDateString()}`);
         
-        // Stop all tracks
+        
         stream.getTracks().forEach(track => track.stop());
       };
 
@@ -204,7 +204,7 @@ const CreateAISpeech = () => {
       setIsPaused(false);
       setPermissionDenied(false);
 
-      // Start timer
+      
       timerRef.current = setInterval(() => {
         setRecordingTime(prev => prev + 1);
       }, 1000);
@@ -285,12 +285,12 @@ const CreateAISpeech = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // ============================================
-  // SWITCH INPUT METHOD (Clear previous data)
-  // ============================================
+  
+  
+  
 
   const switchInputMethod = (method: 'paste' | 'upload' | 'record') => {
-    // Clear previous input data when switching
+    
     if (method !== 'upload') {
       setFile(null);
       setFileName('');
@@ -305,7 +305,7 @@ const CreateAISpeech = () => {
     }
 
     if (method !== 'record') {
-      // Cancel recording if switching away
+      
       if (isRecording || audioBlob) {
         cancelRecording();
       }
@@ -320,29 +320,29 @@ const CreateAISpeech = () => {
     setError(null);
   };
 
-  // ============================================
-  // GENERATE FUNCTION
-  // ============================================
-
-// pages/user/Ai-speech/CreateAISpeech.tsx
-
-// ============================================
-// ✅ ADD THESE TYPES AT THE TOP (After imports)
-// ============================================
+  
+  
+  
 
 
-// ============================================
-// ✅ REPLACE YOUR EXISTING handleGenerate WITH THIS
-// ============================================
+
+
+
+
+
+
+
+
+
 
 const handleGenerate = async () => {
-  // Validation
+  
   if (!name.trim()) {
     setError('Please enter a speech name');
     return;
   }
 
-  // Check if ANY content is provided based on input method
+  
   if (inputMethod === 'paste' && !content.trim()) {
     setError('Please paste your content');
     return;
@@ -373,11 +373,11 @@ const handleGenerate = async () => {
       return;
     }
 
-    // Step 1: Analysing your content
+    
     setProcessingStep(0);
     await new Promise(resolve => setTimeout(resolve, 600));
 
-    // Prepare form data - ONLY ONE INPUT METHOD AT A TIME
+    
     const formData = new FormData();
     formData.append('title', name);
     formData.append('authority', String(parameters.authority));
@@ -387,7 +387,7 @@ const handleGenerate = async () => {
     formData.append('narrativeDepth', String(parameters.narrativeDepth));
     formData.append('inputMethod', inputMethod);
 
-    // ✅ ONLY send data based on current input method
+    
     if (inputMethod === 'paste') {
       formData.append('content', content);
     } else if (inputMethod === 'upload') {
@@ -406,11 +406,11 @@ const handleGenerate = async () => {
       }
     }
 
-    // Step 2: Calibrating voice tone parameters
+    
     setProcessingStep(1);
     await new Promise(resolve => setTimeout(resolve, 600));
 
-    // Send to backend
+    
     const response = await axios.post<ApiResponse>(
       `${API_URL}/api/ai-speech/generate`,
       formData,
@@ -422,34 +422,34 @@ const handleGenerate = async () => {
       }
     );
 
-    // Step 3: Generating speech output
+    
     setProcessingStep(2);
     await new Promise(resolve => setTimeout(resolve, 600));
 
     if (response.data.success) {
-      // ✅ FIXED: Use backend response data directly
+      
       const backendData = response.data.data;
       
-      // ✅ Create result data that matches Result.tsx expected structure
+      
       const resultData: SpeechData = {
-        // Audio data
+        
         audioUrl: backendData?.audioUrl || '',
         duration: backendData?.duration || 0,
         format: backendData?.format || 'mp3',
         size: backendData?.size || 0,
         
-        // Provider info
+        
         provider: backendData?.provider || 'openai',
         model: backendData?.model || 'tts-1',
         
-        // Content
+        
         charCount: backendData?.charCount || 0,
         text: backendData?.text || content || 'Generated speech content',
         
-        // Cost
+        
         cost: backendData?.cost || { usd: 0, zar: 0 },
         
-        // Analysis - Use backend data if available, otherwise use local parameters
+        
         analysis: backendData?.analysis || {
           authority: parameters.authority,
           clarity: parameters.clarity,
@@ -458,23 +458,23 @@ const handleGenerate = async () => {
           narrativeDepth: parameters.narrativeDepth,
         },
         
-        // Metadata
+        
         metadata: {
           title: backendData?.metadata?.title || name,
           generatedAt: backendData?.metadata?.generatedAt || new Date().toISOString(),
         },
         
-        // Optional fields
+        
         ...(backendData?.file && { file: backendData.file }),
         ...(backendData?.audio && { audio: backendData.audio }),
         ...(backendData?.recordingDuration && { recordingDuration: backendData.recordingDuration }),
       };
 
-      // Step 4: Finalising your speech
+      
       setProcessingStep(3);
       await new Promise(resolve => setTimeout(resolve, 400));
 
-      // Navigate to result page with proper data
+      
       navigate('/user/ai-speech/result', { state: { data: resultData } });
       
     } else {
@@ -494,7 +494,7 @@ const handleGenerate = async () => {
     navigate('/user/voice-calibrator');
   };
 
-  // Processing Screen
+  
   const renderProcessing = () => (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 flex items-center justify-center p-6">
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xl p-10 w-full max-w-sm text-center">
@@ -538,11 +538,11 @@ const handleGenerate = async () => {
     </div>
   );
 
-  // Create Screen
+  
   const renderCreate = () => (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[680px] mx-auto">
-        {/* Header */}
+        
         <div className="flex items-center gap-3 mb-6">
           <button 
             onClick={handleBack}
@@ -558,7 +558,7 @@ const handleGenerate = async () => {
           </div>
         </div>
 
-        {/* Error Message */}
+        
         {error && (
           <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-4">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -567,7 +567,7 @@ const handleGenerate = async () => {
         )}
 
         <div className="flex flex-col gap-4">
-          {/* Step 1: Speech Name */}
+          
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">
               <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">1</span>
@@ -582,7 +582,7 @@ const handleGenerate = async () => {
             />
           </div>
 
-          {/* Step 2: Voice Tone Parameters */}
+          
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">
               <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">2</span>
@@ -623,7 +623,7 @@ const handleGenerate = async () => {
             </div>
           </div>
 
-          {/* Step 3: Add Content - Only ONE option at a time */}
+          
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
             <div className="px-5 pt-5 pb-0">
               <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
@@ -704,9 +704,9 @@ const handleGenerate = async () => {
                   className="w-full text-sm text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3.5 resize-none focus:outline-none focus:border-[#C85A32] transition-colors leading-relaxed"
                 />
               ) : (
-                // Record Your Voice
+                
                 <div className="space-y-4">
-                  {/* Permission Denied */}
+                  
                   {permissionDenied && (
                     <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-4 text-center">
                       <MicOff className="w-8 h-8 text-red-500 mx-auto mb-2" />
@@ -723,10 +723,10 @@ const handleGenerate = async () => {
                     </div>
                   )}
 
-                  {/* Recording Controls */}
+                  
                   {!permissionDenied && (
                     <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6">
-                      {/* Timer Display */}
+                      
                       <div className="flex items-center justify-center mb-4">
                         <div className="flex items-center gap-3">
                           <div className={`w-3 h-3 rounded-full ${isRecording ? 'animate-pulse bg-red-500' : 'bg-gray-400'}`}></div>
@@ -739,7 +739,7 @@ const handleGenerate = async () => {
                         </div>
                       </div>
 
-                      {/* Recording Controls */}
+                      
                       <div className="flex items-center justify-center gap-3">
                         {!isRecording && !audioURL && (
                           <button
@@ -790,7 +790,7 @@ const handleGenerate = async () => {
                         )}
                       </div>
 
-                      {/* Audio Preview */}
+                      
                       {audioURL && (
                         <div className="mt-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
                           <div className="flex items-center gap-4">
@@ -838,7 +838,7 @@ const handleGenerate = async () => {
             </div>
           </div>
 
-          {/* Generate Button */}
+          
           <button
             onClick={handleGenerate}
             disabled={isSubmitting}
@@ -857,7 +857,7 @@ const handleGenerate = async () => {
             )}
           </button>
 
-          {/* Disclaimer */}
+          
           <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 flex items-start gap-3">
             <span className="text-amber-500 text-base flex-shrink-0 mt-0.5">⚠️</span>
             <div>

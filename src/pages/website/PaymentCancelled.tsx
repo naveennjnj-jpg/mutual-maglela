@@ -1,4 +1,4 @@
-// components/auth/PaymentCancelled.tsx
+
 import React, { useEffect, useState } from "react";
 import { XCircle, Home, Loader2, ShoppingBag, ArrowLeft, X } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -11,7 +11,7 @@ const PaymentCancelled: React.FC = () => {
 
   useEffect(() => {
     const cancelOrder = async () => {
-      // ✅ Check localStorage for pending order ID
+      
       const orderId = localStorage.getItem('pendingOrderId');
       const hasPendingPayment = localStorage.getItem('pendingPayment');
 
@@ -30,7 +30,7 @@ const PaymentCancelled: React.FC = () => {
         setIsLoading(true);
         setError(null);
 
-        // ✅ Simple API call - only order ID in URL
+        
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/api/toolkit/orders/${orderId}/cancel`,
           {
@@ -51,7 +51,7 @@ const PaymentCancelled: React.FC = () => {
 
         setSuccess(true);
 
-        // ✅ Clear localStorage
+        
         localStorage.removeItem('pendingOrderId');
         localStorage.removeItem('pendingPayment');
 
@@ -72,7 +72,7 @@ const PaymentCancelled: React.FC = () => {
     <main className="flex-1 pt-0">
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F2D63]">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-          {/* Header */}
+          
           <div className="bg-[#0F2D63] px-6 py-5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 bg-[#C85A32] rounded-lg flex items-center justify-center">
@@ -100,9 +100,9 @@ const PaymentCancelled: React.FC = () => {
             </Link>
           </div>
 
-          {/* Content */}
+          
           <div className="px-8 py-8 text-center">
-            {/* Icon */}
+            
             <div className="relative w-20 h-20 mx-auto mb-6">
               <div className={`absolute inset-0 rounded-full animate-ping opacity-30 ${isLoading ? 'bg-yellow-100' :
                 success ? 'bg-green-100' :
@@ -122,7 +122,7 @@ const PaymentCancelled: React.FC = () => {
               </div>
             </div>
 
-            {/* Title */}
+            
             <h2 className="text-2xl font-['Roboto'] font-bold text-[#1C1C1C] mb-2">
               {isLoading ? 'Processing...' : success ? 'Order Cancelled' : 'Payment Cancelled'}
             </h2>
@@ -146,7 +146,7 @@ const PaymentCancelled: React.FC = () => {
               </div>
             )}
 
-            {/* What happened? */}
+            
             {!isLoading && !success && !error && (
               <div className="bg-[#F5F0EA] rounded-xl p-4 mb-6 text-left">
                 <p className="text-[#C85A32] text-xs font-bold uppercase tracking-widest mb-2">
@@ -169,7 +169,7 @@ const PaymentCancelled: React.FC = () => {
               </div>
             )}
 
-            {/* Success message */}
+            
             {success && (
               <div className="bg-green-50 rounded-xl p-4 mb-6 text-left border border-green-100">
                 <p className="text-green-700 text-sm font-medium">
@@ -178,7 +178,7 @@ const PaymentCancelled: React.FC = () => {
               </div>
             )}
 
-            {/* Error message */}
+            
             {error && (
               <div className="bg-red-50 rounded-xl p-4 mb-6 text-left border border-red-100">
                 <p className="text-red-700 text-sm font-medium">
@@ -190,7 +190,7 @@ const PaymentCancelled: React.FC = () => {
               </div>
             )}
 
-            {/* Buttons */}
+            
             <div className="flex flex-col gap-3">
               <Link
                 to="/digital-toolkit"

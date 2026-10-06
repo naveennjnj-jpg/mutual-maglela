@@ -1,4 +1,4 @@
-// components/settings/NotificationsTab.tsx
+
 import React, { useState, useEffect } from "react";
 import { Loader2, AlertCircle, CheckCircle, Save } from "lucide-react";
 import axios from "axios";
@@ -40,7 +40,7 @@ const NotificationsTab = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // Default notification items
+  
   const defaultNotifications: NotificationItem[] = [
     {
       id: 1,
@@ -107,10 +107,10 @@ const NotificationsTab = () => {
       console.log("API Response:", response.data);
 
       if (response.data.success && response.data.data) {
-        // The notification data is directly in response.data.data
+        
         const notificationData = response.data.data;
         
-        // Map API data to notification items
+        
         const mappedNotifications = defaultNotifications.map((item) => {
           const value = notificationData[item.key as keyof typeof notificationData];
           return {
@@ -148,7 +148,7 @@ const NotificationsTab = () => {
     try {
       const token = localStorage.getItem("token");
       
-      // Prepare data for API - create an object with all notification keys
+      
       const notificationData = notifications.reduce((acc, item) => {
         acc[item.key] = item.enabled;
         return acc;
@@ -158,7 +158,7 @@ const NotificationsTab = () => {
 
       const response = await axios.post<ApiResponse>(
         `${API_URL}/api/auth/notification-preferences`,
-        notificationData, // Send directly as the request body
+        notificationData, 
         {
           headers: {
             "Content-Type": "application/json",
@@ -197,7 +197,7 @@ const NotificationsTab = () => {
         Notification Preferences
       </h2>
 
-      {/* Success/Error Messages */}
+      
       {success && (
         <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm mb-4">
           <CheckCircle className="w-4 h-4" />

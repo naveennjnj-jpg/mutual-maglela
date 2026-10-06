@@ -58,7 +58,7 @@ const MeasurableOutcomes = ({
     <section className="py-20 lg:py-24 bg-[#0F2D63]">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
         <div className="grid lg:grid-cols-[420px_1fr] gap-12 lg:gap-16 items-start">
-          {/* Left Column - Content */}
+          
           <div>
             <p className="text-white/70 text-xs font-semibold tracking-[0.15em] uppercase mb-4">
               {badge}
@@ -71,7 +71,7 @@ const MeasurableOutcomes = ({
             </p>
           </div>
 
-          {/* Right Column - Outcomes Grid */}
+          
           <div className="grid sm:grid-cols-2 gap-4">
             {outcomes.map((outcome) => (
               <div

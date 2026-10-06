@@ -1,4 +1,4 @@
-// pages/admin/Projects.tsx
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -77,7 +77,7 @@ const Projects: React.FC = () => {
         const projectsData = response.data.data || [];
         setProjects(projectsData);
         
-        // Calculate stats - Include both 'Completed' and 'publish' for completed
+        
         const statsData = {
           active: projectsData.filter((p: Project) => 
             p.status === 'Pending' || p.status === 'In Progress' || p.status === 'On Hold'
@@ -305,7 +305,7 @@ const Projects: React.FC = () => {
   return (
     <main className="flex-1">
       <div className="min-h-screen bg-[#F4F6FB] p-6 space-y-5">
-        {/* Header */}
+        
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-[#C85A32] mb-1">
             Operations
@@ -316,7 +316,7 @@ const Projects: React.FC = () => {
           </p>
         </div>
 
-        {/* Filter Tabs */}
+        
         <div className="flex gap-1.5 flex-wrap">
           <button
             onClick={() => setActiveFilter('all')}
@@ -400,7 +400,7 @@ const Projects: React.FC = () => {
           </button>
         </div>
 
-        {/* Error */}
+        
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
@@ -408,7 +408,7 @@ const Projects: React.FC = () => {
           </div>
         )}
 
-        {/* Projects Grid */}
+        
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredProjects.length > 0 ? (
             filteredProjects.map((project) => {
@@ -443,7 +443,7 @@ const Projects: React.FC = () => {
                       {project.description || 'No description'}
                     </p>
 
-                    {/* Show rejection reason if rejected */}
+                    
                     {isRejected && project.feedbacknote && (
                       <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-3 text-xs">
                         <p className="font-semibold text-red-700 mb-1">Rejection Reason</p>
@@ -506,7 +506,7 @@ const Projects: React.FC = () => {
         </div>
       </div>
 
-      {/* Resubmit Modal */}
+      
       {showResubmitModal && selectedProject && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-xl max-w-[500px] w-full max-h-[90vh] overflow-y-auto">
@@ -529,14 +529,14 @@ const Projects: React.FC = () => {
             </div>
 
             <form onSubmit={handleResubmitSubmit} className="p-6 space-y-4">
-              {/* Project Info */}
+              
               <div className="bg-gray-50 rounded-xl p-3">
                 <p className="text-xs text-gray-500">Resubmitting</p>
                 <p className="text-sm font-semibold text-[#0F2D63]">{selectedProject.title}</p>
                 <p className="text-xs text-gray-400">{selectedProject.type}</p>
               </div>
 
-              {/* Note */}
+              
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                   Note to User <span className="text-red-500">*</span>
@@ -551,7 +551,7 @@ const Projects: React.FC = () => {
                 />
               </div>
 
-              {/* File Upload */}
+              
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                   Attachment (Optional)

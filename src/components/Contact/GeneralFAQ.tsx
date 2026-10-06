@@ -116,7 +116,7 @@ const GeneralFAQ = ({
     <section id="faq" className={`${padding} ${bgColor}`}>
       <div className={`${maxWidth} mx-auto px-6 lg:px-8`}>
         <div className="flex flex-col lg:flex-row gap-14 items-start">
-          {/* Left Column - FAQs */}
+          
           <div className="lg:w-[55%]">
             {badge && (
               <p className={`${badgeColor} text-xs font-semibold uppercase tracking-widest mb-4`}>
@@ -160,7 +160,7 @@ const GeneralFAQ = ({
             </div>
           </div>
 
-          {/* Right Column - Sidebar */}
+          
           <div className="lg:w-[45%]">
             <div className={`${sidebarBgColor} rounded-2xl p-8`}>
               {sidebarBadge && (

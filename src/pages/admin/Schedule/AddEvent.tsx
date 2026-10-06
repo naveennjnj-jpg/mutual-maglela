@@ -1,4 +1,4 @@
-// pages/user/AddEvent.tsx
+
 import React, { useState } from "react";
 import {
   ArrowLeft,
@@ -151,7 +151,7 @@ const AddEvent = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6FB]">
-      {/* Sticky Header */}
+      
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4 sticky top-0 z-20 shadow-sm">
         <button
           onClick={handleCancel}
@@ -183,16 +183,16 @@ const AddEvent = () => {
         </button>
       </div>
 
-      {/* Form Content */}
+      
       <div className="max-w-[680px] mx-auto px-4 py-7 space-y-5">
-        {/* Event Details */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
             <Tag className="w-3.5 h-3.5 text-[#C85A32]" />
             Event Details
           </p>
 
-          {/* Title */}
+          
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
               Event Title *
@@ -207,7 +207,7 @@ const AddEvent = () => {
             />
           </div>
 
-          {/* Event Type */}
+          
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
               Event Type
@@ -231,14 +231,14 @@ const AddEvent = () => {
           </div>
         </div>
 
-        {/* Date & Time */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-[#C85A32]" />
             Date & Time
           </p>
 
-          {/* Date */}
+          
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
               Date *
@@ -255,7 +255,7 @@ const AddEvent = () => {
             </div>
           </div>
 
-          {/* Time */}
+          
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
@@ -290,7 +290,7 @@ const AddEvent = () => {
           </div>
         </div>
 
-        {/* Location */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-[#C85A32]" />
@@ -309,7 +309,7 @@ const AddEvent = () => {
           </div>
         </div>
 
-        {/* Description */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
             <FileText className="w-3.5 h-3.5 text-[#C85A32]" />
@@ -325,7 +325,7 @@ const AddEvent = () => {
           />
         </div>
 
-        {/* Reminder */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
             <Bell className="w-3.5 h-3.5 text-[#C85A32]" />
@@ -349,7 +349,7 @@ const AddEvent = () => {
           </div>
         </div>
 
-        {/* Action Buttons */}
+        
         <div className="flex gap-3 pb-6">
           <button
             onClick={handleCancel}

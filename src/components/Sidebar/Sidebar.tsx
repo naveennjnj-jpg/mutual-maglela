@@ -1,4 +1,4 @@
-// components/Sidebar/Sidebar.tsx
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -57,7 +57,7 @@ const Sidebar = ({
     return location.pathname === path || location.pathname.startsWith(path + "/");
   };
 
-  // Group menu items by category
+  
   const groupedItems: Record<string, MenuItem[]> = {
     overview: [],
     management: [],
@@ -125,11 +125,11 @@ const Sidebar = ({
 
   return (
     <>
-      {/* Desktop Sidebar */}
+      
       <aside className={`hidden lg:flex lg:flex-col fixed left-0 top-0 bottom-0 z-30 bg-[#0F2D63] transition-all duration-300 ${
         isOpen ? 'w-[260px]' : 'w-[72px]'
       }`}>
-        {/* Logo */}
+        
         <div className={`flex items-center ${isOpen ? 'justify-center' : 'justify-center'} h-20 flex-shrink-0 px-4 border-b border-white/10`}>
           <Link to={isAdmin ? "/admin" : "/user"}>
             {isOpen ? (
@@ -146,7 +146,7 @@ const Sidebar = ({
           </Link>
         </div>
 
-        {/* Navigation */}
+        
         <nav className={`flex-1 overflow-y-auto px-3 py-4 [scrollbar-width:none] ${!isOpen && 'px-2'}`}>
           {Object.entries(groupedItems).map(([key, items]) => {
             if (items.length === 0) return null;
@@ -204,7 +204,7 @@ const Sidebar = ({
             );
           })}
 
-          {/* Help Center - Only when expanded */}
+          
           {isOpen && (
             <div className="mt-6 px-1">
               <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
@@ -222,7 +222,7 @@ const Sidebar = ({
           )}
         </nav>
 
-        {/* User Profile */}
+        
         <div className={`border-t border-white/10 p-4 flex items-center ${isOpen ? 'gap-3' : 'justify-center gap-0'}`}>
           {isOpen ? (
             <>
@@ -244,7 +244,7 @@ const Sidebar = ({
           )}
         </div>
 
-        {/* Toggle Button */}
+        
         <button 
           onClick={onToggle}
           className="hidden lg:flex fixed top-[130px] items-center justify-center w-8 h-8 bg-[#C85A32] rounded-full shadow-lg hover:bg-[#a8472a] transition-all z-40 left-[244px]"
@@ -257,7 +257,7 @@ const Sidebar = ({
         </button>
       </aside>
 
-      {/* Mobile Overlay */}
+      
       {isOpen && (
         <div 
           className="lg:hidden fixed inset-0 z-20 bg-black/50 backdrop-blur-sm"

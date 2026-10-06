@@ -1,4 +1,4 @@
-// pages/user/Dashboard.tsx
+
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from 'axios';
@@ -25,9 +25,9 @@ import {
   AlertCircle
 } from "lucide-react";
 
-// ============================================
-// TYPES
-// ============================================
+
+
+
 
 interface UserData {
   id: string;
@@ -94,20 +94,20 @@ interface DashboardStats {
   pendingProjects: number;
 }
 
-// ============================================
-// COMPONENT
-// ============================================
+
+
+
 
 const UserDashboard = () => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // State
+  
   const [timezone, setTimezone] = useState("UTC");
   const [currentTime, setCurrentTime] = useState("");
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState("Good afternoon");
 
-  // User Data
+  
   const [userData, setUserData] = useState<UserData>({
     id: '',
     name: 'User',
@@ -121,7 +121,7 @@ const UserDashboard = () => {
     initials: 'U'
   });
 
-  // Stats
+  
   const [stats, setStats] = useState<DashboardStats>({
     totalProjects: 0,
     totalSpeeches: 0,
@@ -131,15 +131,15 @@ const UserDashboard = () => {
     pendingProjects: 0
   });
 
-  // Projects & Workshops
+  
   const [projects, setProjects] = useState<Project[]>([]);
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [recentProjects, setRecentProjects] = useState<Project[]>([]);
   const [upcomingWorkshops, setUpcomingWorkshops] = useState<Workshop[]>([]);
 
-  // ============================================
-  // FETCH ALL DATA
-  // ============================================
+  
+  
+  
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -150,7 +150,7 @@ const UserDashboard = () => {
           return;
         }
 
-        // Fetch User Data
+        
         const userResponse = await axios.get(`${API_URL}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -181,7 +181,7 @@ const UserDashboard = () => {
           updateGreeting(data.timezone || 'UTC');
         }
 
-        // Fetch Projects
+        
         const projectsResponse = await axios.get(`${API_URL}/api/auth/projects`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -190,18 +190,18 @@ const UserDashboard = () => {
           const allProjects = projectsResponse.data.data || [];
           setProjects(allProjects);
 
-          // Filter: Only show projects with title and status not 'Deleted'
+          
           const activeProjects = allProjects.filter(
             (p: Project) => p.title && p.status !== 'Deleted'
           );
 
-          // Recent projects (last 3)
+          
           const sorted = [...activeProjects].sort(
             (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
           setRecentProjects(sorted.slice(0, 3));
 
-          // Update stats
+          
           const completed = activeProjects.filter((p: Project) =>
             p.status === 'Completed' || p.status === 'Published' || p.status === 'Approved'
           ).length;
@@ -218,7 +218,7 @@ const UserDashboard = () => {
           }));
         }
 
-        // Fetch Workshops
+        
         const workshopsResponse = await axios.get(`${API_URL}/api/auth/workshops`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -227,20 +227,20 @@ const UserDashboard = () => {
           const allWorkshops = workshopsResponse.data.data || [];
           setWorkshops(allWorkshops);
 
-          // Upcoming workshops (status: upcoming or pending)
+          
           const upcoming = allWorkshops.filter(
             (w: Workshop) => w.status === 'upcoming' || w.status === 'pending'
           );
           setUpcomingWorkshops(upcoming.slice(0, 4));
 
-          // Update stats
+          
           setStats(prev => ({
             ...prev,
             totalWorkshops: allWorkshops.length
           }));
         }
 
-        // Fetch Writing Stats (if you have this endpoint)
+        
         try {
           const writingResponse = await axios.get(`${API_URL}/api/auth/ai-writing`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -256,7 +256,7 @@ const UserDashboard = () => {
           console.log('Writing stats not available');
         }
 
-        // Fetch Speech Stats (if you have this endpoint)
+        
         try {
           const speechResponse = await axios.get(`${API_URL}/api/auth/ai-speech`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -282,9 +282,9 @@ const UserDashboard = () => {
     fetchAllData();
   }, []);
 
-  // ============================================
-  // UPDATE TIME
-  // ============================================
+  
+  
+  
 
   const updateGreeting = (tz: string) => {
     const now = new Date();
@@ -320,9 +320,9 @@ const UserDashboard = () => {
     return () => clearInterval(interval);
   }, [timezone]);
 
-  // ============================================
-  // HELPERS
-  // ============================================
+  
+  
+  
 
   const handleTopUp = () => {
     window.location.href = '/user/credits/topup';
@@ -386,9 +386,9 @@ const UserDashboard = () => {
     return labels[type] || type;
   };
 
-  // ============================================
-  // RENDER
-  // ============================================
+  
+  
+  
 
   if (loading) {
     return (
@@ -404,7 +404,7 @@ const UserDashboard = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4]">
       <div className="max-w-[1500px] mx-auto px-6 py-6 space-y-5">
-        {/* Top Bar */}
+        
         <div className="bg-white border border-gray-100 rounded-2xl shadow-sm px-5 py-3.5 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
@@ -414,7 +414,7 @@ const UserDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
-            {/* Credits Display */}
+            
             <div className="flex items-center gap-2 bg-[#F9F7F4] border border-gray-100 rounded-xl px-3 py-1.5">
               <CreditCard className="w-3.5 h-3.5 text-[#C85A32]" />
               <span className="text-xs text-gray-500">Credits:</span>
@@ -430,7 +430,7 @@ const UserDashboard = () => {
                 </button>
               )}
             </div>
-            {/* Time Display */}
+            
             <div className="flex items-center gap-2.5 bg-[#F9F7F4] border border-gray-100 rounded-xl px-4 py-2">
               <MapPin className="w-3.5 h-3.5 text-[#C85A32]" />
               <div>
@@ -445,7 +445,7 @@ const UserDashboard = () => {
           </div>
         </div>
 
-        {/* Hero Banner */}
+        
         <div className="bg-[#0F2D63] rounded-2xl overflow-hidden relative">
           <div
             className="absolute inset-0 opacity-20"
@@ -461,9 +461,7 @@ const UserDashboard = () => {
               <h1 className="text-2xl lg:text-3xl font-['Roboto'] font-bold text-white mb-1.5">
                 {greeting}, {userData.name}
               </h1>
-              {/* <p className="text-white/60 text-sm mb-2 leading-relaxed">
-                {userData.institution || 'Your Institution'} · {userData.position || 'Your Position'}
-              </p> */}
+              
               <div className="flex flex-wrap gap-4 mb-4 text-white/50 text-xs">
                 <span className="flex items-center gap-1">
                   <Mail className="w-3 h-3" />
@@ -549,9 +547,9 @@ const UserDashboard = () => {
           </div>
         </div>
 
-        {/* Active Projects & Workshops */}
+        
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-          {/* Active Projects */}
+          
           <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
             <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-50">
               <div className="flex items-center gap-3">
@@ -621,7 +619,7 @@ const UserDashboard = () => {
             </div>
           </div>
 
-          {/* Upcoming Workshops */}
+          
           <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-6 pt-5 pb-4 border-b border-gray-50">
               <div className="flex items-center gap-3 mb-3">

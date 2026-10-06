@@ -1,4 +1,4 @@
-// pages/admin/CreateQuote.tsx
+
 import React, { useState, useEffect } from "react";
 import {
   ArrowLeft,
@@ -74,7 +74,7 @@ const CreateQuote = () => {
     ],
   });
 
-  // Fetch users on mount
+  
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -101,7 +101,7 @@ const CreateQuote = () => {
     }
   };
 
-  // Clear messages after 5 seconds
+  
   React.useEffect(() => {
     if (success || error) {
       const timer = setTimeout(() => {
@@ -368,7 +368,7 @@ const CreateQuote = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6FB]">
-      {/* Sticky Header */}
+      
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4 sticky top-0 z-20 shadow-sm">
         <button
           onClick={handleBack}
@@ -408,7 +408,7 @@ const CreateQuote = () => {
         </div>
       </div>
 
-      {/* Success/Error Messages */}
+      
       {success && (
         <div className="max-w-[1200px] mx-auto px-6 pt-4">
           <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
@@ -433,11 +433,11 @@ const CreateQuote = () => {
         </div>
       )}
 
-      {/* Form Content */}
+      
       <div className="max-w-[1200px] mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Main Form - 2 columns */}
+        
         <div className="lg:col-span-2 space-y-5">
-          {/* Client Information */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
             <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
               Client Information
@@ -512,7 +512,7 @@ const CreateQuote = () => {
             </div>
           </div>
 
-          {/* Service & Items */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
             <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
               Service & Items
@@ -651,7 +651,7 @@ const CreateQuote = () => {
             </div>
           </div>
 
-          {/* Additional Notes */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
             <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
               Additional Notes
@@ -672,9 +672,9 @@ const CreateQuote = () => {
           </div>
         </div>
 
-        {/* Sidebar - 1 column */}
+        
         <div className="space-y-4">
-          {/* Quote Summary */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
             <p className="text-sm font-bold text-[#0F2D63] border-b border-gray-50 pb-3">
               Quote Summary
@@ -723,7 +723,7 @@ const CreateQuote = () => {
             </div>
           </div>
 
-          {/* Quick Tips */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
             <div className="flex items-center gap-2">
               <Lightbulb className="w-3.5 h-3.5 text-[#C85A32]" />

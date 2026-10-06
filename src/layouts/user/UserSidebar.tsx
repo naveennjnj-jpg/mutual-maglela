@@ -1,4 +1,4 @@
-// layouts/user/UserSidebar.tsx
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -60,7 +60,7 @@ const UserSidebar = ({
     if (window.innerWidth < 1024 && isOpen && onClose) {
       onClose();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [location.pathname]);
 
   const handleCloseOnMobile = () => {
@@ -83,7 +83,7 @@ const UserSidebar = ({
 
   const sidebarItems = userSidebar as SidebarItem[];
 
-  // Group items exactly as shown in your HTML
+  
   const groupedItems = {
     overview: sidebarItems.filter(item => ["/user"].includes(item.path)),
     projects: sidebarItems.filter(item => 
@@ -150,7 +150,7 @@ const UserSidebar = ({
           ${isOpen ? 'w-[260px]' : 'w-[72px]'}
         `}
       >
-        {/* Close button for mobile */}
+        
         <button
           onClick={handleCloseOnMobile}
           className="lg:hidden absolute right-3 top-3 p-2 text-white/60 hover:text-white transition-colors"
@@ -159,7 +159,7 @@ const UserSidebar = ({
           <X className="w-5 h-5" />
         </button>
 
-        {/* Logo */}
+        
         <div className={`flex items-center ${isOpen ? 'justify-center' : 'justify-center'} h-20 flex-shrink-0 px-4 border-b border-white/10`}>
           <Link to="/user" onClick={handleCloseOnMobile}>
             {isOpen ? (
@@ -180,7 +180,7 @@ const UserSidebar = ({
           </Link>
         </div>
 
-        {/* Navigation */}
+        
         <nav className="flex-1 overflow-y-auto px-3 py-4 [scrollbar-width:none]">
           {Object.entries(groupedItems).map(([key, items]) => {
             if (items.length === 0) return null;
@@ -249,7 +249,7 @@ const UserSidebar = ({
             );
           })}
 
-          {/* Help Center */}
+          
           {isOpen && (
             <div className="mt-6 px-1">
               <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
@@ -267,7 +267,7 @@ const UserSidebar = ({
           )}
         </nav>
 
-        {/* User Profile */}
+        
         <div className={`border-t border-white/10 p-4 flex items-center ${isOpen ? 'gap-3' : 'justify-center gap-0'}`}>
           {isOpen ? (
             <>
@@ -297,7 +297,7 @@ const UserSidebar = ({
           )}
         </div>
 
-        {/* Toggle Button - Desktop only */}
+        
         <button
           onClick={onToggle}
           className="hidden lg:flex absolute -right-4 top-[130px] items-center justify-center w-8 h-8 bg-[#C85A32] rounded-full shadow-lg hover:bg-[#a8472a] transition-all z-40"
@@ -310,7 +310,7 @@ const UserSidebar = ({
         </button>
       </aside>
 
-      {/* Mobile Overlay */}
+      
       {isOpen && (
         <div
           className="lg:hidden fixed inset-0 z-20 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
@@ -318,7 +318,7 @@ const UserSidebar = ({
         ></div>
       )}
 
-      {/* Logout Modal */}
+      
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-7 w-full max-w-sm shadow-xl">

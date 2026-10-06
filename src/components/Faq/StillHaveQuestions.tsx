@@ -68,7 +68,7 @@ const StillHaveQuestions = ({
   const hasPrimaryButton = primaryButton.text && primaryButton.text.trim() !== "";
   const hasSecondaryButton = secondaryButton.text && secondaryButton.text.trim() !== "";
 
-  // If no content, don't render anything
+  
   if (!hasTitle && !hasDescription && !hasPrimaryButton && !hasSecondaryButton) {
     return null;
   }
@@ -76,26 +76,26 @@ const StillHaveQuestions = ({
   return (
     <section className={`${padding} ${bgColor} border-t border-gray-100`}>
       <div className={`${maxWidth} mx-auto px-6 text-center`}>
-        {/* Icon */}
+        
         <div className={`w-16 h-16 rounded-2xl ${iconBgColor} flex items-center justify-center mx-auto mb-6`}>
           {icon || defaultIcon}
         </div>
 
-        {/* Title */}
+        
         {hasTitle && (
           <h2 className={`${titleSize} font-['Roboto'] font-semibold ${titleColor} mb-5 leading-[1.2]`}>
             {title}
           </h2>
         )}
 
-        {/* Description */}
+        
         {hasDescription && (
           <p className={`${descriptionColor} text-base leading-relaxed mb-10 max-w-xl mx-auto`}>
             {description}
           </p>
         )}
 
-        {/* Buttons */}
+        
         {(hasPrimaryButton || hasSecondaryButton) && (
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             {hasPrimaryButton && (

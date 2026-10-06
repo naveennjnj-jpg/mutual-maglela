@@ -1,4 +1,4 @@
-// pages/user/Schedule.tsx
+
 import React, { useState, useEffect } from "react";
 import {
   Settings2,
@@ -137,12 +137,12 @@ const Schedule = () => {
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [invoicesLoading, setInvoicesLoading] = useState(true);
 
-  // Fetch data on mount and month change
+  
   useEffect(() => {
     fetchScheduleData();
   }, [currentMonth, currentYear]);
 
-  // Process availability data when it changes
+  
   useEffect(() => {
     if (availability) {
       processAvailability(availability);
@@ -179,7 +179,7 @@ const Schedule = () => {
     const month = currentMonth;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // Initialize all days with default info
+    
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       const dateKey = date.toISOString().split('T')[0];
@@ -267,7 +267,7 @@ const Schedule = () => {
       }
     }
 
-    // Process block dates
+    
     if (avail.blockStartDate && avail.blockEndDate) {
       const start = new Date(avail.blockStartDate);
       const end = new Date(avail.blockEndDate);
@@ -304,7 +304,7 @@ const Schedule = () => {
     setAvailabilityDays(availMap);
   };
 
-  // Fetch projects
+  
   const fetchProjects = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -327,7 +327,7 @@ const Schedule = () => {
           createdAt: project.createdAt,
           updatedAt: project.updatedAt
         }));
-        setProjects(projectsData.slice(0, 5)); // Limit to 5 projects
+        setProjects(projectsData.slice(0, 5)); 
       }
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -336,7 +336,7 @@ const Schedule = () => {
     }
   };
 
-  // Fetch invoices
+  
   const fetchInvoices = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -387,7 +387,7 @@ const Schedule = () => {
             return 0;
           });
 
-        setInvoicesDue(invoicesData.slice(0, 5)); // Limit to 5 invoices
+        setInvoicesDue(invoicesData.slice(0, 5)); 
       }
     } catch (error) {
       console.error("Error fetching invoices:", error);
@@ -408,7 +408,7 @@ const Schedule = () => {
 
       const headers = { Authorization: `Bearer ${token}` };
 
-      // Fetch events for the month
+      
       const eventsResponse = await axios.get(
         `${API_URL}/api/admin/events/month?month=${currentMonth}&year=${currentYear}`,
         { headers }
@@ -418,7 +418,7 @@ const Schedule = () => {
         setEventsByDate(eventsResponse.data.data);
       }
 
-      // Fetch today's events
+      
       const todayResponse = await axios.get(
         `${API_URL}/api/admin/events/today`,
         { headers }
@@ -428,7 +428,7 @@ const Schedule = () => {
         setTodayEvents(todayResponse.data.data);
       }
 
-      // Fetch availability
+      
       const availabilityResponse = await axios.get(
         `${API_URL}/api/admin/availability`,
         { headers }
@@ -438,7 +438,7 @@ const Schedule = () => {
         setAvailability(availabilityResponse.data.data);
       }
 
-      // Fetch projects and invoices
+      
       await Promise.all([
         fetchProjects(),
         fetchInvoices()
@@ -479,7 +479,7 @@ const Schedule = () => {
     return config[status] || config.today;
   };
 
-  // Generate calendar days
+  
   const generateCalendarDays = (): CalendarDay[] => {
     const firstDay = new Date(currentYear, currentMonth, 1);
     const lastDay = new Date(currentYear, currentMonth + 1, 0);
@@ -613,7 +613,7 @@ const Schedule = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6FB] p-6">
-      {/* Header */}
+      
       <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-[#C85A32] mb-1">
@@ -642,7 +642,7 @@ const Schedule = () => {
         </div>
       </div>
 
-      {/* Availability Status Bar */}
+      
       {availability && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-5 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
@@ -668,12 +668,12 @@ const Schedule = () => {
         </div>
       )}
 
-      {/* Calendar and Sidebar */}
+      
       <div className="flex flex-col lg:flex-row gap-5 items-start">
-        {/* Calendar */}
+        
         <div className="w-full lg:w-[70%]">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            {/* Calendar Header */}
+            
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="text-base font-bold text-[#0F2D63]">
                 {monthNames[currentMonth]} {currentYear}
@@ -700,7 +700,7 @@ const Schedule = () => {
               </div>
             </div>
 
-            {/* Weekday Headers */}
+            
             <div className="grid grid-cols-7 border-b border-gray-100">
               {dayNames.map((day) => (
                 <div
@@ -712,7 +712,7 @@ const Schedule = () => {
               ))}
             </div>
 
-            {/* Calendar Grid */}
+            
             <div className="grid grid-cols-7 divide-x divide-y divide-gray-100">
               {calendarDays.map((day, index) => {
                 const isEmpty = !day.isCurrentMonth;
@@ -888,7 +888,7 @@ const Schedule = () => {
               })}
             </div>
 
-            {/* Legend */}
+            
             <div className="border-t border-gray-100 px-5 py-3 flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 rounded-full bg-green-500"></div>
@@ -912,7 +912,7 @@ const Schedule = () => {
               </div>
             </div>
 
-            {/* Footer */}
+            
             <div className="border-t border-gray-100 px-5 py-6 flex items-center justify-between">
               <p className="text-sm text-gray-400">
                 {todayEvents.length > 0 
@@ -930,9 +930,9 @@ const Schedule = () => {
           </div>
         </div>
 
-        {/* Sidebar */}
+        
         <div className="w-full lg:w-[30%] space-y-4">
-          {/* Today Card */}
+          
           <div className="bg-[#0F2D63] rounded-2xl p-5">
             <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">
               Today
@@ -955,7 +955,7 @@ const Schedule = () => {
             </div>
           </div>
 
-          {/* Today's Events List */}
+          
           {todayEvents.length > 0 && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
@@ -980,7 +980,7 @@ const Schedule = () => {
             </div>
           )}
 
-          {/* Active Projects - Dynamic */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <FolderKanban className="w-3 h-3 text-[#C85A32]" />
@@ -1023,7 +1023,7 @@ const Schedule = () => {
             )}
           </div>
 
-          {/* Invoices Due - Dynamic */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <FileText className="w-3 h-3 text-[#C85A32]" />
@@ -1078,7 +1078,7 @@ const Schedule = () => {
             )}
           </div>
 
-          {/* Add Event Button */}
+          
           <Link
             to="/admin/add-event"
             className="flex items-center justify-center gap-2 w-full py-3 bg-[#C85A32] hover:bg-[#a8472a] text-white text-sm font-semibold rounded-xl transition-colors"
@@ -1089,7 +1089,7 @@ const Schedule = () => {
         </div>
       </div>
 
-      {/* Event Detail Modal */}
+      
       {showEventModal && selectedEvent && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">

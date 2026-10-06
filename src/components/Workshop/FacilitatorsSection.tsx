@@ -1,4 +1,4 @@
-// components/Common/FacilitatorsSection.tsx
+
 import React from "react";
 import { ArrowRight } from "lucide-react";
 import Team1 from "@/assets/about/team1.jpeg";
@@ -55,7 +55,7 @@ const FacilitatorsSection: React.FC<FacilitatorsSectionProps> = ({
     <section className={`bg-[#F5F0EA] py-20 ${className}`}>
       <div className="mx-auto max-w-[1200px] px-6 lg:px-8">
         <div className="flex flex-col items-center gap-12 lg:flex-row">
-          {/* Left Content */}
+          
           <div className="shrink-0 lg:w-2/5">
             <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-[#C85A32]">
               {badge}
@@ -78,7 +78,7 @@ const FacilitatorsSection: React.FC<FacilitatorsSectionProps> = ({
             </button>
           </div>
 
-          {/* Right Image Grid */}
+          
           <div className="lg:w-3/5">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {teamMembers.map((image, index) => (

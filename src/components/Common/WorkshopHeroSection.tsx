@@ -1,4 +1,4 @@
-// components/Common/HeroSection.tsx
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -44,14 +44,14 @@ const WorkshopHeroSection = ({
     return null;
   }
 
-  // ✅ Debug: Log to check if onClick is being passed
+  
   console.log("Primary Button:", primaryButton);
 
   const handlePrimaryClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    console.log("Primary button clicked"); // ✅ Debug log
+    console.log("Primary button clicked"); 
     if (primaryButton?.onClick) {
-      console.log("Calling onClick..."); // ✅ Debug log
+      console.log("Calling onClick..."); 
       primaryButton.onClick();
     } else if (primaryButton?.link) {
       console.log("Navigating to:", primaryButton.link);

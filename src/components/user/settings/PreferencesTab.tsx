@@ -1,4 +1,4 @@
-// components/settings/PreferencesTab.tsx
+
 import React, { useState, useEffect } from "react";
 import { Save, Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import axios from "axios";
@@ -42,7 +42,7 @@ const PreferencesTab = () => {
     }
   }, [user]);
 
-  // Apply theme on load and when it changes
+  
   useEffect(() => {
     applyTheme(preferences.theme);
   }, [preferences.theme]);
@@ -139,7 +139,7 @@ const PreferencesTab = () => {
         Preferences
       </h2>
 
-      {/* Success/Error Messages */}
+      
       {success && (
         <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm mb-4">
           <CheckCircle className="w-4 h-4" />
@@ -155,7 +155,7 @@ const PreferencesTab = () => {
       )}
 
       <div className="space-y-4">
-        {/* Language */}
+        
         <div>
           <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5 block">
             Language
@@ -175,7 +175,7 @@ const PreferencesTab = () => {
           </select>
         </div>
 
-        {/* Timezone */}
+        
         <div>
           <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5 block">
             Timezone
@@ -196,7 +196,7 @@ const PreferencesTab = () => {
           </select>
         </div>
 
-        {/* Theme */}
+        
         <div>
           <label className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5 block">
             Theme

@@ -1,4 +1,4 @@
-// pages/admin/Workshop/AdminWorkshopEdit.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -172,11 +172,11 @@ const AdminWorkshopEdit = () => {
       }
 
       const payload = {
-        // date: formData.date,
-        // time: formData.time,
+        
+        
         status: formData.status,
         adminNotes: formData.adminNotes,
-        // location: formData.location
+        
       };
 
       const response = await axios.put(
@@ -324,7 +324,7 @@ const AdminWorkshopEdit = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6FB]">
-      {/* Header */}
+      
       <div className="bg-white border-b border-gray-100 px-4 md:px-6 py-4 flex items-center gap-4 sticky top-0 z-20 shadow-sm">
         <button
           onClick={() => navigate('/admin/workshop-requests')}
@@ -380,9 +380,9 @@ const AdminWorkshopEdit = () => {
         </div>
       </div>
 
-      {/* Main Content */}
+      
       <div className="max-w-[680px] mx-auto px-4 py-7 space-y-5">
-        {/* Success Message */}
+        
         {successMessage && (
           <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
             <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -390,7 +390,7 @@ const AdminWorkshopEdit = () => {
           </div>
         )}
 
-        {/* Error Message */}
+        
         {error && (
           <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -398,7 +398,7 @@ const AdminWorkshopEdit = () => {
           </div>
         )}
 
-        {/* Requester Information */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
             Requester Information
@@ -447,7 +447,7 @@ const AdminWorkshopEdit = () => {
           </div>
         </div>
 
-        {/* Workshop Details */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
             Workshop Details
@@ -500,7 +500,7 @@ const AdminWorkshopEdit = () => {
           </div>
         </div>
 
-        {/* Schedule Date & Time */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-[#C85A32]" />
@@ -519,7 +519,7 @@ const AdminWorkshopEdit = () => {
                   value={formData.date}
                   onChange={handleInputChange}
                   disabled
-                //   ={!isEditing}
+                
                   className={`w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-[#0F2D63] focus:ring-2 focus:ring-[#0F2D63]/10 transition-all bg-white pl-9 ${
                     !isEditing ? 'bg-gray-50 cursor-not-allowed' : ''
                   }`}
@@ -538,7 +538,7 @@ const AdminWorkshopEdit = () => {
                   value={formData.time}
                   onChange={handleInputChange}
                   disabled
-                //   ={!isEditing}
+                
                   className={`w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-[#0F2D63] focus:ring-2 focus:ring-[#0F2D63]/10 transition-all bg-white pl-9 ${
                     !isEditing ? 'bg-gray-50 cursor-not-allowed' : ''
                   }`}
@@ -548,7 +548,7 @@ const AdminWorkshopEdit = () => {
           </div>
         </div>
 
-        {/* Status */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
             Status
@@ -593,7 +593,7 @@ const AdminWorkshopEdit = () => {
           </div>
         </div>
 
-        {/* Admin Notes */}
+        
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
             Admin Notes
@@ -611,7 +611,7 @@ const AdminWorkshopEdit = () => {
           />
         </div>
 
-        {/* Actions */}
+        
         <div className="flex gap-3 pb-6">
           <button
             onClick={() => {

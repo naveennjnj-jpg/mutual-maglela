@@ -1,4 +1,4 @@
-// pages/user/HelpCenter.tsx
+
 import React, { useState } from "react";
 import {
   Search,
@@ -14,9 +14,9 @@ import {
 } from "lucide-react";
 import axios from "axios";
 
-// ============================================
-// INTERFACES / TYPES
-// ============================================
+
+
+
 
 interface FaqItem {
   id: string;
@@ -33,14 +33,14 @@ interface GuideItem {
   link: string;
 }
 
-// ============================================
-// MAIN COMPONENT
-// ============================================
+
+
+
 
 const HelpCenter = () => {
-  // ============================================
-  // STATE MANAGEMENT
-  // ============================================
+  
+  
+  
 
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedFaqs, setExpandedFaqs] = useState<Set<string>>(new Set());
@@ -52,9 +52,9 @@ const HelpCenter = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // ============================================
-  // DATA
-  // ============================================
+  
+  
+  
 
   const popularGuides: GuideItem[] = [
     {
@@ -88,7 +88,7 @@ const HelpCenter = () => {
   ];
 
   const faqs: FaqItem[] = [
-    // Getting Started
+    
     {
       id: "faq-1",
       category: "Getting Started",
@@ -110,7 +110,7 @@ const HelpCenter = () => {
       answer:
         "Yes! Workspace collaboration is available on our Pro and Enterprise plans. You can invite team members by going to Settings > Team Members and entering their email addresses. Each team member will receive an invitation to join your workspace.",
     },
-    // AI Writing
+    
     {
       id: "faq-4",
       category: "AI Writing",
@@ -132,7 +132,7 @@ const HelpCenter = () => {
       answer:
         "Generated content can be saved directly to your project dashboard. You can also export content in various formats including DOCX, PDF, and TXT using the export button in the content editor.",
     },
-    // Billing & Plans
+    
     {
       id: "faq-7",
       category: "Billing & Plans",
@@ -154,7 +154,7 @@ const HelpCenter = () => {
       answer:
         "Yes, you can cancel your subscription at any time from your billing settings. There are no cancellation fees. If you cancel, you'll continue to have access to your plan features until the end of your current billing period.",
     },
-    // Expert Consultations
+    
     {
       id: "faq-10",
       category: "Expert Consultations",
@@ -171,7 +171,7 @@ const HelpCenter = () => {
     },
   ];
 
-  // Group FAQs by category
+  
   const groupedFaqs = faqs.reduce((acc, faq) => {
     if (!acc[faq.category]) {
       acc[faq.category] = [];
@@ -180,9 +180,9 @@ const HelpCenter = () => {
     return acc;
   }, {} as Record<string, FaqItem[]>);
 
-  // ============================================
-  // HANDLERS
-  // ============================================
+  
+  
+  
 
   const toggleFaq = (id: string) => {
     setExpandedFaqs((prev) => {
@@ -198,7 +198,7 @@ const HelpCenter = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Implement search logic here
+    
     console.log("Searching for:", searchQuery);
   };
 
@@ -210,7 +210,7 @@ const HelpCenter = () => {
       ...prev,
       [name]: value,
     }));
-    // Clear messages when user starts typing again
+    
     if (successMessage) setSuccessMessage(null);
     if (errorMessage) setErrorMessage(null);
   };
@@ -218,11 +218,11 @@ const HelpCenter = () => {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Clear previous messages
+    
     setSuccessMessage(null);
     setErrorMessage(null);
     
-    // Set sending state
+    
     setIsSending(true);
 
     try {
@@ -237,10 +237,10 @@ const HelpCenter = () => {
       );
 
       if (response.data.success) {
-        // Show success message
+        
         setSuccessMessage("Your message has been sent successfully! We'll get back to you within 24 hours.");
         
-        // Reset form
+        
         setFormData({
           subject: "",
           message: "",
@@ -257,7 +257,7 @@ const HelpCenter = () => {
     }
   };
 
-  // Filter FAQs based on search
+  
   const filteredFaqs = searchQuery
     ? faqs.filter(
         (faq) =>
@@ -276,16 +276,14 @@ const HelpCenter = () => {
       }, {} as Record<string, FaqItem[]>)
     : groupedFaqs;
 
-  // ============================================
-  // RENDER
-  // ============================================
+  
+  
+  
 
   return (
     <div className="min-h-screen bg-[#F9F7F4] p-6">
       <div className="max-w-[1000px] mx-auto">
-        {/* ==========================================
-            HEADER
-            ========================================== */}
+        
         <div className="mb-6">
           <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-1">
             Support
@@ -298,9 +296,7 @@ const HelpCenter = () => {
           </p>
         </div>
 
-        {/* ==========================================
-            HERO / SEARCH SECTION
-            ========================================== */}
+        
         <div className="relative bg-[#0F2D63] rounded-2xl overflow-hidden mb-8">
           <div
             className="absolute inset-0 opacity-20"
@@ -321,7 +317,7 @@ const HelpCenter = () => {
               — we're here to help you succeed.
             </p>
 
-            {/* Search Bar */}
+            
             <form onSubmit={handleSearch} className="w-full max-w-xl">
               <div className="flex items-center bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="flex items-center pl-4 pr-2 flex-shrink-0">
@@ -348,9 +344,7 @@ const HelpCenter = () => {
           </div>
         </div>
 
-        {/* ==========================================
-            POPULAR GUIDES
-            ========================================== */}
+        
         <div className="mb-8">
           <h2 className="text-sm font-semibold text-[#0F2D63] mb-4">
             Popular Guides
@@ -378,15 +372,13 @@ const HelpCenter = () => {
           </div>
         </div>
 
-        {/* ==========================================
-            FAQ SECTION
-            ========================================== */}
+        
         <div className="mb-8">
           <h2 className="text-sm font-semibold text-[#0F2D63] mb-4">
             Frequently Asked Questions
           </h2>
 
-          {/* Show message if search has no results */}
+          
           {searchQuery && Object.keys(filteredGroupedFaqs).length === 0 && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
               <p className="text-gray-500 text-sm">
@@ -438,11 +430,9 @@ const HelpCenter = () => {
           </div>
         </div>
 
-        {/* ==========================================
-            CONTACT SECTION
-            ========================================== */}
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {/* Contact Form */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <div className="flex items-center gap-2 mb-4">
               <MessageCircle className="w-4 h-4 text-[#C85A32]" />
@@ -451,7 +441,7 @@ const HelpCenter = () => {
               </h2>
             </div>
 
-            {/* Success Message */}
+            
             {successMessage && (
               <div className="flex items-start gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4">
                 <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
@@ -459,7 +449,7 @@ const HelpCenter = () => {
               </div>
             )}
 
-            {/* Error Message */}
+            
             {errorMessage && (
               <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
                 <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
@@ -516,9 +506,9 @@ const HelpCenter = () => {
             </form>
           </div>
 
-          {/* Contact Options */}
+          
           <div className="flex flex-col gap-4">
-            {/* Email Support */}
+            
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-start gap-3">
               <div className="w-10 h-10 bg-[#FFF8F5] rounded-xl flex items-center justify-center flex-shrink-0">
                 <Mail className="w-5 h-5 text-[#C85A32]" />
@@ -536,7 +526,7 @@ const HelpCenter = () => {
               </div>
             </div>
 
-            {/* Live Chat */}
+            
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-start gap-3">
               <div className="w-10 h-10 bg-[#FFF8F5] rounded-xl flex items-center justify-center flex-shrink-0">
                 <MessageCircle className="w-5 h-5 text-[#C85A32]" />
@@ -552,7 +542,7 @@ const HelpCenter = () => {
               </div>
             </div>
 
-            {/* Enterprise Support */}
+            
             <div className="bg-[#0F2D63] rounded-2xl p-5">
               <p className="text-white font-semibold text-sm mb-1">
                 Need urgent help?

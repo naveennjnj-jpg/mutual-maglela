@@ -14,7 +14,7 @@ type MenuItem = {
 };
 
 const menuItems: MenuItem[] = [
-  // ... (Insert your existing menuItems array here. It's too long to copy)
+  
 ];
 
 interface NavigationProps {
@@ -53,19 +53,19 @@ const Navigation: React.FC<NavigationProps> = ({
     setOpenDropdown(openDropdown === label ? null : label);
   };
 
-  // ==========================================
-  // MOBILE NAVIGATION
-  // ==========================================
+  
+  
+  
   if (isMobile) {
     return (
       <nav className="flex flex-col w-full">
         {menuItems.map((item) => (
           <div key={item.label} className="w-full border-b border-gray-100">
             
-            {/* Top Level Items */}
+            
             <div className="flex items-center justify-between w-full px-6 py-4">
               
-              {/* Link (Only renders if href exists) */}
+              
               {item.href ? (
                 <LinkOrAnchor
                   href={item.href}
@@ -78,7 +78,7 @@ const Navigation: React.FC<NavigationProps> = ({
                 <span className="flex-1 text-paragraph text-sm">{item.label}</span>
               )}
 
-              {/* Chevron Button (Only renders if dropdown exists) */}
+              
               {item.dropdown && (
                 <button
                   type="button"
@@ -95,7 +95,7 @@ const Navigation: React.FC<NavigationProps> = ({
               )}
             </div>
 
-            {/* Dropdown Content */}
+            
             {item.dropdown && (
               <div
                 className={`overflow-hidden transition-all duration-300 bg-light-blue/30 ${
@@ -108,7 +108,7 @@ const Navigation: React.FC<NavigationProps> = ({
                       key={sub.label}
                       href={sub.href}
                       className="block w-full px-10 py-3 text-paragraph text-xs hover:text-primary_heading border-b border-gray-100/50 last:border-0"
-                      // ONLY calling onItemClick here. 
+                      
                       onClick={onItemClick}
                     >
                       {sub.label}
@@ -123,9 +123,9 @@ const Navigation: React.FC<NavigationProps> = ({
     );
   }
 
-  // ==========================================
-  // DESKTOP NAVIGATION
-  // ==========================================
+  
+  
+  
   return (
     <nav className="flex-wrap flex gap-3 xl:gap-7 px-4 justify-center items-center border-[1px] border-primary_blue rounded-[20px] bg-white">
       {menuItems.map((item) => (

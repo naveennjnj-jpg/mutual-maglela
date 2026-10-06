@@ -1,4 +1,4 @@
-// pages/user/AISpeech.tsx
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -22,9 +22,9 @@ import {
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 
-// ============================================
-// ✅ UPDATED TYPES - Matching Backend Response
-// ============================================
+
+
+
 
 interface Parameters {
   authority: number;
@@ -88,9 +88,9 @@ interface UserData {
   initials?: string;
 }
 
-// ============================================
-// COMPONENT
-// ============================================
+
+
+
 
 const AISpeech = () => {
   const navigate = useNavigate();
@@ -107,7 +107,7 @@ const AISpeech = () => {
   const [showNoCreditsModal, setShowNoCreditsModal] = useState(false);
   const fetchCalled = useRef(false);
 
-  // User state
+  
   const [userData, setUserData] = useState<UserData>({
     id: '',
     name: 'User',
@@ -124,9 +124,9 @@ const AISpeech = () => {
     }
   }, []);
 
-  // ============================================
-  // ✅ FETCH USER DATA
-  // ============================================
+  
+  
+  
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -166,7 +166,7 @@ const AISpeech = () => {
             initials: initials || 'U'
           });
 
-          // ✅ CHECK CREDITS - If 0, show modal
+          
           if (credits === 0) {
             setShowNoCreditsModal(true);
           }
@@ -201,9 +201,9 @@ const AISpeech = () => {
     fetchUserData();
   }, []);
 
-  // ============================================
-  // ✅ FETCH SPEECHES FROM BACKEND
-  // ============================================
+  
+  
+  
 
   const fetchSpeeches = async () => {
     setLoading(true);
@@ -243,9 +243,9 @@ const AISpeech = () => {
     }
   };
 
-  // ============================================
-  // ✅ DELETE SPEECH
-  // ============================================
+  
+  
+  
 
   const handleDelete = async (id: string) => {
     setDeleteLoading(id);
@@ -278,9 +278,9 @@ const AISpeech = () => {
     }
   };
 
-  // ============================================
-  // ✅ GET TOP PARAMETERS FROM OBJECT
-  // ============================================
+  
+  
+  
 
   const getTopParameters = (parameters: Parameters): { key: string; label: string; value: number }[] => {
     const entries = Object.entries(parameters);
@@ -300,9 +300,9 @@ const AISpeech = () => {
     }));
   };
 
-  // ============================================
-  // ✅ GET PARAMETER COLOR
-  // ============================================
+  
+  
+  
 
   const getParameterColor = (score: number): string => {
     if (score >= 80) return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800';
@@ -310,9 +310,9 @@ const AISpeech = () => {
     return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800';
   };
 
-  // ============================================
-  // ✅ GET STATUS COLOR
-  // ============================================
+  
+  
+  
 
   const getStatusColor = (status: string): string => {
     switch (status) {
@@ -329,9 +329,9 @@ const AISpeech = () => {
     }
   };
 
-  // ============================================
-  // ✅ FORMAT DATE
-  // ============================================
+  
+  
+  
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -342,9 +342,9 @@ const AISpeech = () => {
     });
   };
 
-  // ============================================
-  // ✅ GET STATUS ICON
-  // ============================================
+  
+  
+  
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -357,9 +357,9 @@ const AISpeech = () => {
     }
   };
 
-  // ============================================
-  // ✅ FILTER SPEECHES
-  // ============================================
+  
+  
+  
 
   const getFilteredSpeeches = () => {
     let filtered = speeches;
@@ -375,12 +375,12 @@ const AISpeech = () => {
 
   const filteredSpeeches = getFilteredSpeeches();
 
-  // ============================================
-  // ✅ HANDLERS
-  // ============================================
+  
+  
+  
 
   const handleCreate = () => {
-    // ✅ CHECK CREDITS BEFORE CREATING
+    
     if (userData.credits === 0) {
       setShowNoCreditsModal(true);
       return;
@@ -402,9 +402,9 @@ const AISpeech = () => {
     navigate('/user/add-credits');
   };
 
-  // ============================================
-  // ✅ NO CREDITS MODAL
-  // ============================================
+  
+  
+  
 
   const NoCreditsModal = () => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -445,9 +445,9 @@ const AISpeech = () => {
     </div>
   );
 
-  // ============================================
-  // ✅ DELETE MODAL
-  // ============================================
+  
+  
+  
 
   const DeleteModal = ({ id, title }: { id: string; title: string }) => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -487,9 +487,9 @@ const AISpeech = () => {
     </div>
   );
 
-  // ============================================
-  // ✅ RENDER
-  // ============================================
+  
+  
+  
 
   if (loading) {
     return (
@@ -505,10 +505,10 @@ const AISpeech = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[1500px] mx-auto">
-        {/* No Credits Modal */}
+        
         {showNoCreditsModal && <NoCreditsModal />}
 
-        {/* Delete Modal */}
+        
         {showDeleteModal && (
           <DeleteModal
             id={showDeleteModal}
@@ -516,7 +516,7 @@ const AISpeech = () => {
           />
         )}
 
-        {/* Header */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm px-6 py-5 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <div className="w-11 h-11 bg-[#0F2D63] rounded-xl flex items-center justify-center flex-shrink-0">
@@ -529,7 +529,7 @@ const AISpeech = () => {
               <p className="text-gray-400 dark:text-gray-500 text-xs mt-0.5">
                 Calibrate and manage your institutional speech recordings
               </p>
-              {/* ✅ CREDIT DISPLAY - Show credits */}
+              
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-xs text-gray-500 dark:text-gray-400">
                   Credits:
@@ -546,7 +546,7 @@ const AISpeech = () => {
                   </button>
                 )}
               </div>
-      {/* ✅ WARNING TEXT - Show when credits less than 10 */}
+      
       {(userData.credits ?? 0) < 10 && (
         <div className="flex items-center gap-1.5 mt-1">
           <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
@@ -585,7 +585,7 @@ const AISpeech = () => {
           </div>
         </div>
 
-        {/* ✅ CREDIT WARNING BANNER - Show if credits are 0 */}
+        
         {userData.credits === 0 && (
           <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 mb-4">
             <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
@@ -602,7 +602,7 @@ const AISpeech = () => {
           </div>
         )}
 
-        {/* Success/Error Messages */}
+        
         {successMessage && (
           <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm mb-4">
             <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -616,13 +616,13 @@ const AISpeech = () => {
           </div>
         )}
 
-        {/* ============================================ */}
-        {/* ✅ RESPONSIVE SCROLLABLE SPEECHES TABLE */}
-        {/* ============================================ */}
+        
+        
+        
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
           <div className="overflow-x-auto w-full">
             <div className="min-w-[900px]">
-              {/* Header Row */}
+              
               <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
                 <div className="col-span-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Speech Name</div>
                 <div className="col-span-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Top Parameters</div>
@@ -633,7 +633,7 @@ const AISpeech = () => {
                 <div className="col-span-1"></div>
               </div>
 
-              {/* Data Rows */}
+              
               {filteredSpeeches.length > 0 ? (
                 filteredSpeeches.map((speech, index) => {
                   const topParams = getTopParameters(speech.parameters);

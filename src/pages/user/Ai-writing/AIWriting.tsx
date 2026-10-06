@@ -1,4 +1,4 @@
-// pages/user/AIWriting.tsx
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -27,9 +27,9 @@ import {
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 
-// ============================================
-// ✅ TYPES - Matching Backend Response
-// ============================================
+
+
+
 
 interface Parameters {
   authority: number;
@@ -105,9 +105,9 @@ interface UserData {
   initials?: string;
 }
 
-// ============================================
-// COMPONENT
-// ============================================
+
+
+
 
 const AIWriting = () => {
   const navigate = useNavigate();
@@ -124,7 +124,7 @@ const AIWriting = () => {
   const [showNoCreditsModal, setShowNoCreditsModal] = useState(false);
   const fetchCalled = useRef(false);
 
-  // User state
+  
   const [userData, setUserData] = useState<UserData>({
     id: '',
     name: 'User',
@@ -141,7 +141,7 @@ const AIWriting = () => {
     }
   }, []);
 
-  // Fetch user data on mount
+  
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -161,7 +161,7 @@ const AIWriting = () => {
         if (response.data.success && response.data.data) {
           const data = response.data.data;
 
-          // Generate initials from name
+          
           const nameParts = data.name?.split(' ') || ['U'];
           const initials = nameParts
             .map((part: string) => part.charAt(0).toUpperCase())
@@ -181,19 +181,19 @@ const AIWriting = () => {
             initials: initials || 'U'
           });
 
-          // ✅ CHECK CREDITS - If 0, show modal
+          
           if (credits === 0) {
             setShowNoCreditsModal(true);
           }
 
-          // Apply theme if needed
+          
           if (data.theme) {
             localStorage.setItem('theme', data.theme);
           }
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
-        // Fallback to localStorage or default values
+        
         const savedName = localStorage.getItem('userName') || 'User';
         const savedEmail = localStorage.getItem('userEmail') || 'user@email.com';
         const savedCredits = parseInt(localStorage.getItem('userCredits') || '0');
@@ -207,7 +207,7 @@ const AIWriting = () => {
           initials: savedInitials
         }));
 
-        // ✅ CHECK CREDITS from localStorage
+        
         if (savedCredits === 0) {
           setShowNoCreditsModal(true);
         }
@@ -219,9 +219,9 @@ const AIWriting = () => {
     fetchUserData();
   }, []);
 
-  // ============================================
-  // ✅ FETCH DOCUMENTS FROM BACKEND
-  // ============================================
+  
+  
+  
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -261,9 +261,9 @@ const AIWriting = () => {
     }
   };
 
-  // ============================================
-  // ✅ DELETE DOCUMENT
-  // ============================================
+  
+  
+  
 
   const handleDelete = async (id: string) => {
     setDeleteLoading(id);
@@ -296,9 +296,9 @@ const AIWriting = () => {
     }
   };
 
-  // ============================================
-  // ✅ GET ICON FOR DOCUMENT TYPE
-  // ============================================
+  
+  
+  
 
   const getIconForType = (type: string): React.ReactNode => {
     const iconMap: Record<string, React.ReactNode> = {
@@ -314,9 +314,9 @@ const AIWriting = () => {
     return iconMap[type] || <FileText className="w-4 h-4 text-[#C85A32]" />;
   };
 
-  // ============================================
-  // ✅ GET TYPE LABEL
-  // ============================================
+  
+  
+  
 
   const getTypeLabel = (type: string): string => {
     const labelMap: Record<string, string> = {
@@ -332,9 +332,9 @@ const AIWriting = () => {
     return labelMap[type] || type;
   };
 
-  // ============================================
-  // ✅ GET TONE LABEL
-  // ============================================
+  
+  
+  
 
   const getToneLabel = (tone: string): string => {
     const labelMap: Record<string, string> = {
@@ -347,9 +347,9 @@ const AIWriting = () => {
     return labelMap[tone] || tone;
   };
 
-  // ============================================
-  // ✅ GET STATUS COLOR
-  // ============================================
+  
+  
+  
 
   const getStatusColor = (status: string): string => {
     switch (status) {
@@ -366,9 +366,9 @@ const AIWriting = () => {
     }
   };
 
-  // ============================================
-  // ✅ GET STATUS ICON
-  // ============================================
+  
+  
+  
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -381,9 +381,9 @@ const AIWriting = () => {
     }
   };
 
-  // ============================================
-  // ✅ FORMAT DATE
-  // ============================================
+  
+  
+  
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -394,9 +394,9 @@ const AIWriting = () => {
     });
   };
 
-  // ============================================
-  // ✅ FILTER DOCUMENTS
-  // ============================================
+  
+  
+  
 
   const getFilteredDocuments = () => {
     let filtered = documents;
@@ -413,12 +413,12 @@ const AIWriting = () => {
 
   const filteredDocuments = getFilteredDocuments();
 
-  // ============================================
-  // ✅ HANDLERS
-  // ============================================
+  
+  
+  
 
   const handleCreate = () => {
-    // ✅ CHECK CREDITS BEFORE CREATING
+    
     if (userData.credits === 0) {
       setShowNoCreditsModal(true);
       return;
@@ -440,9 +440,9 @@ const AIWriting = () => {
     navigate('/user/add-credits');
   };
 
-  // ============================================
-  // ✅ NO CREDITS MODAL
-  // ============================================
+  
+  
+  
 
   const NoCreditsModal = () => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -483,9 +483,9 @@ const AIWriting = () => {
     </div>
   );
 
-  // ============================================
-  // ✅ DELETE MODAL
-  // ============================================
+  
+  
+  
 
   const DeleteModal = ({ id, title }: { id: string; title: string }) => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -525,9 +525,9 @@ const AIWriting = () => {
     </div>
   );
 
-  // ============================================
-  // ✅ RENDER
-  // ============================================
+  
+  
+  
 
   if (loading) {
     return (
@@ -543,10 +543,10 @@ const AIWriting = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[1500px] mx-auto">
-        {/* No Credits Modal */}
+        
         {showNoCreditsModal && <NoCreditsModal />}
 
-        {/* Delete Modal */}
+        
         {showDeleteModal && (
           <DeleteModal
             id={showDeleteModal}
@@ -554,7 +554,7 @@ const AIWriting = () => {
           />
         )}
 
-        {/* Header */}
+        
         <div className="flex items-start justify-between mb-6">
           <div>
             <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-1">
@@ -566,7 +566,7 @@ const AIWriting = () => {
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
               Generate and manage institutional communication narratives
             </p>
-            {/* ✅ CREDIT DISPLAY - Show credits */}
+            
             <div className="flex items-center gap-2 mt-2">
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 Credits:
@@ -583,7 +583,7 @@ const AIWriting = () => {
                 </button>
               )}
             </div>
-                  {/* ✅ WARNING TEXT - Show when credits less than 10 */}
+                  
       {(userData.credits ?? 0) < 10 && (
         <div className="flex items-center gap-1.5 mt-1">
           <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
@@ -608,7 +608,7 @@ const AIWriting = () => {
           </button>
         </div>
 
-        {/* ✅ CREDIT WARNING BANNER - Show if credits are 0 */}
+        
         {userData.credits === 0 && (
           <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 mb-4">
             <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
@@ -625,7 +625,7 @@ const AIWriting = () => {
           </div>
         )}
 
-        {/* Search */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-5">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -639,7 +639,7 @@ const AIWriting = () => {
           </div>
         </div>
 
-        {/* Success/Error Messages */}
+        
         {successMessage && (
           <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm mb-4">
             <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -653,14 +653,14 @@ const AIWriting = () => {
           </div>
         )}
 
-        {/* ============================================ */}
-        {/* ✅ RESPONSIVE SCROLLABLE DOCUMENTS TABLE */}
-        {/* ============================================ */}
+        
+        
+        
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-          {/* Add overflow-x-auto and a min-width container */}
+          
           <div className="overflow-x-auto w-full">
             <div className="min-w-[900px]">
-              {/* Header Row */}
+              
               <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
                 <div className="col-span-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                   Document
@@ -683,7 +683,7 @@ const AIWriting = () => {
                 <div className="col-span-1"></div>
               </div>
 
-              {/* Data Rows */}
+              
               {filteredDocuments.length > 0 ? (
                 filteredDocuments.map((doc, index) => (
                   <div
@@ -692,7 +692,7 @@ const AIWriting = () => {
                       }`}
                     onClick={() => handleView(doc)}
                   >
-                    {/* Title */}
+                    
                     <div className="col-span-4 flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 bg-[#FFF8F5] dark:bg-[#C85A32]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                         {getIconForType(doc.metadata?.type || '')}
@@ -707,24 +707,24 @@ const AIWriting = () => {
                       </div>
                     </div>
 
-                    {/* Type */}
+                    
                     <div className="col-span-2">
                       <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-lg">
                         {getTypeLabel(doc.metadata?.type || '')}
                       </span>
                     </div>
 
-                    {/* Tone */}
+                    
                     <div className="col-span-2 text-xs text-gray-500 dark:text-gray-400">
                       {getToneLabel(doc.metadata?.tone || 'neutral')}
                     </div>
 
-                    {/* Word Count */}
+                    
                     <div className="col-span-1 text-xs text-gray-500 dark:text-gray-400 text-right">
                       {doc.metadata?.wordCount || doc.charCount || 0}
                     </div>
 
-                    {/* Status */}
+                    
                     <div className="col-span-1 flex items-center justify-center">
                       <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full border ${getStatusColor(doc.status)} flex items-center gap-1`}>
                         {getStatusIcon(doc.status)}
@@ -732,13 +732,13 @@ const AIWriting = () => {
                       </span>
                     </div>
 
-                    {/* Created Date */}
+                    
                     <div className="col-span-1 text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       {formatDate(doc.createdAt)}
                     </div>
 
-                    {/* Actions */}
+                    
                     <div className="col-span-1 flex items-center justify-end gap-1">
                       <button
                         onClick={(e) => {

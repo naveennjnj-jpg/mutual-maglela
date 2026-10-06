@@ -1,4 +1,4 @@
-// pages/admin/CreditPlans.tsx
+
 import React, { useState, useEffect } from "react";
 import {
   Plus,
@@ -151,7 +151,7 @@ const CreditPlans = () => {
   };
 
   const handleCreatePlan = async () => {
-    // Validate form
+    
     if (!formData.name || formData.name.trim() === "") {
       toast.error("Plan name is required");
       return;
@@ -166,7 +166,7 @@ const CreditPlans = () => {
     }
 
     try {
-      // Map billing type to match backend enum
+      
       const billingTypeMap: Record<string, string> = {
         once: "One-time",
         monthly: "Monthly",
@@ -185,7 +185,7 @@ const CreditPlans = () => {
         isActive: Boolean(formData.isActive),
       };
 
-      console.log("Sending payload:", payload); // Debug log
+      console.log("Sending payload:", payload); 
 
       const response = await planService.createPlan(payload);
       
@@ -352,7 +352,7 @@ const CreditPlans = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6FB] p-6 space-y-5">
-      {/* Header */}
+      
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-[#C85A32] mb-1">
@@ -375,7 +375,7 @@ const CreditPlans = () => {
         </button>
       </div>
 
-      {/* Stats */}
+      
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
           <p className="text-2xl font-bold text-[#0F2D63]">{plans.length}</p>
@@ -393,7 +393,7 @@ const CreditPlans = () => {
         </div>
       </div>
 
-      {/* Plans Grid */}
+      
       {plans.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
           <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
@@ -533,7 +533,7 @@ const CreditPlans = () => {
         </div>
       )}
 
-      {/* New/Edit Plan Modal */}
+      
       {showNewPlanModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">

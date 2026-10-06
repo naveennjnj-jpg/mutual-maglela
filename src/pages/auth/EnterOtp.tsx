@@ -35,7 +35,7 @@ const EnterOtp = () => {
 
     setError("");
 
-    // ✅ DIFFERENT FLOW
+    
     if (mode === "signup") {
       setIsDialogOpen(true);
     } else {
@@ -97,7 +97,7 @@ const EnterOtp = () => {
         </div>
       </form>
 
-      {/* ✅ SUCCESS FOR SIGNUP */}
+      
       <SuccessDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}

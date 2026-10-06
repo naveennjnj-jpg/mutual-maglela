@@ -143,7 +143,7 @@ const Terms = () => {
     },
   ];
 
-  // Update active section on scroll
+  
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 120;
@@ -182,7 +182,7 @@ const Terms = () => {
 
   return (
     <>
-      {/* Hero Section */}
+      
       <section className="relative h-[380px] overflow-hidden -mt-20">
         <img
           src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1400&q=80"
@@ -213,11 +213,11 @@ const Terms = () => {
         </div>
       </section>
 
-      {/* Content Section */}
+      
       <section className="py-16 bg-[#F5F0EA]">
         <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-12 items-start">
-            {/* Sidebar */}
+            
             <div className="lg:w-[22%] shrink-0 lg:sticky lg:top-24">
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4">
@@ -252,7 +252,7 @@ const Terms = () => {
               </div>
             </div>
 
-            {/* Content */}
+            
             <div className="lg:w-[78%] flex flex-col gap-5">
               {sections.map((section) => (
                 <div

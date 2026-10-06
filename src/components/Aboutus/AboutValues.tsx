@@ -36,7 +36,6 @@ const AboutValues = () => {
   return (
     <section className="py-20 bg-[#F5F0EA]">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
-        {/* Header */}
         <div className="text-center mb-14">
           <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-4">
             Our Values
@@ -46,7 +45,6 @@ const AboutValues = () => {
           </h2>
         </div>
 
-        {/* Values Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {values.map((value) => {
             const IconComponent = value.icon;

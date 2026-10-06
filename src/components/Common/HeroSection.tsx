@@ -31,28 +31,28 @@ const HeroSection = ({
   overlayOpacity = "from-[#1C1C1C]/92 via-[#1C1C1C]/70 to-transparent",
   imagePosition = "object-center",
 }: HeroSectionProps) => {
-  // Check if there's any content to show
+  
   const hasBadge = badge && badge.trim() !== "";
   const hasTitle = title && title.trim() !== "";
   const hasDescription = description && description.trim() !== "";
   const hasPrimaryButton = primaryButton?.text && primaryButton.text.trim() !== "";
   const hasSecondaryButton = secondaryButton?.text && secondaryButton.text.trim() !== "";
 
-  // If no content, don't render anything
+  
   if (!hasBadge && !hasTitle && !hasDescription && !hasPrimaryButton && !hasSecondaryButton) {
     return null;
   }
 
   return (
     <section className={`relative ${height} overflow-hidden -mt-20`}>
-      {/* Background Image */}
+      
       <img
         src={image}
         alt={badge || "Hero"}
         className={`absolute inset-0 w-full h-full object-cover ${imagePosition}`}
       />
 
-      {/* Overlays */}
+      
       <div className={`absolute inset-0 bg-gradient-to-r ${overlayOpacity}`}></div>
       <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/50 via-transparent to-transparent"></div>
       <div
@@ -63,31 +63,31 @@ const HeroSection = ({
         }}
       ></div>
 
-      {/* Content */}
+      
       <div className="relative h-full max-w-[1500px] mx-auto px-6 lg:px-8 flex flex-col justify-end pb-16 pt-20">
         <div className="max-w-2xl">
-          {/* Badge */}
+          
           {hasBadge && (
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-xs px-4 py-1.5 rounded-full mb-5 font-semibold uppercase tracking-widest">
               {badge}
             </div>
           )}
 
-          {/* Heading */}
+          
           {hasTitle && (
             <h1 className="text-3xl md:text-[44px] font-['Roboto'] text-white mb-5 leading-[1.15]">
               {title}
             </h1>
           )}
 
-          {/* Description */}
+          
           {hasDescription && (
             <p className="text-white/70 text-sm md:text-base leading-relaxed mb-8 max-w-xl">
               {description}
             </p>
           )}
 
-          {/* Buttons */}
+          
           {(hasPrimaryButton || hasSecondaryButton) && (
             <div className="flex flex-wrap gap-3">
               {hasPrimaryButton && (

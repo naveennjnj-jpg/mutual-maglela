@@ -1,4 +1,4 @@
-// components/modals/GuestWorkshopModal.tsx
+
 import React, { useState } from 'react';
 import {
     X,
@@ -57,7 +57,7 @@ const GuestWorkshopModal: React.FC<GuestWorkshopModalProps> = ({
 
     const today = new Date().toISOString().split('T')[0];
 
-    // ✅ Generate time slots for the dropdown
+    
     const generateTimeSlots = () => {
         const slots = [];
         for (let hour = 6; hour <= 22; hour++) {
@@ -203,7 +203,7 @@ const GuestWorkshopModal: React.FC<GuestWorkshopModalProps> = ({
         }
     };
 
-    // ✅ Render Success Message
+    
     const renderSuccess = () => {
         return (
             <div className="text-center py-8">
@@ -241,7 +241,7 @@ const GuestWorkshopModal: React.FC<GuestWorkshopModalProps> = ({
         );
     };
 
-    // Step 2: Select Service
+    
     const renderServiceSelection = () => {
         const services = [
             {
@@ -336,7 +336,7 @@ const GuestWorkshopModal: React.FC<GuestWorkshopModalProps> = ({
         );
     };
 
-    // Step 3: Configure Workshop
+    
     const renderConfigureWorkshop = () => {
         const serviceLabels: Record<string, string> = {
             'media-training': 'Media Training',
@@ -363,14 +363,14 @@ const GuestWorkshopModal: React.FC<GuestWorkshopModalProps> = ({
                     Configure Your Workshop
                 </h2>
 
-                {/* ✅ Date & Time Picker */}
+                
                 <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                     <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5" />
                         Schedule Date & Time
                     </p>
                     <div className="grid grid-cols-2 gap-3">
-                        {/* Date Picker */}
+                        
                         <div>
                             <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
                                 Date *
@@ -389,7 +389,7 @@ const GuestWorkshopModal: React.FC<GuestWorkshopModalProps> = ({
                             </div>
                         </div>
 
-                        {/* ✅ Time Dropdown Selector */}
+                        
                         <div>
                             <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
                                 Time *
@@ -410,7 +410,7 @@ const GuestWorkshopModal: React.FC<GuestWorkshopModalProps> = ({
                                         </option>
                                     ))}
                                 </select>
-                                {/* Custom dropdown arrow */}
+                                
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                                     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -421,7 +421,7 @@ const GuestWorkshopModal: React.FC<GuestWorkshopModalProps> = ({
                     </div>
                 </div>
 
-                {/* Attendance Type */}
+                
                 <div className="mb-4">
                     <p className="text-xs font-semibold text-gray-500 mb-2">
                         How would you like to attend?
@@ -452,7 +452,7 @@ const GuestWorkshopModal: React.FC<GuestWorkshopModalProps> = ({
                     </div>
                 </div>
 
-                {/* Session Duration */}
+                
                 <div className="mb-5">
                     <p className="text-xs font-semibold text-gray-500 mb-2">
                         Session duration
@@ -483,7 +483,7 @@ const GuestWorkshopModal: React.FC<GuestWorkshopModalProps> = ({
                     </div>
                 </div>
 
-                {/* Personal Details */}
+                
                 <div className="space-y-3.5 pt-1">
                     <div>
                         <label className="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1.5">

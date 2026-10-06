@@ -1,4 +1,4 @@
-// components/auth/SecurityNDAStep.tsx
+
 import React from 'react';
 import { Check } from 'lucide-react';
 

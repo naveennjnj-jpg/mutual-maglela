@@ -51,7 +51,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen bg-[#F9F7F4] flex flex-col">
-      {/* Header */}
+      
       <header className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center">
           <img
@@ -69,13 +69,13 @@ const ForgotPassword = () => {
         </button>
       </header>
 
-      {/* Main Content */}
+      
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-[400px]">
           {!isEmailSent ? (
-            // Forgot Password Form
+            
             <>
-              {/* Header Section */}
+              
               <div className="text-center mb-8">
                 <div className="w-12 h-12 bg-[#F3EDE6] rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Lock className="w-5 h-5 text-[#C85A32]" />
@@ -88,7 +88,7 @@ const ForgotPassword = () => {
                 </p>
               </div>
 
-              {/* Form Card */}
+              
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7">
                 {error && (
                   <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm mb-4">
@@ -126,9 +126,8 @@ const ForgotPassword = () => {
               </div>
             </>
           ) : (
-            // Check Your Inbox View
             <>
-              {/* Header Section */}
+              
               <div className="text-center mb-8">
                 <div className="w-12 h-12 bg-[#F3EDE6] rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Check className="w-5 h-5 text-[#C85A32]" />
@@ -144,7 +143,7 @@ const ForgotPassword = () => {
                 </p>
               </div>
 
-              {/* Steps Card */}
+              
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 space-y-5">
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
@@ -197,7 +196,7 @@ const ForgotPassword = () => {
             </>
           )}
 
-          {/* Security Footer */}
+          
           <div className="flex items-center justify-center gap-1.5 mt-6 text-xs text-gray-400">
             <Shield className="w-3.5 h-3.5" />
             <span>Enterprise-grade security</span>

@@ -1,4 +1,4 @@
-// pages/admin/Workshop/AdminWorkshopList.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -119,12 +119,12 @@ const AdminWorkshopList = () => {
   const filterWorkshops = () => {
     let filtered = [...workshops];
 
-    // Filter by status
+    
     if (activeTab !== 'all') {
       filtered = filtered.filter(w => w.status === activeTab);
     }
 
-    // Filter by search
+    
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(w =>
@@ -238,7 +238,7 @@ const AdminWorkshopList = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6FB] p-6 space-y-5">
-      {/* Header */}
+      
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-[#C85A32] mb-1">Operations</p>
         <div className="flex items-center justify-between">
@@ -257,7 +257,7 @@ const AdminWorkshopList = () => {
         </div>
       </div>
 
-      {/* Tabs */}
+      
       <div className="flex gap-1 bg-white border border-gray-100 rounded-2xl p-1.5 shadow-sm overflow-x-auto">
         {['all', 'pending', 'upcoming', 'completed', 'cancelled'].map((tab) => (
           <button
@@ -283,7 +283,7 @@ const AdminWorkshopList = () => {
         ))}
       </div>
 
-      {/* Search */}
+      
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
@@ -297,7 +297,7 @@ const AdminWorkshopList = () => {
         </div>
       </div>
 
-      {/* Error Message */}
+      
       {error && (
         <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -308,7 +308,7 @@ const AdminWorkshopList = () => {
         </div>
       )}
 
-      {/* Workshops Table */}
+      
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {filteredWorkshops.length === 0 ? (
           <div className="text-center py-12">

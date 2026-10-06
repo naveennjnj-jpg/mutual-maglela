@@ -1,4 +1,4 @@
-// pages/admin/ProjectSubmit.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
@@ -46,9 +46,9 @@ const ProjectSubmit: React.FC = () => {
 
             if (response.data.success) {
                 setProject(response.data.data);
-                // If project is in revision, pre-fill with previous admin note if needed
+                
                 if (response.data.data.status === 'Under Review') {
-                    // You might want to pre-fill or show existing admin note
+                    
                 }
             } else {
                 setError(response.data.message || 'Failed to fetch project');
@@ -167,7 +167,7 @@ const ProjectSubmit: React.FC = () => {
                 return;
             }
 
-            // Step 1: Upload document
+            
             let documentUrl: string | null = null;
             try {
                 documentUrl = await uploadDocument(file);
@@ -183,11 +183,11 @@ const ProjectSubmit: React.FC = () => {
                 return;
             }
 
-            // Step 2: Update project with note and document URL
+            
             const updateData = {
                 adminnote: note,
                 adminattachment: documentUrl,
-                status: 'Under Review' // Set to Under Review for user review
+                status: 'Under Review' 
             };
 
             const response = await axios.put(
@@ -257,7 +257,7 @@ const ProjectSubmit: React.FC = () => {
         <main className="flex-1">
             <div className="min-h-screen bg-[#F4F6FB] p-6">
                 <div className="max-w-[680px] mx-auto space-y-5">
-                    {/* Back Button */}
+                    
                     <Link
                         to={`/admin/projects/${id}`}
                         className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#0F2D63] transition-colors"
@@ -266,7 +266,7 @@ const ProjectSubmit: React.FC = () => {
                         Back to Project
                     </Link>
 
-                    {/* Header */}
+                    
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
                             {isRevision ? 'Resubmit Project' : 'Submit Project'}
@@ -283,7 +283,7 @@ const ProjectSubmit: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Success Message */}
+                    
                     {success && (
                         <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
                             <CheckCircle className="w-4 h-4" />
@@ -291,7 +291,7 @@ const ProjectSubmit: React.FC = () => {
                         </div>
                     )}
 
-                    {/* Error Message */}
+                    
                     {error && (
                         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
                             <AlertCircle className="w-4 h-4" />
@@ -300,7 +300,7 @@ const ProjectSubmit: React.FC = () => {
                     )}
 
                     <form onSubmit={handleSubmit}>
-                        {/* Note */}
+                        
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                             <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">
                                 Note to User *
@@ -315,7 +315,7 @@ const ProjectSubmit: React.FC = () => {
                             />
                         </div>
 
-                        {/* File Upload */}
+                        
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                             <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">
                                 Attach Completed File *
@@ -379,7 +379,7 @@ const ProjectSubmit: React.FC = () => {
                             )}
                         </div>
 
-                        {/* Action Buttons */}
+                        
                         <div className="flex gap-3">
                             <Link
                                 to={`/admin/projects/${id}`}

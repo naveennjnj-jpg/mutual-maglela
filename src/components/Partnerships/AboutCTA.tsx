@@ -40,7 +40,7 @@ const AboutCTA = () => {
     <section className="py-20 bg-[#F5F0EA]">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-12 items-center">
-          {/* Left Column - Content */}
+          
           <div className="lg:w-2/5 shrink-0">
             <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-4">
               Join Our Network
@@ -62,7 +62,7 @@ const AboutCTA = () => {
             </Link>
           </div>
 
-          {/* Right Column - Image Grid */}
+          
           <div className="lg:w-3/5">
             <div className="grid grid-cols-3 gap-3">
               {images.map((image) => (

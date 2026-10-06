@@ -31,7 +31,7 @@ const CreateNewPassword = () => {
       return;
     }
 
-    // Success
+    
     setError("");
     setIsDialogOpen(true);
   };
@@ -53,7 +53,7 @@ const handleConfirm = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {/* Password */}
+        
         <div className="relative">
           <Lock  className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-input-888"
             strokeWidth={0.9} />
@@ -76,7 +76,7 @@ const handleConfirm = () => {
           </button>
         </div>
 
-        {/* Confirm Password */}
+        
         <div className="relative">
           <Lock  className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-input-888"
             strokeWidth={0.9} />
@@ -99,7 +99,7 @@ const handleConfirm = () => {
           </button>
         </div>
 
-        {/* Error Message */}
+        
         {error && (
           <p className="text-red-500 text-sm text-center">
             {error}
@@ -111,7 +111,7 @@ const handleConfirm = () => {
         </Button>
       </form>
 
-      {/* Success Popup */}
+      
       <SuccessDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}

@@ -98,7 +98,7 @@ const ProjectPricing = ({
 
   const items = propItems || defaultItems;
 
-  // Split items into two columns (left and right) for the old design
+  
   const leftItems = items.slice(0, Math.ceil(items.length / 2));
   const rightItems = items.slice(Math.ceil(items.length / 2));
 
@@ -106,7 +106,7 @@ const ProjectPricing = ({
     <section className={`${padding} ${bgColor}`}>
       <div className={`${maxWidth} mx-auto px-6 lg:px-8`}>
         <div className="flex flex-col lg:flex-row gap-16 items-start">
-          {/* Left Column - Content */}
+          
           <div className={`${leftWidth} shrink-0`}>
             {badge && (
               <p className={`${badgeColor} text-xs font-semibold uppercase tracking-widest mb-4`}>
@@ -124,7 +124,7 @@ const ProjectPricing = ({
               </p>
             )}
 
-            {/* Quick Links */}
+            
             <div className="space-y-3">
               {items.slice(0, 3).map((item) => (
                 <div
@@ -149,7 +149,7 @@ const ProjectPricing = ({
             </div>
           </div>
 
-          {/* Right Column - Detailed Pricing */}
+          
           <div className={`${rightWidth}`}>
             <div 
               className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden"
@@ -190,7 +190,7 @@ const ProjectPricing = ({
                   ))}
                 </div>
 
-                {/* CTA Button */}
+                
                 <Link
                   to={ctaButton.link}
                   className={`mt-2 w-full ${buttonColor} ${buttonHoverColor} text-white py-3.5 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2`}

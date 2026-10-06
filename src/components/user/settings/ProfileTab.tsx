@@ -1,4 +1,4 @@
-// components/settings/ProfileTab.tsx
+
 import React, { useState, useRef, useEffect } from "react";
 import { Camera, Save, Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import axios from "axios";
@@ -63,7 +63,7 @@ const ProfileTab = () => {
     }
   }, [user]);
 
-  // Handle input changes
+  
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -76,19 +76,19 @@ const ProfileTab = () => {
     }));
   };
 
-  // Handle image upload
+  
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
+    
     const validTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!validTypes.includes(file.type)) {
       setError("Please upload a valid image (JPEG, PNG, or WEBP)");
       return;
     }
 
-    // Validate file size (max 5MB)
+    
     if (file.size > 5 * 1024 * 1024) {
       setError("Image size must be less than 5MB");
       return;
@@ -148,7 +148,7 @@ const ProfileTab = () => {
     }
   };
 
-  // Handle form submission
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -178,9 +178,9 @@ const ProfileTab = () => {
 
       if (response.data.success) {
         setSuccess(true);
-        // Update user context
+        
         if (updateDetails) {
-          // Cast to any to allow extra properties not defined on Partial<User>
+          
           await updateDetails({
             name: formData.fullName,
             jobtitle: formData.jobtitle,
@@ -203,7 +203,7 @@ const ProfileTab = () => {
     }
   };
 
-  // Get initials for avatar
+  
   const getInitials = () => {
     if (!formData.fullName) return "U";
     return formData.fullName
@@ -220,7 +220,7 @@ const ProfileTab = () => {
         Profile Information
       </h2>
 
-      {/* Success/Error Messages */}
+      
       {success && (
         <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm mb-4">
           <CheckCircle className="w-4 h-4" />
@@ -235,7 +235,7 @@ const ProfileTab = () => {
         </div>
       )}
 
-      {/* Avatar */}
+      
       <div className="flex items-center gap-4 mb-6">
         <div className="relative group">
           {formData.profilePic ? (
@@ -277,7 +277,7 @@ const ProfileTab = () => {
         </div>
       </div>
 
-      {/* Form */}
+      
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -332,53 +332,9 @@ const ProfileTab = () => {
           </div>
         </div>
 
-        {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs font-medium text-gray-600 mb-1.5 block">
-              Phone Number
-            </label>
-            <input
-              name="phoneNumber"
-              value={formData.phoneNumber || ""}
-              onChange={handleChange}
-              className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#C85A32] focus:ring-2 focus:ring-[#C85A32]/10 transition-all"
-              placeholder="Your phone number"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-medium text-gray-600 mb-1.5 block">
-              Country
-            </label>
-            <select
-              name="country"
-              value={formData.country || "South Africa"}
-              onChange={handleChange}
-              className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#C85A32] focus:ring-2 focus:ring-[#C85A32]/10 transition-all"
-            >
-              <option value="South Africa">South Africa</option>
-              <option value="Nigeria">Nigeria</option>
-              <option value="Kenya">Kenya</option>
-              <option value="Ghana">Ghana</option>
-              <option value="Egypt">Egypt</option>
-              <option value="United Kingdom">United Kingdom</option>
-              <option value="United States">United States</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-        </div> */}
+        
 
-        {/* <div>
-          <label className="text-xs font-medium text-gray-600 mb-1.5 block">
-            Address
-          </label>
-          <input
-            name="address"
-            value={formData.address || ""}
-            onChange={handleChange}
-            className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#C85A32] focus:ring-2 focus:ring-[#C85A32]/10 transition-all"
-            placeholder="Your address"
-          />
-        </div> */}
+        
 
         <div>
           <label className="text-xs font-medium text-gray-600 mb-1.5 block">

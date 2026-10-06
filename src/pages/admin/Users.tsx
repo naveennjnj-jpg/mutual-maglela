@@ -1,4 +1,4 @@
-// pages/admin/Users.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import UserDetailsModal from '@/components/admin/users/UserDetailsModal';
 import AddClientModal from '@/components/admin/users/AddClientModal';
 
-// Toast notification component
+
 const Toast: React.FC<{
   message: string;
   type: 'success' | 'error';
@@ -153,7 +153,7 @@ const Users: React.FC = () => {
         return;
       }
 
-      // Fetch users and clients in parallel
+      
       const [usersResponse, clientsResponse] = await Promise.all([
         axios.get(`${API_URL}/api/admin/users`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -197,7 +197,7 @@ const Users: React.FC = () => {
       filteredData = clients;
     }
 
-    // Search filter
+    
     if (searchTerm) {
       filteredData = filteredData.filter((item) =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -205,7 +205,7 @@ const Users: React.FC = () => {
       );
     }
 
-    // Type filter (only for users)
+    
     if (activeTab === 'platform' && filterType !== 'all') {
       if (filterType === 'b2c') {
         filteredData = filteredData.filter((u: User) => u.userType === 'professional');
@@ -216,7 +216,7 @@ const Users: React.FC = () => {
       }
     }
 
-    // Status filter
+    
     if (filterStatus !== 'all') {
       const isActive = filterStatus === 'active';
       filteredData = filteredData.filter((item) => item.isActive === isActive);
@@ -360,7 +360,7 @@ const Users: React.FC = () => {
   return (
     <>
       <main className="flex-1">
-        {/* Toast Notifications */}
+        
         {toast && (
           <Toast
             message={toast.message}
@@ -370,7 +370,7 @@ const Users: React.FC = () => {
         )}
 
         <div className="min-h-screen bg-[#F4F6FB] p-6 space-y-5">
-          {/* Header */}
+          
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-[#C85A32] mb-1">
@@ -392,7 +392,7 @@ const Users: React.FC = () => {
             )}
           </div>
 
-          {/* Tabs */}
+          
           <div className="flex gap-1 bg-white border border-gray-100 rounded-2xl p-1.5 shadow-sm">
             <button
               onClick={() => setActiveTab('platform')}
@@ -428,7 +428,7 @@ const Users: React.FC = () => {
             </button>
           </div>
 
-          {/* Search and Filters */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-wrap gap-3 items-center">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -464,7 +464,7 @@ const Users: React.FC = () => {
             </div>
           </div>
 
-          {/* Error */}
+          
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />
@@ -472,7 +472,7 @@ const Users: React.FC = () => {
             </div>
           )}
 
-          {/* Data Table */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm table-fixed">
@@ -554,7 +554,7 @@ const Users: React.FC = () => {
                             <Ellipsis className="w-3.5 h-3.5" />
                           </button>
                           
-                          {/* Dropdown Menu */}
+                          
                           {openDropdown === item._id && (
                             <div className="absolute right-8 top-2 z-20 bg-white border border-gray-100 shadow-lg rounded-xl py-1 w-44">
                               <button
@@ -617,7 +617,7 @@ const Users: React.FC = () => {
           </div>
         </div>
 
-        {/* User Details Modal */}
+        
         <UserDetailsModal
           user={selectedUser}
           isOpen={showModal}
@@ -630,7 +630,7 @@ const Users: React.FC = () => {
           getStatusLabel={getStatusLabel}
         />
         
-        {/* Add Client Modal */}
+        
         <AddClientModal
           isOpen={showAddClient}
           onClose={() => setShowAddClient(false)}

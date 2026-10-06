@@ -1,4 +1,4 @@
-// layouts/admin/AdminHeader.tsx
+
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -64,7 +64,7 @@ interface Notification {
   timestamp: Date;
 }
 
-// Map icon strings to components
+
 const iconMap: Record<string, any> = {
   Users: Users,
   FolderKanban: FolderKanban,
@@ -90,7 +90,7 @@ const iconMap: Record<string, any> = {
   LayoutDashboard: LayoutDashboard
 };
 
-// Color mapping for different activity types
+
 const getColorForIcon = (icon: string): string => {
   const colorMap: Record<string, string> = {
     Users: "text-[#4F6EF7]",
@@ -119,7 +119,7 @@ const getColorForIcon = (icon: string): string => {
   return colorMap[icon] || "text-gray-500";
 };
 
-// Get background color for icon
+
 const getBgColorForIcon = (icon: string): string => {
   const colorMap: Record<string, string> = {
     Users: "bg-[#4F6EF7]/10",
@@ -162,7 +162,7 @@ const AdminHeader = ({
   const notificationRef = useRef<HTMLDivElement>(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   
-  // User state
+  
   const [userData, setUserData] = useState<UserData>({
     id: '',
     name: 'Admin',
@@ -176,7 +176,7 @@ const AdminHeader = ({
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  // Fetch user data on mount
+  
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -196,7 +196,7 @@ const AdminHeader = ({
         if (response.data.success && response.data.data) {
           const data = response.data.data;
           
-          // Generate initials from name
+          
           const nameParts = data.name?.split(' ') || ['A'];
           const initials = nameParts
             .map((part: string) => part.charAt(0).toUpperCase())
@@ -213,14 +213,14 @@ const AdminHeader = ({
             initials: initials || 'A'
           });
 
-          // Apply theme if needed
+          
           if (data.theme) {
             localStorage.setItem('theme', data.theme);
           }
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
-        // Fallback to localStorage or default values
+        
         const savedName = localStorage.getItem('userName') || 'Admin';
         const savedEmail = localStorage.getItem('userEmail') || 'admin@email.com';
         const savedInitials = savedName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
@@ -239,7 +239,7 @@ const AdminHeader = ({
     fetchUserData();
   }, []);
 
-  // Fetch notifications from separate endpoint
+  
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -250,7 +250,7 @@ const AdminHeader = ({
           return;
         }
 
-        // ✅ Use separate API endpoint for notifications
+        
         const response = await axios.get(`${API_URL}/api/admin/notifications`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -260,7 +260,7 @@ const AdminHeader = ({
         if (response.data.success && response.data.data) {
           const activities = response.data.data;
           
-          // Transform activities to notifications
+          
           const transformedNotifications: Notification[] = activities.map((activity: any, index: number) => ({
             id: activity.id || `${index}-${activity.time}`,
             title: activity.title,
@@ -269,18 +269,18 @@ const AdminHeader = ({
             icon: activity.icon || 'Activity',
             color: getColorForIcon(activity.icon || 'Activity'),
             bgColor: getBgColorForIcon(activity.icon || 'Activity'),
-            read: activity.read || index >= 5, // Mark older notifications as read
+            read: activity.read || index >= 5, 
             timestamp: activity.timestamp || new Date(Date.now() - (index + 1) * 60000)
           }));
 
-          setNotifications(transformedNotifications.slice(0, 10)); // Limit to 10
+          setNotifications(transformedNotifications.slice(0, 10)); 
         } else {
-          // Fallback to empty state
+          
           setNotifications([]);
         }
       } catch (error) {
         console.error('Error fetching notifications:', error);
-        // Fallback to empty state
+        
         setNotifications([]);
       } finally {
         setNotificationsLoading(false);
@@ -289,13 +289,13 @@ const AdminHeader = ({
 
     fetchNotifications();
 
-    // Refresh notifications every 30 seconds
+    
     const interval = setInterval(fetchNotifications, 30000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Click outside handlers
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
@@ -315,22 +315,22 @@ const AdminHeader = ({
     navigate("/login");
   };
 
-  // Get notification icon component
+  
   const getNotificationIcon = (iconName: string) => {
     return iconMap[iconName] || Activity;
   };
 
-  // Mark notification as read
+  
   const markAsRead = async (id: string) => {
     try {
-      // Update local state
+      
       setNotifications(prev => 
         prev.map(notif => 
           notif.id === id ? { ...notif, read: true } : notif
         )
       );
 
-      // ✅ Call API to mark as read
+      
       const token = localStorage.getItem('token');
       if (token) {
         await axios.patch(
@@ -348,15 +348,15 @@ const AdminHeader = ({
     }
   };
 
-  // Mark all as read
+  
   const markAllAsRead = async () => {
     try {
-      // Update local state
+      
       setNotifications(prev => 
         prev.map(notif => ({ ...notif, read: true }))
       );
 
-      // ✅ Call API to mark all as read
+      
       const token = localStorage.getItem('token');
       if (token) {
         await axios.patch(
@@ -408,7 +408,7 @@ const AdminHeader = ({
         }`}
       >
         <div className="flex items-center justify-between h-full px-4 lg:px-8">
-          {/* Left Section */}
+          
           <div className="flex items-center gap-3">
             <button
               onClick={onMenuClick}
@@ -424,7 +424,7 @@ const AdminHeader = ({
             </div>
           </div>
 
-          {/* Right Section */}
+          
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
@@ -433,7 +433,7 @@ const AdminHeader = ({
               <Search className="w-5 h-5" />
             </button>
 
-            {/* Notifications */}
+            
             <div className="relative" ref={notificationRef}>
               <button
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
@@ -449,14 +449,7 @@ const AdminHeader = ({
                 <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50">
                   <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                     <h3 className="font-semibold text-[#0F2D63] dark:text-white">Notifications</h3>
-                    {/* {unreadCount > 0 && (
-                      <button 
-                        onClick={markAllAsRead}
-                        className="text-xs text-[#C85A32] hover:underline font-medium"
-                      >
-                        Mark all read
-                      </button>
-                    )} */}
+                    
                   </div>
                   <div className="max-h-80 overflow-y-auto">
                     {notificationsLoading ? (
@@ -504,15 +497,7 @@ const AdminHeader = ({
                     )}
                   </div>
                   <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-2 text-center">
-                    {/* <button 
-                      onClick={() => {
-                        setIsNotificationsOpen(false);
-                        navigate('/admin/activity');
-                      }}
-                      className="text-xs text-[#C85A32] font-medium hover:underline"
-                    >
-                      View all activity
-                    </button> */}
+                    
                   </div>
                 </div>
               )}
@@ -525,7 +510,7 @@ const AdminHeader = ({
               <Home className="w-4 h-4" />
             </Link>
 
-            {/* Profile */}
+            
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -591,7 +576,7 @@ const AdminHeader = ({
           </div>
         </div>
 
-        {/* Mobile Search */}
+        
         {isMobileSearchOpen && (
           <div className="md:hidden absolute top-16 left-0 right-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 p-3 shadow-lg">
             <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2">
@@ -610,7 +595,7 @@ const AdminHeader = ({
         )}
       </header>
 
-      {/* Logout Modal */}
+      
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-7 w-full max-w-sm shadow-xl">

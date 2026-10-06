@@ -27,7 +27,6 @@ const AboutTeam = () => {
     <section className="py-20 bg-[#F5F0EA]">
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-14 items-center">
-          {/* Left Column - Image */}
           <div className="lg:w-[45%] shrink-0 relative">
             <div className="rounded-2xl overflow-hidden aspect-[4/3]">
               <img
@@ -46,7 +45,6 @@ const AboutTeam = () => {
             </div>
           </div>
 
-          {/* Right Column - Content */}
           <div className="lg:w-[55%]">
             <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-4">
               Our Team
@@ -71,7 +69,6 @@ const AboutTeam = () => {
               </p>
             </div>
 
-            {/* Stats */}
             <div className="flex items-center gap-0 divide-x divide-gray-200 bg-white rounded-xl border border-gray-100 overflow-hidden">
               {stats.map((stat) => (
                 <div key={stat.id} className="flex-1 py-5 text-center">

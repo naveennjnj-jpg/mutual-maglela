@@ -84,22 +84,22 @@ const Testimonial = ({
     </svg>
   );
 
-  // Check if there's any content to show
+  
   const hasQuote = quote && quote.trim() !== "";
   const hasName = name && name.trim() !== "";
   const hasTitle = title && title.trim() !== "";
   const hasInstitution = institution && institution.trim() !== "";
   const hasBrandText = brandText && brandText.trim() !== "";
 
-  // If no content, don't render anything
+  
   if (!hasQuote && !hasName && !hasTitle && !hasInstitution && !hasBrandText) {
     return null;
   }
 
-  // Format quote with quotation marks
+  
   const formatQuote = (text: string) => {
     if (!showQuotationMarks) return text;
-    // Remove existing quotes if any and add new ones
+    
     const cleanText = text.replace(/^["']|["']$/g, '').trim();
     return `"${cleanText}"`;
   };
@@ -107,21 +107,21 @@ const Testimonial = ({
   return (
     <section className={`${padding} ${bgColor}`}>
       <div className={`${maxWidth} mx-auto px-6 lg:px-8 ${getAlignmentClasses()}`}>
-        {/* Quote Icon */}
+        
         {showQuoteIcon && hasQuote && (
           <div className={getIconAlignment()}>
             {icon || defaultIcon}
           </div>
         )}
 
-        {/* Quote */}
+        
         {hasQuote && (
           <blockquote className={`${textColor} ${quoteSize} leading-relaxed mb-8 font-['Roboto']`}>
             {formatQuote(quote)}
           </blockquote>
         )}
 
-        {/* Author Info - Only show if at least one field is present */}
+        
         {(hasName || hasTitle || hasInstitution) && (
           <div>
             {hasName && (
@@ -136,7 +136,7 @@ const Testimonial = ({
           </div>
         )}
 
-        {/* Brand Line */}
+        
         {showBrandLine && hasBrandText && (
           <div className={`mt-6 ${getBrandAlignment()}`}>
             <span className={`font-['Roboto'] font-bold text-sm ${brandColor} uppercase tracking-wide border-b-2 ${brandBorderColor} pb-0.5 inline-block`}>

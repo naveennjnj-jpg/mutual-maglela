@@ -18,7 +18,7 @@ const Header = () => {
     window.location.href = LOGIN_REDIRECT_URL;
   };
 
-  // Handle scroll effect
+  
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
@@ -52,7 +52,7 @@ const Header = () => {
     useEffect(() => {
     const isDesktop = window.innerWidth >= 1024;
     
-    // Only run this logic on DESKTOP
+    
     if (!isDesktop) return;
 
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
@@ -84,7 +84,7 @@ const Header = () => {
     };
   }, [isMenuOpen]);
 
-  // Solutions data with icons
+  
   const solutionsData = [
     {
       icon: "BookOpen",
@@ -130,7 +130,7 @@ const Header = () => {
     },
   ];
 
-  // Icon mapping
+  
   const getIcon = (iconName: string) => {
     const icons: Record<string, React.ReactNode> = {
       BookOpen: (
@@ -193,7 +193,7 @@ const Header = () => {
 >
       <nav className="max-w-[1500px] mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* Logo */}
+          
           <Link to="/" className="flex items-center shrink-0">
             <img
               src={Logo}
@@ -204,9 +204,9 @@ const Header = () => {
             />
           </Link>
 
-          {/* Desktop Menu */}
+          
           <div className="hidden lg:flex items-center gap-6">
-            {/* Solutions Dropdown */}
+            
             <div 
               className="relative" 
               ref={solutionsRef}
@@ -229,17 +229,17 @@ const Header = () => {
                 />
               </button>
 
-              {/* Solutions Dropdown Content */}
+              
               {isSolutionsOpen && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-[660px] z-50">
                   <div className="bg-white/85 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/60 overflow-hidden">
-                    {/* Header */}
+                    
                     <div className="bg-gray-50/70 border-b border-white/40 px-6 py-3">
                       <p className="text-[#1C1C1C] font-semibold text-sm">Solutions</p>
                       <p className="text-gray-400 text-xs mt-0.5">Communication strategies for every sector</p>
                     </div>
 
-                    {/* Grid Items */}
+                    
                     <div className="grid grid-cols-2 gap-0 p-3">
                       {solutionsData.map((item, index) => (
                         <Link
@@ -262,7 +262,7 @@ const Header = () => {
                       ))}
                     </div>
 
-                    {/* Footer CTA */}
+                    
                     <div className="border-t border-white/40 px-6 py-3 bg-white/40 flex items-center justify-between">
                       <p className="text-xs text-gray-500">Not sure which solution fits? We'll help.</p>
                       <Link
@@ -299,7 +299,7 @@ const Header = () => {
               Pricing
             </NavLink>
 
-            {/* Company Dropdown */}
+            
             <div 
               className="relative" 
               ref={companyRef}
@@ -356,7 +356,7 @@ const Header = () => {
               Insights
             </NavLink>
 
-            {/* Login and Get a Demo */}
+            
             <div className="flex items-center gap-3">
               <Link
                 to="/login"
@@ -377,7 +377,7 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Mobile Menu Button */}
+          
           <button
             className={`lg:hidden p-2 transition-colors duration-300 ${
               isScrolled ? 'text-[#0F2D63]' : 'text-white'
@@ -389,11 +389,11 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        
         {isMenuOpen && (
           <div className="lg:hidden fixed inset-0 top-20 bg-black/95 backdrop-blur-lg overflow-y-auto">
             <div className="flex flex-col p-6 space-y-4">
-              {/* Mobile Solutions */}
+              
               <div className="border-b border-white/10 pb-4">
                 <button
                   className="text-sm transition-all duration-300 px-3 py-2 rounded-lg flex items-center gap-1 outline-none text-white hover:bg-white/10 w-full justify-between"
@@ -449,7 +449,7 @@ const Header = () => {
                 Pricing
               </NavLink>
 
-              {/* Mobile Company */}
+              
               <div className="border-b border-white/10 pb-4">
                 <button
                   className="text-sm transition-all duration-300 px-3 py-2 rounded-lg flex items-center gap-1 outline-none text-white hover:bg-white/10 w-full justify-between"

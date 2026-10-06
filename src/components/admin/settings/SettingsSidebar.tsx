@@ -1,4 +1,3 @@
-// components/settings/SettingsSidebar.tsx
 import React from "react";
 import { User, Bell, Lock, Globe, Shield, Plug } from "lucide-react";
 

@@ -1,4 +1,4 @@
-// app.tsx
+
 import { AuthProvider } from "./context/AuthContext";
 import AppRoutes from "./routes/AppRoutes";
 

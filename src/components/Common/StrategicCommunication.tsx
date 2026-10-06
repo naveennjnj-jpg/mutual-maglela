@@ -98,7 +98,7 @@ const StrategicCommunication = ({
   return (
     <section className={`${padding} ${bgColor}`}>
       <div className="max-w-[1500px] mx-auto px-6 lg:px-8">
-        {/* Header */}
+        
         <div className="mb-12">
             <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-4">{main}</p>
           <h2 className={`${titleSize} font-['Roboto'] ${textColor} mb-4 leading-tight`}>
@@ -109,7 +109,7 @@ const StrategicCommunication = ({
           </p>
         </div>
 
-        {/* Services Grid */}
+        
         <div className={`grid ${gridCols} ${gap}`}>
           {services.map((service) => {
             const IconComponent = service.icon;

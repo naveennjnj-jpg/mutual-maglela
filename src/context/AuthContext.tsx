@@ -157,7 +157,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Axios interceptors
+  
   axios.interceptors.request.use(
     (config) => {
       const token = localStorage.getItem('token');

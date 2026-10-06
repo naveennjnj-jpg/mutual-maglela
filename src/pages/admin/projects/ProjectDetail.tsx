@@ -1,4 +1,4 @@
-// pages/admin/ProjectDetail.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
@@ -271,7 +271,7 @@ const ProjectDetail: React.FC = () => {
     <main className="flex-1">
       <div className="min-h-screen bg-[#F4F6FB] p-6">
         <div className="max-w-[720px] mx-auto space-y-5">
-          {/* Back Button */}
+          
           <Link
             to="/admin/projects"
             className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#0F2D63] transition-colors"
@@ -280,7 +280,7 @@ const ProjectDetail: React.FC = () => {
             Back to Projects
           </Link>
 
-          {/* Header */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <div className="flex items-start justify-between gap-3 mb-2">
               <div>
@@ -309,13 +309,13 @@ const ProjectDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* Project Type */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Project Type</p>
             <p className="text-sm font-semibold text-[#0F2D63]">{project.type || 'N/A'}</p>
           </div>
 
-          {/* Description */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Project Description</p>
             <p className="text-sm text-gray-700 leading-relaxed">
@@ -323,7 +323,7 @@ const ProjectDetail: React.FC = () => {
             </p>
           </div>
 
-          {/* Priority & Deadline */}
+          
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Priority</p>
@@ -340,7 +340,7 @@ const ProjectDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* User Attached Files */}
+          
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <div className="flex items-center gap-2 mb-3">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Attached Files</p>
@@ -371,7 +371,7 @@ const ProjectDetail: React.FC = () => {
             )}
           </div>
 
-          {/* Admin Section */}
+          
           {(project.adminnote || project.adminattachment) && (
             <div className={`rounded-2xl border p-5 ${
               isRevision ? 'bg-blue-50 border-blue-200' : 
@@ -436,7 +436,7 @@ const ProjectDetail: React.FC = () => {
             </div>
           )}
 
-          {/* Feedback Section */}
+          
           {(project.feedbacknote || project.feedbackadminattachment) && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
               <div className="flex items-center gap-2 mb-4">
@@ -481,7 +481,7 @@ const ProjectDetail: React.FC = () => {
             </div>
           )}
 
-          {/* Revision Status Message */}
+          
           {isRevision && (
             <div className="rounded-2xl border overflow-hidden border-amber-200">
               <div className="px-5 py-3 flex items-center gap-2 bg-amber-500">
@@ -496,7 +496,7 @@ const ProjectDetail: React.FC = () => {
             </div>
           )}
 
-          {/* Completed Status Message */}
+          
           {isCompleted && (
             <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
@@ -507,7 +507,7 @@ const ProjectDetail: React.FC = () => {
             </div>
           )}
 
-          {/* Submit Button */}
+          
           {!isCompleted && (
             <button
               onClick={() => navigate(`/admin/projects/${project._id}/submit`)}

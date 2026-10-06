@@ -1,4 +1,4 @@
-// pages/user/Ai-speech/AISpeechDetail.tsx
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -27,9 +27,9 @@ import {
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 
-// ============================================
-// ✅ TYPES
-// ============================================
+
+
+
 
 interface Parameters {
   authority: number;
@@ -76,9 +76,9 @@ interface SpeechData {
   updatedAt: string;
 }
 
-// ============================================
-// COMPONENT
-// ============================================
+
+
+
 
 const AISpeechDetail = () => {
   const navigate = useNavigate();
@@ -86,7 +86,7 @@ const AISpeechDetail = () => {
   const { user } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // State
+  
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
@@ -96,18 +96,18 @@ const AISpeechDetail = () => {
   const [speechData, setSpeechData] = useState<SpeechData | null>(null);
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
 
-  // Refs
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // ✅ Get data from location state or fetch by ID
+  
   useEffect(() => {
     const data = location.state?.data;
     if (data) {
       setSpeechData(data);
       setAudioSrc(`${API_URL}${data.audioUrl}`);
     } else {
-      // If no data, fetch by ID from URL params
+      
       const pathParts = location.pathname.split('/');
       const id = pathParts[pathParts.length - 1];
       if (id && id !== 'result') {
@@ -116,7 +116,7 @@ const AISpeechDetail = () => {
     }
   }, [location]);
 
-  // ✅ Fetch speech by ID
+  
   const fetchSpeechById = async (id: string) => {
     setIsLoading(true);
     try {
@@ -147,7 +147,7 @@ const AISpeechDetail = () => {
     }
   };
 
-  // Cleanup audio on unmount
+  
   useEffect(() => {
     return () => {
       if (progressIntervalRef.current) {
@@ -160,7 +160,7 @@ const AISpeechDetail = () => {
     };
   }, []);
 
-  // Handle audio end
+  
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
@@ -177,9 +177,9 @@ const AISpeechDetail = () => {
     }
   }, []);
 
-  // ============================================
-  // AUDIO PLAYBACK
-  // ============================================
+  
+  
+  
 
   const togglePlayAudio = () => {
     if (audioRef.current && audioSrc) {
@@ -222,9 +222,9 @@ const AISpeechDetail = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // ============================================
-  // HANDLERS
-  // ============================================
+  
+  
+  
 
   const handleBack = () => {
     navigate('/user/voice-calibrator');
@@ -304,9 +304,9 @@ const AISpeechDetail = () => {
     }
   };
 
-  // ============================================
-  // RENDER
-  // ============================================
+  
+  
+  
 
   if (isLoading) {
     return (
@@ -378,7 +378,7 @@ const AISpeechDetail = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[900px] mx-auto">
-        {/* Header */}
+        
         <div className="flex items-center gap-3 mb-6">
           <button
             onClick={handleBack}
@@ -392,7 +392,7 @@ const AISpeechDetail = () => {
             {speechData.title}
           </span>
 
-          {/* Action Buttons */}
+          
           <div className="ml-auto flex items-center gap-2">
             <button
               onClick={handleCopy}
@@ -421,24 +421,12 @@ const AISpeechDetail = () => {
                 Audio
               </button>
             )}
-            {/* <button
-              onClick={handleEdit}
-              className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-[#C85A32] transition-colors border border-gray-200 dark:border-gray-700 px-3 py-1.5 rounded-lg"
-            >
-              <Edit className="w-3.5 h-3.5" />
-              Edit
-            </button> */}
-            {/* <button
-              onClick={handleDelete}
-              className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-600 transition-colors border border-red-200 dark:border-red-800 px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              Delete
-            </button> */}
+            
+            
           </div>
         </div>
 
-        {/* Error */}
+        
         {error && (
           <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-4">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -446,9 +434,9 @@ const AISpeechDetail = () => {
           </div>
         )}
 
-        {/* Main Content */}
+        
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-8">
-          {/* Header Info */}
+          
           <div className="flex items-center gap-3 mb-6 pb-5 border-b border-gray-100 dark:border-gray-700">
             <div className="w-12 h-12 bg-[#FFF8F5] dark:bg-[#C85A32]/10 rounded-xl flex items-center justify-center flex-shrink-0">
               <Mic className="w-6 h-6 text-[#C85A32]" />
@@ -507,7 +495,7 @@ const AISpeechDetail = () => {
             </div>
           </div>
 
-          {/* Audio Player */}
+          
           {audioSrc && (
             <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-700">
               <div className="flex items-center gap-4">
@@ -554,14 +542,14 @@ const AISpeechDetail = () => {
             </div>
           )}
 
-          {/* Speech Content */}
+          
           <div className="prose prose-sm dark:prose-invert max-w-none">
             <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-sans leading-relaxed">
               {speechData.content}
             </pre>
           </div>
 
-          {/* Parameters Section */}
+          
           <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
             <h4 className="text-sm font-semibold text-[#0F2D63] dark:text-white mb-3">
               Voice Tone Parameters
@@ -593,7 +581,7 @@ const AISpeechDetail = () => {
             </div>
           </div>
 
-          {/* Metadata */}
+          
           <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
               <div>
@@ -623,7 +611,7 @@ const AISpeechDetail = () => {
             </div>
           </div>
         </div>
-        {/* Disclaimer */}
+        
         <div className="mt-6 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 flex items-start gap-3">
           <span className="text-amber-500 text-base flex-shrink-0 mt-0.5">⚠️</span>
           <div>
