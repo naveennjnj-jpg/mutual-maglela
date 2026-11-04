@@ -440,12 +440,28 @@ const handleGenerate = async () => {
 
     const backendData = response.data?.data;
 
-    // CHANGED: no more fake "Generated speech content" fallback - show an error instead
-    if (!response.data?.success || !backendData?.audioUrl) {
-      setError(response.data?.message || 'The speech could not be generated. Please try again.');
-      setCurrentStep('create');
-      return;
+
+// CHANGED: Handle nested API errors and show a proper error message
+if (!response.data?.success || !backendData?.audioUrl) {
+  let errorMessage = response.data?.message;
+
+  // Handle nested JSON error message
+  if (typeof errorMessage === 'string') {
+    try {
+      const parsedError = JSON.parse(errorMessage);
+      errorMessage = parsedError?.message || errorMessage;
+    } catch (e) {
+      // Keep original error message
     }
+  }
+
+  setError(
+    errorMessage || 'The speech could not be generated. Please try again.'
+  );
+
+  setCurrentStep('create');
+  return;
+}
 
     const resultData: SpeechData = {
       audioUrl: backendData.audioUrl,
