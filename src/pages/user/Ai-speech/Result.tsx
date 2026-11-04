@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -48,6 +47,7 @@ interface MetadataData {
 }
 
 interface SpeechData {
+  id?: string; // CHANGED: database id (needed to save edits)
   audioUrl: string;
   duration: number;
   format: string;
@@ -94,6 +94,7 @@ const AISpeechResult = () => {
   const [audioDuration, setAudioDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null); // CHANGED: success messages (replaces alert)
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   
   
@@ -101,6 +102,7 @@ const AISpeechResult = () => {
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [textEdited, setTextEdited] = useState(false); // CHANGED: audio no longer matches the text after an edit
   
   
   const [localResultData, setLocalResultData] = useState<SpeechData | null>(null);
@@ -117,7 +119,6 @@ const AISpeechResult = () => {
   
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   
   const resultData = location.state?.data as SpeechData;
@@ -208,9 +209,6 @@ const AISpeechResult = () => {
   
   useEffect(() => {
     return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-      }
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = '';
@@ -219,58 +217,37 @@ const AISpeechResult = () => {
   }, []);
 
   
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      const handleEnded = () => {
-        setIsPlaying(false);
-        setAudioProgress(0);
-        if (progressIntervalRef.current) {
-          clearInterval(progressIntervalRef.current);
-          progressIntervalRef.current = null;
-        }
-      };
-      audio.addEventListener('ended', handleEnded);
-      return () => audio.removeEventListener('ended', handleEnded);
-    }
-  }, []);
-
-  
   
   
 
+  // CHANGED: playback state is driven by the <audio> element events (onTimeUpdate / onEnded / onPlay / onPause).
+  // Before, the "ended" listener was attached before the audio element existed, so the icon stayed on "Pause" after the audio finished.
   const togglePlayAudio = () => {
-    if (audioRef.current && audioSrc) {
-      if (isPlaying) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-        if (progressIntervalRef.current) {
-          clearInterval(progressIntervalRef.current);
-          progressIntervalRef.current = null;
-        }
-      } else {
-        audioRef.current.play()
-          .then(() => {
-            setIsPlaying(true);
-            progressIntervalRef.current = setInterval(() => {
-              if (audioRef.current) {
-                const progress = (audioRef.current.currentTime / audioRef.current.duration) * 100;
-                setAudioProgress(progress);
-              }
-            }, 100);
-          })
-          .catch((err) => {
-            console.error('Error playing audio:', err);
-            setError('Failed to play audio. Please try again.');
-          });
-      }
+    const audio = audioRef.current;
+    if (!audio || !audioSrc) return;
+
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play().catch((err) => {
+        console.error('Error playing audio:', err);
+        setError('Failed to play audio. Please try again.');
+      });
     }
   };
 
   const handleAudioTimeUpdate = () => {
-    if (audioRef.current) {
-      setAudioDuration(audioRef.current.duration);
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.duration && isFinite(audio.duration)) {
+      setAudioDuration(audio.duration);
+      setAudioProgress((audio.currentTime / audio.duration) * 100);
     }
+  };
+
+  const handleAudioEnded = () => {
+    setIsPlaying(false);
+    setAudioProgress(0);
   };
 
   const formatDuration = (seconds: number) => {
@@ -289,7 +266,7 @@ const AISpeechResult = () => {
     if (textToCopy) {
       try {
         await navigator.clipboard.writeText(textToCopy);
-        alert('Content copied to clipboard!');
+        setSuccess('Content copied to clipboard!');
       } catch (err) {
         setError('Failed to copy content');
       }
@@ -320,8 +297,9 @@ const AISpeechResult = () => {
   
   
 
+  // CHANGED: uses the resolved audio source (works for /uploads files and for base64 "data:" audio, which failed before)
   const handleDownloadAudio = async () => {
-    if (!localResultData?.audioUrl) {
+    if (!audioSrc || !localResultData) {
       setError('No audio file available to download');
       return;
     }
@@ -330,15 +308,22 @@ const AISpeechResult = () => {
     setError(null);
 
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`${API_URL}${localResultData.audioUrl}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        responseType: 'blob',
-      });
+      let blob: Blob;
 
-      const blob = new Blob([response.data], { type: 'audio/mp3' });
+      if (audioSrc.startsWith('data:')) {
+        const res = await fetch(audioSrc);
+        blob = await res.blob();
+      } else {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(audioSrc, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: 'blob',
+        });
+        blob = new Blob([response.data], { type: 'audio/mpeg' });
+      }
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -360,43 +345,66 @@ const AISpeechResult = () => {
   
 
   const handleEditToggle = () => {
-    if (isEditing) {
-      
-      setEditTitle(localResultData?.metadata?.title || '');
-      setEditContent(localResultData?.text || '');
-      setIsEditing(false);
-    } else {
-      
-      setEditTitle(localResultData?.metadata?.title || '');
-      setEditContent(localResultData?.text || '');
-      setIsEditing(true);
-    }
+    setError(null);
+    setSuccess(null);
+    setEditTitle(localResultData?.metadata?.title || '');
+    setEditContent(localResultData?.text || '');
+    setIsEditing(!isEditing);
   };
 
-  const handleSaveEdit = () => {
+  // CHANGED: edits are really saved to the database (before: setTimeout + local state only, lost on refresh).
+  // When not editing, the speech is already saved at generation time, so the button just confirms it.
+  const handleSaveEdit = async () => {
+    if (!localResultData) return;
+
+    if (!isEditing) {
+      setSuccess('Your speech is already saved.');
+      return;
+    }
+
+    const newTitle = editTitle.trim() || localResultData.metadata.title;
+    const newText = editContent.trim() || localResultData.text;
+
     setIsSavingEdit(true);
-    setTimeout(() => {
-      
-      if (localResultData) {
-        const updatedData = {
-          ...localResultData,
-          metadata: {
-            ...localResultData.metadata,
-            title: editTitle.trim() || localResultData.metadata.title
-          },
-          text: editContent.trim() || localResultData.text,
-          charCount: editContent.trim().length || 0
-        };
-        setLocalResultData(updatedData);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      if (localResultData.id) {
+        const token = localStorage.getItem('token');
+        await axios.patch(
+          `${API_URL}/api/ai-content/${localResultData.id}`,
+          { title: newTitle, content: newText },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
       }
-      
-      
+
+      if (newText !== localResultData.text) {
+        setTextEdited(true);
+      }
+
+      setLocalResultData({
+        ...localResultData,
+        metadata: {
+          ...localResultData.metadata,
+          title: newTitle
+        },
+        text: newText,
+        charCount: newText.length
+      });
+
       setIsEditing(false);
+      setSuccess(
+        localResultData.id
+          ? 'Changes saved successfully!'
+          : 'Changes applied on this page only. Copy or download the text to keep it.'
+      );
+    } catch (err: any) {
+      console.error('Error saving changes:', err);
+      setError(err.response?.data?.message || 'Failed to save changes. Please try again.');
+    } finally {
       setIsSavingEdit(false);
-      
-      
-      
-    }, 500);
+    }
   };
 
   
@@ -467,12 +475,12 @@ const AISpeechResult = () => {
   };
 
   const avgScore = Math.floor(
-    (localResultData.analysis.authority + 
-     localResultData.analysis.clarity + 
-     localResultData.analysis.academicRigor + 
-     localResultData.analysis.accessibility + 
-     localResultData.analysis.narrativeDepth) / 5
-  );
+    (Number(localResultData.analysis.authority) + 
+     Number(localResultData.analysis.clarity) + 
+     Number(localResultData.analysis.academicRigor) + 
+     Number(localResultData.analysis.accessibility) + 
+     Number(localResultData.analysis.narrativeDepth)) / 5
+  ); // CHANGED: Number() so string values can never be joined as text
 
   const displayTitle = isEditing ? editTitle : localResultData.metadata.title;
   const displayContent = isEditing ? editContent : localResultData.text;
@@ -487,7 +495,20 @@ const AISpeechResult = () => {
         {error && (
           <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-4">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{error}</span>
+            <span className="flex-1">{error}</span>
+            <button onClick={() => setError(null)} className="opacity-60 hover:opacity-100">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {success && (
+          <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm mb-4">
+            <Check className="w-4 h-4 flex-shrink-0" />
+            <span className="flex-1">{success}</span>
+            <button onClick={() => setSuccess(null)} className="opacity-60 hover:opacity-100">
+              <X className="w-4 h-4" />
+            </button>
           </div>
         )}
 
@@ -645,7 +666,7 @@ const AISpeechResult = () => {
                           {formatDuration(audioRef.current?.currentTime || 0)}
                         </span>
                         <span className="text-[10px] text-gray-400 dark:text-gray-500">
-                          {formatDuration(audioDuration)}
+                          {formatDuration(audioDuration || localResultData.duration)}
                         </span>
                       </div>
                     </div>
@@ -655,11 +676,20 @@ const AISpeechResult = () => {
                       src={audioSrc}
                       onTimeUpdate={handleAudioTimeUpdate}
                       onLoadedMetadata={handleAudioTimeUpdate}
+                      onEnded={handleAudioEnded}
+                      onPlay={() => setIsPlaying(true)}
+                      onPause={() => setIsPlaying(false)}
                       className="hidden"
                     />
                   </div>
                 )}
               </div>
+
+              {textEdited && (
+                <div className="mb-4 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2">
+                  The text was edited after the audio was generated. The audio still reflects the original text.
+                </div>
+              )}
               
               
               <div className="prose prose-sm max-w-none dark:prose-invert">
@@ -712,7 +742,9 @@ const AISpeechResult = () => {
                 Voice Tone Parameters
               </h2>
               <div className="space-y-4">
-                {Object.entries(localResultData.analysis).map(([key, value]) => (
+                {Object.entries(localResultData.analysis).map(([key, rawValue]) => {
+                  const value = Number(rawValue); // CHANGED: always a number
+                  return (
                   <div key={key}>
                     <div className="flex justify-between mb-1.5">
                       <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -732,7 +764,8 @@ const AISpeechResult = () => {
                       {paramDescriptions[key]}
                     </p>
                   </div>
-                ))}
+                  );
+                })}
               </div>
               <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between">
