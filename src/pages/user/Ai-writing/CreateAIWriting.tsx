@@ -1,7 +1,6 @@
-
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   ArrowLeft,
   X,
   WandSparkles,
@@ -25,7 +24,6 @@ interface ApiResponse {
   data?: any;
 }
 
-
 const DOCUMENT_TYPES = [
   { value: 'policy-brief', label: 'Policy Brief', icon: BookOpen },
   { value: 'op-ed', label: 'Op-Ed', icon: PenTool },
@@ -37,7 +35,6 @@ const DOCUMENT_TYPES = [
   { value: 'blog-post', label: 'Blog Post', icon: PenTool },
 ];
 
-
 const TONE_OPTIONS = [
   { value: 'formal', label: 'Formal' },
   { value: 'authoritative', label: 'Clear & Authoritative' },
@@ -46,13 +43,19 @@ const TONE_OPTIONS = [
   { value: 'neutral', label: 'Neutral' },
 ];
 
+const processingSteps = [
+  { label: 'Analysing your document…' },
+  { label: 'Applying target tone and style…' },
+  { label: 'Structuring your document…' },
+  { label: 'Finalising output…' },
+];
+
 const CreateAIWriting = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  
   const [title, setTitle] = useState('');
   const [selectedType, setSelectedType] = useState('policy-brief');
   const [selectedTone, setSelectedTone] = useState('authoritative');
@@ -65,34 +68,33 @@ const CreateAIWriting = () => {
   const [currentStep, setCurrentStep] = useState<'create' | 'processing'>('create');
   const [processingStep, setProcessingStep] = useState(0);
 
-  const processingSteps = [
-    { label: 'Analysing your document…' },
-    { label: 'Applying target tone and style…' },
-    { label: 'Structuring your document…' },
-    { label: 'Finalising output…' },
-  ];
+  const validateAndSetFile = (selected: File) => {
+    const validTypes = ['.pdf', '.docx', '.doc', '.txt'];
+    const ext = selected.name.substring(selected.name.lastIndexOf('.')).toLowerCase();
+
+    if (!validTypes.includes(ext)) {
+      setError('Please upload a valid file (PDF, DOCX, DOC, or TXT)');
+      return;
+    }
+    if (selected.size > 10 * 1024 * 1024) {
+      setError('File size must be less than 10MB');
+      return;
+    }
+    setFile(selected);
+    setFileName(selected.name);
+    setFileSize((selected.size / 1024).toFixed(1) + ' KB');
+    setError(null);
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const validTypes = ['.pdf', '.docx', '.doc', '.txt'];
-      const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-      
-      if (!validTypes.includes(fileExtension)) {
-        setError('Please upload a valid file (PDF, DOCX, DOC, or TXT)');
-        return;
-      }
+    const selected = e.target.files?.[0];
+    if (selected) validateAndSetFile(selected);
+  };
 
-      if (file.size > 10 * 1024 * 1024) {
-        setError('File size must be less than 10MB');
-        return;
-      }
-
-      setFile(file);
-      setFileName(file.name);
-      setFileSize((file.size / 1024).toFixed(1) + ' KB');
-      setError(null);
-    }
+  const handleDrop = (e: React.DragEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const dropped = e.dataTransfer.files?.[0];
+    if (dropped) validateAndSetFile(dropped);
   };
 
   const removeFile = () => {
@@ -104,149 +106,87 @@ const CreateAIWriting = () => {
     }
   };
 
-  
-  const generateMockContent = () => {
-    return `# ${title}
-
-## Executive Summary
-
-This document outlines the key strategic initiatives and partnerships that will drive our organization forward in the coming quarter. The following sections detail our approach, expected outcomes, and implementation timeline.
-
-## Introduction
-
-The rapidly evolving landscape of [industry/sector] demands innovative approaches to [core activity]. Our organization is committed to leading this transformation through strategic partnerships and targeted initiatives.
-
-## Key Objectives
-
-1. **Strategic Alignment**: Ensure all initiatives align with organizational goals
-2. **Stakeholder Engagement**: Build and maintain strong relationships with key partners
-3. **Impact Measurement**: Track and report on outcomes effectively
-4. **Sustainable Growth**: Create long-term value through responsible practices
-
-## Implementation Strategy
-
-### Phase 1: Foundation
-- Establish core partnerships
-- Define clear metrics for success
-- Build internal capacity
-
-### Phase 2: Execution
-- Launch key initiatives
-- Monitor progress against targets
-- Adapt and refine approach
-
-### Phase 3: Scale
-- Expand successful initiatives
-- Share learnings and best practices
-- Drive systemic change
-
-## Expected Outcomes
-
-By implementing this strategy, we anticipate:
-- Increased stakeholder engagement
-- Measurable impact on key metrics
-- Strengthened organizational reputation
-- Sustainable growth and innovation
-
-## Conclusion
-
-This strategic approach positions our organization to achieve meaningful impact while building lasting partnerships that will support our mission for years to come.`;
-  };
-
-  const generateMockOutline = () => {
-    return [
-      'Executive Summary',
-      'Introduction',
-      'Key Objectives',
-      'Implementation Strategy',
-      'Expected Outcomes',
-      'Conclusion'
-    ];
-  };
-
   const handleGenerate = async () => {
-    if (!title.trim()) {
-      setError('Please enter a document title');
-      return;
-    }
+    if (isSubmitting) return;
+    if (!title.trim()) { setError('Please enter a document title'); return; }
+    if (!selectedType) { setError('Please select a document type'); return; }
+    if (!file) { setError('Please upload a source document'); return; }
 
-    if (!selectedType) {
-      setError('Please select a document type');
-      return;
-    }
-
-    if (!file) {
-      setError('Please upload a source document');
-      return;
-    }
+    const token = localStorage.getItem('token');
+    if (!token) { setError('Authentication required. Please log in again.'); return; }
 
     setError(null);
     setIsSubmitting(true);
     setCurrentStep('processing');
     setProcessingStep(0);
 
+    // Advance the progress steps while the real request runs (stops on the last step).
+    const stepTimer = setInterval(() => {
+      setProcessingStep((p) => Math.min(p + 1, processingSteps.length - 1));
+    }, 5000);
+
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        setError('Authentication required');
-        setIsSubmitting(false);
-        setCurrentStep('create');
-        return;
-      }
-
-      
       const formData = new FormData();
-      formData.append('title', title);
-      formData.append('type', selectedType); 
-      formData.append('tone', selectedTone); 
+      formData.append('title', title.trim());
+      formData.append('type', selectedType);
+      formData.append('tone', selectedTone);
       formData.append('includeOutline', String(includeOutline));
       formData.append('file', file);
 
-      
-      for (let i = 0; i < processingSteps.length; i++) {
-        setProcessingStep(i);
-        await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 600));
-      }
-
-      
+      // Do NOT set Content-Type manually – the browser must add the multipart boundary.
       const response = await axios.post<ApiResponse>(
         `${API_URL}/api/ai-writing/generate`,
         formData,
         {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 180000,
         }
       );
 
-      if (response.data.success) {
-        const resultData = {
-          title: title,
-          type: selectedType,
-          tone: selectedTone,
-          content: response.data.data?.content || generateMockContent(),
-          outline: response.data.data?.outline || generateMockOutline(),
-          wordCount: response.data.data?.wordCount || Math.floor(Math.random() * 500) + 200,
-          createdAt: new Date().toLocaleDateString('en-US', { 
-            day: 'numeric', 
-            month: 'short', 
-            year: 'numeric' 
-          }),
-          author: user?.name || 'AI Assistant'
-        };
-
-        navigate('/user/ai-writing/result', { state: { data: resultData } });
-      } else {
-        setError(response.data.message || 'Failed to generate document');
+      const data = response.data?.data;
+      if (!response.data?.success || !data?.content) {
+        setError(response.data?.message || 'The AI did not return any content. Please try again.');
         setCurrentStep('create');
+        return;
       }
+
+      navigate('/user/ai-writing/result', {
+        state: {
+          data: {
+            title: title.trim(),
+            type: selectedType,
+            tone: selectedTone,
+            content: data.content,
+            outline: data.outline
+              ? String(data.outline)
+                  .split('\n')
+                  .map((l: string) => l.replace(/^[-*\d.\s]+/, '').trim())
+                  .filter(Boolean)
+              : [],
+            wordCount: data.wordCount ?? data.content.split(/\s+/).filter(Boolean).length,
+            createdAt: new Date().toLocaleDateString('en-US', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            }),
+            author: user?.name || 'AI Assistant'
+          }
+        }
+      });
     } catch (err: any) {
       console.error('Error generating document:', err);
-      setError(err.response?.data?.message || 'Failed to generate document');
+      const status = err.response?.status;
+      setError(
+        err.response?.data?.message ||
+          (err.code === 'ECONNABORTED'
+            ? 'The request timed out. Please try again with a shorter document.'
+            : status === 402
+            ? 'Insufficient credits. Please top up your credits.'
+            : 'Failed to generate document')
+      );
       setCurrentStep('create');
     } finally {
+      clearInterval(stepTimer);
       setIsSubmitting(false);
     }
   };
@@ -255,7 +195,6 @@ This strategic approach positions our organization to achieve meaningful impact 
     navigate('/user/narrative-engine');
   };
 
-  
   const renderProcessing = () => (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 flex items-center justify-center p-6">
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xl p-10 w-full max-w-sm text-center">
@@ -263,17 +202,17 @@ This strategic approach positions our organization to achieve meaningful impact 
           <div className="w-8 h-8 border-2 border-[#C85A32]/30 border-t-[#C85A32] rounded-full animate-spin"></div>
         </div>
         <h3 className="font-semibold text-[#0F2D63] dark:text-white mb-1">Generating Your Content</h3>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">This will only take a moment…</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">This can take up to a minute…</p>
         <div className="space-y-2.5">
           {processingSteps.map((step, index) => {
             const isCompleted = index < processingStep;
             const isActive = index === processingStep;
-            
+
             return (
-              <div 
+              <div
                 key={index}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
-                  isCompleted ? 'opacity-40' : 
+                  isCompleted ? 'opacity-40' :
                   isActive ? 'bg-[#FFF8F5] dark:bg-[#C85A32]/10' : 'opacity-40'
                 }`}
               >
@@ -299,13 +238,12 @@ This strategic approach positions our organization to achieve meaningful impact 
     </div>
   );
 
-  
   const renderCreate = () => (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[680px] mx-auto">
-        
+
         <div className="flex items-center gap-3 mb-6">
-          <button 
+          <button
             onClick={handleBack}
             className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-[#0F2D63] dark:hover:text-white transition-colors"
           >
@@ -319,7 +257,6 @@ This strategic approach positions our organization to achieve meaningful impact 
           </div>
         </div>
 
-        
         {error && (
           <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-4">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -328,7 +265,8 @@ This strategic approach positions our organization to achieve meaningful impact 
         )}
 
         <div className="flex flex-col gap-4">
-          
+
+          {/* 1. Title */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">
               <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">
@@ -345,7 +283,7 @@ This strategic approach positions our organization to achieve meaningful impact 
             />
           </div>
 
-          
+          {/* 2. Desired output */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
               <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">
@@ -368,9 +306,7 @@ This strategic approach positions our organization to achieve meaningful impact 
                     }`}
                   >
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      isSelected 
-                        ? 'bg-[#C85A32]' 
-                        : 'bg-gray-100 dark:bg-gray-700'
+                      isSelected ? 'bg-[#C85A32]' : 'bg-gray-100 dark:bg-gray-700'
                     }`}>
                       <Icon className={`w-3.5 h-3.5 ${
                         isSelected ? 'text-white' : 'text-gray-500 dark:text-gray-400'
@@ -387,7 +323,7 @@ This strategic approach positions our organization to achieve meaningful impact 
             </div>
           </div>
 
-          
+          {/* 3. Tone */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
               <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">
@@ -412,7 +348,7 @@ This strategic approach positions our organization to achieve meaningful impact 
             </div>
           </div>
 
-          
+          {/* 4. Upload */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
               <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">
@@ -423,7 +359,7 @@ This strategic approach positions our organization to achieve meaningful impact 
             <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 ml-7">
               Upload the source document to transform into your desired output
             </p>
-            
+
             {file ? (
               <div className="flex items-center gap-3 p-4 bg-[#FFF8F5] dark:bg-[#C85A32]/10 border border-[#C85A32]/20 rounded-xl">
                 <div className="w-10 h-10 bg-[#C85A32]/10 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -443,6 +379,8 @@ This strategic approach positions our organization to achieve meaningful impact 
             ) : (
               <button
                 onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
                 className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl hover:border-[#C85A32] hover:bg-[#FFF8F5] dark:hover:bg-[#C85A32]/5 transition-all group"
               >
                 <Upload className="w-5 h-5 text-gray-400 group-hover:text-[#C85A32] transition-colors" />
@@ -460,7 +398,7 @@ This strategic approach positions our organization to achieve meaningful impact 
             />
           </div>
 
-          
+          {/* 5. Outline toggle */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
             <div className="flex items-center justify-between">
               <div>
@@ -487,7 +425,7 @@ This strategic approach positions our organization to achieve meaningful impact 
             </div>
           </div>
 
-          
+          {/* Generate */}
           <button
             onClick={handleGenerate}
             disabled={isSubmitting}
@@ -506,7 +444,7 @@ This strategic approach positions our organization to achieve meaningful impact 
             )}
           </button>
 
-          
+          {/* Disclaimer */}
           <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 flex items-start gap-3">
             <span className="text-amber-500 text-lg flex-shrink-0 mt-0.5">⚠️</span>
             <div>
@@ -523,7 +461,6 @@ This strategic approach positions our organization to achieve meaningful impact 
     </div>
   );
 
-  
   if (currentStep === 'processing') {
     return renderProcessing();
   }
