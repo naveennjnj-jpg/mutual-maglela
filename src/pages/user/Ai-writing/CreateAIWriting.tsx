@@ -144,8 +144,24 @@ const CreateAIWriting = () => {
       );
 
       const data = response.data?.data;
+      
       if (!response.data?.success || !data?.content) {
-        setError(response.data?.message || 'The AI did not return any content. Please try again.');
+        let errorMessage = response.data?.message;
+      
+        // Handle nested JSON error message
+        if (typeof errorMessage === 'string') {
+          try {
+            const parsedError = JSON.parse(errorMessage);
+            errorMessage = parsedError?.message || errorMessage;
+          } catch (e) {
+            // Keep original message if it is not JSON
+          }
+        }
+      
+        setError(
+          errorMessage || 'The AI did not return any content. Please try again.'
+        );
+      
         setCurrentStep('create');
         return;
       }
