@@ -298,7 +298,16 @@ const Header = () => {
             >
               Pricing
             </NavLink>
-
+            <NavLink
+              to="/digital-toolkit"
+              className={`text-sm transition-all duration-300 px-3 py-2 rounded-lg ${
+                isScrolled 
+                  ? 'text-[#0F2D63] hover:bg-[#0F2D63]/10' 
+                  : 'text-white hover:bg-white/10'
+              }`}
+            >
+              Digital Toolkit
+            </NavLink>  
             
             <div 
               className="relative" 
@@ -346,7 +355,7 @@ const Header = () => {
             </div>
 
             <NavLink
-              to="/blog"
+              to="/insights"
               className={`text-sm transition-all duration-300 px-3 py-2 rounded-lg ${
                 isScrolled 
                   ? 'text-[#0F2D63] hover:bg-[#0F2D63]/10' 
