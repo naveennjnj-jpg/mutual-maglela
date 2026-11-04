@@ -195,22 +195,22 @@ const CreateAIWriting = () => {
           }
         }
       });
-    } catch (err: any) {
-      console.error('Error generating document:', err);
-      const status = err.response?.status;
-      setError(
-        err.response?.data?.message ||
-          (err.code === 'ECONNABORTED'
-            ? 'The request timed out. Please try again with a shorter document.'
-            : status === 402
-            ? 'Insufficient credits. Please top up your credits.'
-            : 'Failed to generate document')
-      );
-      setCurrentStep('create');
-    } finally {
-      clearInterval(stepTimer);
-      setIsSubmitting(false);
-    }
+} catch (err: any) {
+  console.error('Error generating document:', err);
+  const status = err.response?.status;
+  setError(
+    err.response?.data?.message ||
+      (err.code === 'ECONNABORTED'
+        ? 'The request timed out. Please try again with a shorter document.'
+        : status === 402
+        ? 'Insufficient credits. Please top up your credits.'
+        : 'Failed to generate document')
+  );
+  setCurrentStep('create');
+} finally {
+  clearInterval(stepTimer);
+  setIsSubmitting(false);
+}
   };
 
   const handleBack = () => {
