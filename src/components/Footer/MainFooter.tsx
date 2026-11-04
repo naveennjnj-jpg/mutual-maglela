@@ -157,7 +157,7 @@ const MainFooter = () => {
             <ul className="space-y-2.5">
               <li>
                 <Link
-                  to="/blog"
+                  to="/insights"
                   className="text-[14px] text-white/70 hover:text-white transition-colors"
                 >
                   Insights
