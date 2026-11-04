@@ -144,12 +144,13 @@ const CreateAIWriting = () => {
       );
 
       const data = response.data?.data;
-      
+
+      // CHANGED: if the API signals failure in a 2xx body, unwrap and show the message
       if (!response.data?.success || !data?.content) {
         let errorMessage: string =
           response.data?.message || 'The AI did not return any content. Please try again.';
-      
-        // CHANGED: unwrap double-encoded JSON messages (parse up to 2 levels deep)
+
+        // Unwrap double-encoded JSON messages (up to 2 levels deep)
         if (typeof errorMessage === 'string') {
           try {
             const parsed = JSON.parse(errorMessage);
@@ -166,7 +167,7 @@ const CreateAIWriting = () => {
             // not JSON — keep original message
           }
         }
-      
+
         setError(errorMessage);
         setCurrentStep('create');
         return;
@@ -195,22 +196,50 @@ const CreateAIWriting = () => {
           }
         }
       });
-} catch (err: any) {
-  console.error('Error generating document:', err);
-  const status = err.response?.status;
-  setError(
-    err.response?.data?.message ||
-      (err.code === 'ECONNABORTED'
-        ? 'The request timed out. Please try again with a shorter document.'
-        : status === 402
-        ? 'Insufficient credits. Please top up your credits.'
-        : 'Failed to generate document')
-  );
-  setCurrentStep('create');
-} finally {
-  clearInterval(stepTimer);
-  setIsSubmitting(false);
-}
+    } catch (err: any) {
+      console.error('Error generating document:', err);
+      const status = err.response?.status;
+
+      // CHANGED: unwrap the double-encoded JSON message from the response body
+      let errorMessage: string | null = null;
+
+      const rawMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.response?.data;
+
+      if (typeof rawMessage === 'string') {
+        errorMessage = rawMessage;
+        try {
+          const parsed = JSON.parse(rawMessage);
+          if (parsed?.message) {
+            errorMessage = parsed.message;
+            try {
+              const inner = JSON.parse(errorMessage);
+              if (inner?.message) errorMessage = inner.message;
+            } catch {
+              // not nested further
+            }
+          }
+        } catch {
+          // not JSON — keep raw string
+        }
+      }
+
+      setError(
+        errorMessage ||
+          (err.code === 'ECONNABORTED'
+            ? 'The request timed out. Please try again with a shorter document.'
+            : status === 402
+            ? 'Insufficient credits. Please top up your credits.'
+            : 'Failed to generate document')
+      );
+
+      setCurrentStep('create');
+    } finally {
+      clearInterval(stepTimer);
+      setIsSubmitting(false);
+    }
   };
 
   const handleBack = () => {
