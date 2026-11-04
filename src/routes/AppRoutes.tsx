@@ -103,7 +103,7 @@ const AppRoutes = () => {
         <Route path="pricing" element={<Pricing />} />
         <Route path="workshops" element={<Workshops />} />
         <Route path="faqs" element={<Faq />} />
-        <Route path="blog" element={<Blog />} />
+        <Route path="insights" element={<Blog />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="terms" element={<Terms />} />
         <Route path="refund-policy" element={<RefundPolicy />} />
