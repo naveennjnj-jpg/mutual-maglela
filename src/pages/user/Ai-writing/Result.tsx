@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -18,10 +17,12 @@ import {
   Save,
   X,
   Plus,
-  Coins
+  Coins,
+  AlertCircle
 } from 'lucide-react';
 
 interface ResultData {
+  id?: string; // CHANGED: database id (needed to save edits)
   title: string;
   type: string;
   tone: string;
@@ -43,11 +44,21 @@ interface UserData {
   initials?: string;
 }
 
+// CHANGED: "policy-brief" -> "Policy Brief" for display
+const formatLabel = (value: string) =>
+  (value || '')
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+
 const Result = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [resultData, setResultData] = useState<ResultData>(
-    location.state?.data as ResultData || getMockResult()
+
+  // CHANGED: no more fake mock result. If the page is opened without generated data
+  // (refresh / direct URL) the "No content found" screen is shown instead.
+  const [resultData, setResultData] = useState<ResultData | null>(
+    (location.state?.data as ResultData) || null
   );
   
   
@@ -61,13 +72,14 @@ const Result = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'; // CHANGED: was 5000 (all other pages use 8000)
 
   
   const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(resultData.title);
-  const [editContent, setEditContent] = useState(resultData.content);
+  const [editTitle, setEditTitle] = useState(resultData?.title || '');
+  const [editContent, setEditContent] = useState(resultData?.content || '');
   const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null); // CHANGED: replaces alert()
 
   
   const fetchUpdatedUserData = async () => {
@@ -125,10 +137,19 @@ const Result = () => {
     }
   }, [location.state]);
 
-  const handleCopyContent = () => {
-    if (resultData?.content) {
-      navigator.clipboard.writeText(resultData.content);
-      alert('Content copied to clipboard!');
+  const getWordCount = (text: string) => {
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
+  const handleCopyContent = async () => {
+    const text = isEditing ? editContent : resultData?.content;
+    if (text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        setMessage({ type: 'success', text: 'Content copied to clipboard!' });
+      } catch (err) {
+        setMessage({ type: 'error', text: 'Failed to copy content' });
+      }
     }
   };
 
@@ -147,43 +168,64 @@ const Result = () => {
   };
 
   const handleEditToggle = () => {
-    if (isEditing) {
-      setEditTitle(resultData.title);
-      setEditContent(resultData.content);
-      setIsEditing(false);
-    } else {
-      setEditTitle(resultData.title);
-      setEditContent(resultData.content);
-      setIsEditing(true);
-    }
+    if (!resultData) return;
+    setEditTitle(resultData.title);
+    setEditContent(resultData.content);
+    setMessage(null);
+    setIsEditing(!isEditing);
   };
 
-  const handleSaveChanges = () => {
+  // CHANGED: edits are now really saved to the database (before: setTimeout + local state only, lost on refresh)
+  const handleSaveChanges = async () => {
+    if (!resultData) return;
+
+    const newTitle = editTitle.trim() || resultData.title;
+    const newContent = editContent.trim() || resultData.content;
+
     setIsSaving(true);
-    setTimeout(() => {
+    setMessage(null);
+
+    try {
+      if (resultData.id) {
+        const token = localStorage.getItem('token');
+        await axios.patch(
+          `${API_URL}/api/ai-content/${resultData.id}`,
+          { title: newTitle, content: newContent },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
       setResultData({
         ...resultData,
-        title: editTitle.trim() || resultData.title,
-        content: editContent.trim() || resultData.content,
-        wordCount: editContent.trim().split(/\s+/).length || 0,
+        title: newTitle,
+        content: newContent,
+        wordCount: getWordCount(newContent),
       });
       setIsEditing(false);
+      setMessage({
+        type: 'success',
+        text: resultData.id
+          ? 'Changes saved successfully!'
+          : 'Changes applied on this page only (this document is not linked to your library). Copy or download it to keep it.',
+      });
+    } catch (err: any) {
+      console.error('Error saving changes:', err);
+      setMessage({
+        type: 'error',
+        text: err.response?.data?.message || 'Failed to save changes. Please try again.',
+      });
+    } finally {
       setIsSaving(false);
-      alert('Changes saved successfully!');
-    }, 500);
+    }
   };
 
   const handleBack = () => {
     navigate('/user/narrative-engine');
   };
 
-  const getWordCount = (text: string) => {
-    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
-  };
-
   
   const getOutlineMarkdown = () => {
-    const outline = resultData.outline;
+    const outline = resultData?.outline;
     if (!outline) return null;
 
     let items: string[] = [];
@@ -212,7 +254,7 @@ const Result = () => {
       fullContent += `## Outline\n\n${getOutlineMarkdown()}\n\n---\n\n`;
     }
 
-    if (resultData.content) {
+    if (resultData?.content) {
       fullContent += resultData.content;
     }
 
@@ -237,6 +279,26 @@ const Result = () => {
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
       <div className="max-w-[1000px] mx-auto">
+
+        {message && (
+          <div
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm mb-4 border ${
+              message.type === 'success'
+                ? 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
+                : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 text-red-600 dark:text-red-300'
+            }`}
+          >
+            {message.type === 'success' ? (
+              <Check className="w-4 h-4 flex-shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            )}
+            <span className="flex-1">{message.text}</span>
+            <button onClick={() => setMessage(null)} className="opacity-60 hover:opacity-100">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
         
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -343,11 +405,11 @@ const Result = () => {
               )}
               <div className="flex flex-wrap items-center gap-3 mt-3">
                 <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full">
-                  {resultData.type}
+                  {formatLabel(resultData.type)}
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                   <Sparkles className="w-3 h-3" />
-                  Tone: {resultData.tone}
+                  Tone: {formatLabel(resultData.tone)}
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                   <FileText className="w-3 h-3" />
@@ -456,57 +518,6 @@ const Result = () => {
   );
 };
 
-
-const getMockResult = (): ResultData => {
-  return {
-    title: 'Annual Report Executive Summary',
-    type: 'Impact Story',
-    tone: 'Inspiring',
-    wordCount: 450,
-    createdAt: 'Just now',
-    author: 'AI Assistant',
-    creditsUsed: 0.5,
-    creditsRemaining: 99.5,
-    content: `# Annual Report Executive Summary
-
-## Introduction
-
-This annual report highlights our organization's key achievements and strategic initiatives over the past year. Through collaborative partnerships and innovative approaches, we have made significant progress in advancing our mission.
-
-## Key Achievements
-
-### 1. Strategic Partnerships
-- Established 5 new institutional partnerships
-- Expanded our network across 3 African countries
-- Launched collaborative research initiatives
-
-### 2. Impact Metrics
-- Reached over 10,000 stakeholders
-- Published 15 research papers
-- Conducted 20 training workshops
-
-### 3. Innovation Highlights
-- Launched AI-powered communication tools
-- Developed new training methodologies
-- Implemented digital transformation initiatives
-
-## Looking Forward
-
-Our commitment to excellence and innovation continues to drive our work. We look forward to building on these achievements and creating even greater impact in the coming year.
-
-## Conclusion
-
-The past year has been one of growth and meaningful impact. We thank all our partners and stakeholders for their continued support and collaboration.`,
-    outline: [
-      'Introduction',
-      'Key Achievements',
-      'Strategic Partnerships',
-      'Impact Metrics',
-      'Innovation Highlights',
-      'Looking Forward',
-      'Conclusion'
-    ]
-  };
-};
+// CHANGED: getMockResult() removed - fake "Annual Report Executive Summary" content was shown whenever the page was opened without data.
 
 export default Result;
