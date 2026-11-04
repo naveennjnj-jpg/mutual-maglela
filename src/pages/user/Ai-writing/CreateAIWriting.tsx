@@ -146,22 +146,28 @@ const CreateAIWriting = () => {
       const data = response.data?.data;
       
       if (!response.data?.success || !data?.content) {
-        let errorMessage = response.data?.message;
+        let errorMessage: string =
+          response.data?.message || 'The AI did not return any content. Please try again.';
       
-        // Handle nested JSON error message
+        // CHANGED: unwrap double-encoded JSON messages (parse up to 2 levels deep)
         if (typeof errorMessage === 'string') {
           try {
-            const parsedError = JSON.parse(errorMessage);
-            errorMessage = parsedError?.message || errorMessage;
-          } catch (e) {
-            // Keep original message if it is not JSON
+            const parsed = JSON.parse(errorMessage);
+            if (parsed?.message) {
+              errorMessage = parsed.message;
+              try {
+                const inner = JSON.parse(errorMessage);
+                if (inner?.message) errorMessage = inner.message;
+              } catch {
+                // not nested further
+              }
+            }
+          } catch {
+            // not JSON — keep original message
           }
         }
       
-        setError(
-          errorMessage || 'The AI did not return any content. Please try again.'
-        );
-      
+        setError(errorMessage);
         setCurrentStep('create');
         return;
       }
