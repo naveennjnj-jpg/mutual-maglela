@@ -440,28 +440,33 @@ const handleGenerate = async () => {
 
     const backendData = response.data?.data;
 
+    // CHANGED: Handle nested API errors and show a proper error message
+    if (!response.data?.success || !backendData?.audioUrl) {
+      let errorMessage: string =
+        response.data?.message || 'The speech could not be generated. Please try again.';
 
-// CHANGED: Handle nested API errors and show a proper error message
-if (!response.data?.success || !backendData?.audioUrl) {
-  let errorMessage = response.data?.message;
+      // CHANGED: unwrap double-encoded JSON messages (parse up to 2 levels deep)
+      if (typeof errorMessage === 'string') {
+        try {
+          const parsed = JSON.parse(errorMessage);
+          if (parsed?.message) {
+            errorMessage = parsed.message;
+            try {
+              const inner = JSON.parse(errorMessage);
+              if (inner?.message) errorMessage = inner.message;
+            } catch {
+              // not nested further
+            }
+          }
+        } catch {
+          // not JSON — keep original message
+        }
+      }
 
-  // Handle nested JSON error message
-  if (typeof errorMessage === 'string') {
-    try {
-      const parsedError = JSON.parse(errorMessage);
-      errorMessage = parsedError?.message || errorMessage;
-    } catch (e) {
-      // Keep original error message
+      setError(errorMessage);
+      setCurrentStep('create');
+      return;
     }
-  }
-
-  setError(
-    errorMessage || 'The speech could not be generated. Please try again.'
-  );
-
-  setCurrentStep('create');
-  return;
-}
 
     const resultData: SpeechData = {
       audioUrl: backendData.audioUrl,
@@ -500,14 +505,43 @@ if (!response.data?.success || !backendData?.audioUrl) {
 
   } catch (err: any) {
     console.error('Error generating speech:', err);
-    setError(
+    const status = err.response?.status;
+
+    // CHANGED: unwrap double-encoded JSON message from the response body
+    let errorMessage: string | null = null;
+
+    const rawMessage =
       err.response?.data?.message ||
+      err.response?.data?.error ||
+      err.response?.data;
+
+    if (typeof rawMessage === 'string') {
+      errorMessage = rawMessage;
+      try {
+        const parsed = JSON.parse(rawMessage);
+        if (parsed?.message) {
+          errorMessage = parsed.message;
+          try {
+            const inner = JSON.parse(errorMessage);
+            if (inner?.message) errorMessage = inner.message;
+          } catch {
+            // not nested further
+          }
+        }
+      } catch {
+        // not JSON — keep raw string
+      }
+    }
+
+    setError(
+      errorMessage ||
         (err.code === 'ECONNABORTED'
           ? 'The request timed out. Please try again with shorter content.'
-          : err.response?.status === 402
+          : status === 402
           ? 'Insufficient credits. Please top up your credits.'
           : 'Failed to generate speech. Please try again.')
     );
+
     setCurrentStep('create');
   } finally {
     clearInterval(stepTimer);
