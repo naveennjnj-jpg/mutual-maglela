@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -110,6 +109,7 @@ const CreateAISpeech = () => {
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const cancelledRef = useRef(false); // CHANGED: so a cancelled recording is not restored by onstop
 
   const processingSteps = [
     { label: 'Analysing your content…' },
@@ -137,27 +137,37 @@ const CreateAISpeech = () => {
     setParameters(prev => ({ ...prev, [param]: value }));
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const validTypes = ['.pdf', '.docx', '.doc', '.txt', '.mp3', '.wav'];
-      const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-      
-      if (!validTypes.includes(fileExtension)) {
-        setError('Please upload a valid file (PDF, DOCX, DOC, TXT, MP3, or WAV)');
-        return;
-      }
+  // CHANGED: shared validation (the old code shadowed the `file` state variable)
+  const validateAndSetFile = (selected: File) => {
+    const validTypes = ['.pdf', '.docx', '.doc', '.txt', '.mp3', '.wav'];
+    const fileExtension = selected.name.substring(selected.name.lastIndexOf('.')).toLowerCase();
 
-      if (file.size > 20 * 1024 * 1024) {
-        setError('File size must be less than 20MB');
-        return;
-      }
-
-      setFile(file);
-      setFileName(file.name);
-      setFileSize((file.size / 1024).toFixed(1) + ' KB');
-      setError(null);
+    if (!validTypes.includes(fileExtension)) {
+      setError('Please upload a valid file (PDF, DOCX, DOC, TXT, MP3, or WAV)');
+      return;
     }
+
+    if (selected.size > 20 * 1024 * 1024) {
+      setError('File size must be less than 20MB');
+      return;
+    }
+
+    setFile(selected);
+    setFileName(selected.name);
+    setFileSize((selected.size / 1024).toFixed(1) + ' KB');
+    setError(null);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (selected) validateAndSetFile(selected);
+  };
+
+  // CHANGED: drag and drop was shown in the UI but not implemented
+  const handleDrop = (e: React.DragEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const dropped = e.dataTransfer.files?.[0];
+    if (dropped) validateAndSetFile(dropped);
   };
 
   const removeFile = () => {
@@ -180,6 +190,7 @@ const CreateAISpeech = () => {
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
+      cancelledRef.current = false;
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -188,21 +199,30 @@ const CreateAISpeech = () => {
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        setAudioURL(audioUrl);
-        setAudioBlob(audioBlob);
-        setRecordingSize((audioBlob.size / 1024).toFixed(1) + ' KB');
-        setRecordingName(`Recording-${new Date().toLocaleDateString()}`);
-        
-        
         stream.getTracks().forEach(track => track.stop());
+
+        // CHANGED: if the user cancelled, do not bring the recording back
+        if (cancelledRef.current) {
+          audioChunksRef.current = [];
+          return;
+        }
+
+        // CHANGED: use the real format the browser recorded (it is webm/mp4, not wav)
+        const recordedType = mediaRecorder.mimeType || 'audio/webm';
+        const recordedBlob = new Blob(audioChunksRef.current, { type: recordedType });
+        const recordedUrl = URL.createObjectURL(recordedBlob);
+        setAudioURL(recordedUrl);
+        setAudioBlob(recordedBlob);
+        setRecordingSize((recordedBlob.size / 1024).toFixed(1) + ' KB');
+        setRecordingName(`Recording-${new Date().toLocaleDateString()}`);
       };
 
       mediaRecorder.start();
+      setRecordingTime(0); // CHANGED: a new recording starts from 00:00
       setIsRecording(true);
       setIsPaused(false);
       setPermissionDenied(false);
+      setError(null);
 
       
       timerRef.current = setInterval(() => {
@@ -237,23 +257,26 @@ const CreateAISpeech = () => {
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      setIsPaused(false);
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    }
-  };
-
-  const cancelRecording = () => {
-    if (mediaRecorderRef.current) {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
     }
     setIsRecording(false);
     setIsPaused(false);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const cancelRecording = () => {
+    // CHANGED: stop() on an already-stopped recorder throws, and onstop used to restore the cancelled audio
+    cancelledRef.current = true;
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
+    setIsPaused(false);
+    setIsPlaying(false);
     setRecordingTime(0);
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -323,19 +346,9 @@ const CreateAISpeech = () => {
   
   
   
-
-
-
-
-
-
-
-
-
-
-
-
 const handleGenerate = async () => {
+  if (isSubmitting) return;
+
   
   if (!name.trim()) {
     setError('Please enter a speech name');
@@ -358,28 +371,31 @@ const handleGenerate = async () => {
     return;
   }
 
+  if (inputMethod === 'record' && isRecording) {
+    setError('Please stop the recording first');
+    return;
+  }
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    setError('Authentication required. Please log in again.');
+    return;
+  }
+
   setError(null);
   setIsSubmitting(true);
   setCurrentStep('processing');
   setProcessingStep(0);
 
+  // CHANGED: progress steps now move while the real request runs (the old code waited 600ms several times for nothing)
+  const stepTimer = setInterval(() => {
+    setProcessingStep(p => Math.min(p + 1, processingSteps.length - 1));
+  }, 6000);
+
   try {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      setError('Authentication required');
-      setIsSubmitting(false);
-      setCurrentStep('create');
-      return;
-    }
-
-    
-    setProcessingStep(0);
-    await new Promise(resolve => setTimeout(resolve, 600));
-
-    
     const formData = new FormData();
-    formData.append('title', name);
+    formData.append('title', name.trim());
     formData.append('authority', String(parameters.authority));
     formData.append('clarity', String(parameters.clarity));
     formData.append('academicRigor', String(parameters.academicRigor));
@@ -396,96 +412,89 @@ const handleGenerate = async () => {
       }
     } else if (inputMethod === 'record') {
       if (audioBlob) {
+        // CHANGED: the file name/type now match the real recorded format (it is not wav),
+        // and it is sent in the same "file" field as uploads so the server detects it as audio.
+        const type = audioBlob.type || 'audio/webm';
+        const ext = type.includes('mp4') ? 'm4a' : type.includes('ogg') ? 'ogg' : 'webm';
         const audioFile = new File(
-          [audioBlob], 
-          `${recordingName || 'recording'}.wav`, 
-          { type: 'audio/wav' }
+          [audioBlob],
+          `${recordingName || 'recording'}.${ext}`.replace(/[^\w.\-]+/g, '_'),
+          { type }
         );
-        formData.append('audio', audioFile);
-        formData.append('recordingDuration', formatTime(recordingTime));
+        formData.append('file', audioFile);
+        formData.append('recordingDuration', String(recordingTime)); // CHANGED: seconds (was "01:30" text)
       }
     }
 
-    
-    setProcessingStep(1);
-    await new Promise(resolve => setTimeout(resolve, 600));
-
-    
+    // CHANGED: do NOT set Content-Type manually - the browser must add the multipart boundary
     const response = await axios.post<ApiResponse>(
       `${API_URL}/api/ai-speech/generate`,
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
+        timeout: 300000,
       }
     );
 
-    
-    setProcessingStep(2);
-    await new Promise(resolve => setTimeout(resolve, 600));
+    const backendData = response.data?.data;
 
-    if (response.data.success) {
-      
-      const backendData = response.data.data;
-      
-      
-      const resultData: SpeechData = {
-        
-        audioUrl: backendData?.audioUrl || '',
-        duration: backendData?.duration || 0,
-        format: backendData?.format || 'mp3',
-        size: backendData?.size || 0,
-        
-        
-        provider: backendData?.provider || 'openai',
-        model: backendData?.model || 'tts-1',
-        
-        
-        charCount: backendData?.charCount || 0,
-        text: backendData?.text || content || 'Generated speech content',
-        
-        
-        cost: backendData?.cost || { usd: 0, zar: 0 },
-        
-        
-        analysis: backendData?.analysis || {
-          authority: parameters.authority,
-          clarity: parameters.clarity,
-          academicRigor: parameters.academicRigor,
-          accessibility: parameters.accessibility,
-          narrativeDepth: parameters.narrativeDepth,
-        },
-        
-        
-        metadata: {
-          title: backendData?.metadata?.title || name,
-          generatedAt: backendData?.metadata?.generatedAt || new Date().toISOString(),
-        },
-        
-        
-        ...(backendData?.file && { file: backendData.file }),
-        ...(backendData?.audio && { audio: backendData.audio }),
-        ...(backendData?.recordingDuration && { recordingDuration: backendData.recordingDuration }),
-      };
-
-      
-      setProcessingStep(3);
-      await new Promise(resolve => setTimeout(resolve, 400));
-
-      
-      navigate('/user/ai-speech/result', { state: { data: resultData } });
-      
-    } else {
-      setError(response.data.message || 'Failed to generate speech');
+    // CHANGED: no more fake "Generated speech content" fallback - show an error instead
+    if (!response.data?.success || !backendData?.audioUrl) {
+      setError(response.data?.message || 'The speech could not be generated. Please try again.');
       setCurrentStep('create');
+      return;
     }
+
+    const resultData: SpeechData = {
+      audioUrl: backendData.audioUrl,
+      duration: backendData.duration || 0,
+      format: backendData.format || 'mp3',
+      size: backendData.size || 0,
+
+      provider: backendData.provider || 'openai',
+      model: backendData.model || 'tts-1',
+
+      charCount: backendData.charCount || 0,
+      text: backendData.text || '',
+
+      cost: backendData.cost || { usd: 0, zar: 0 },
+
+      analysis: backendData.analysis || {
+        authority: parameters.authority,
+        clarity: parameters.clarity,
+        academicRigor: parameters.academicRigor,
+        accessibility: parameters.accessibility,
+        narrativeDepth: parameters.narrativeDepth,
+      },
+
+      metadata: {
+        title: backendData.metadata?.title || name,
+        generatedAt: backendData.metadata?.generatedAt || new Date().toISOString(),
+      },
+
+      ...(backendData.file && { file: backendData.file }),
+      ...(backendData.audio && { audio: backendData.audio }),
+      ...(backendData.recordingDuration && { recordingDuration: backendData.recordingDuration }),
+    };
+
+    setProcessingStep(processingSteps.length - 1);
+    navigate('/user/ai-speech/result', { state: { data: resultData } });
+
   } catch (err: any) {
     console.error('Error generating speech:', err);
-    setError(err.response?.data?.message || 'Failed to generate speech. Please try again.');
+    setError(
+      err.response?.data?.message ||
+        (err.code === 'ECONNABORTED'
+          ? 'The request timed out. Please try again with shorter content.'
+          : err.response?.status === 402
+          ? 'Insufficient credits. Please top up your credits.'
+          : 'Failed to generate speech. Please try again.')
+    );
     setCurrentStep('create');
   } finally {
+    clearInterval(stepTimer);
     setIsSubmitting(false);
   }
 };
@@ -502,7 +511,7 @@ const handleGenerate = async () => {
           <div className="w-8 h-8 border-2 border-[#C85A32]/30 border-t-[#C85A32] rounded-full animate-spin"></div>
         </div>
         <h3 className="font-semibold text-[#0F2D63] dark:text-white mb-1">Generating Your Speech</h3>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">This will only take a moment…</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">This can take up to a minute…</p>
         <div className="space-y-2.5">
           {processingSteps.map((step, index) => {
             const isCompleted = index < processingStep;
@@ -679,6 +688,8 @@ const handleGenerate = async () => {
                   ) : (
                     <button
                       onClick={() => fileInputRef.current?.click()}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={handleDrop}
                       className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl hover:border-[#C85A32] hover:bg-[#FFF8F5] dark:hover:bg-[#C85A32]/5 transition-all group"
                     >
                       <Upload className="w-5 h-5 text-gray-400 group-hover:text-[#C85A32] transition-colors" />
