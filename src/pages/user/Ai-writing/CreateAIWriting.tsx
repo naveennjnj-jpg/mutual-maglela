@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -13,7 +13,9 @@ import {
   Check,
   Loader2,
   AlertCircle,
-  Upload
+  Upload,
+  Database,
+  Mic2
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
@@ -23,6 +25,15 @@ interface ApiResponse {
   message: string;
   data?: any;
 }
+
+interface VaultDoc {
+  id: string;
+  title: string;
+  fileName: string;
+  wordCount: number;
+}
+
+const MAX_VAULT_SELECTION = 5;
 
 const DOCUMENT_TYPES = [
   { value: 'policy-brief', label: 'Policy Brief', icon: BookOpen },
@@ -50,6 +61,11 @@ const processingSteps = [
   { label: 'Finalising output…' },
 ];
 
+const cardClass = 'bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5';
+const headingClass = 'text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider';
+const badgeClass =
+  'inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2';
+
 const CreateAIWriting = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -67,6 +83,59 @@ const CreateAIWriting = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<'create' | 'processing'>('create');
   const [processingStep, setProcessingStep] = useState(0);
+
+  // NEW: Data Vault + Voice Profile
+  const [vaultDocs, setVaultDocs] = useState<VaultDoc[]>([]);
+  const [vaultLoading, setVaultLoading] = useState(true);
+  const [selectedVaultIds, setSelectedVaultIds] = useState<string[]>([]);
+  const [saveToVault, setSaveToVault] = useState(false);
+  const [hasVoiceProfile, setHasVoiceProfile] = useState(false);
+  const [voiceSampleCount, setVoiceSampleCount] = useState(0);
+  const [useVoiceProfile, setUseVoiceProfile] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setVaultLoading(false);
+      return;
+    }
+    const headers = { Authorization: `Bearer ${token}` };
+
+    axios
+      .get(`${API_URL}/api/vault/documents`, { headers, params: { kind: 'source' } })
+      .then((res) => setVaultDocs(res.data?.data || []))
+      .catch(() => {})
+      .finally(() => setVaultLoading(false));
+
+    axios
+      .get(`${API_URL}/api/voice-profile`, { headers })
+      .then((res) => {
+        const data = res.data?.data;
+        if (!data) return;
+        const p = data.profile || {};
+        const samples = data.samples || [];
+        const configured =
+          !!(p.organisationName || p.description || p.audience || p.writingStyle || p.guidelines ||
+             p.preferredTone || (p.preferredTerms || []).length || (p.avoidTerms || []).length) ||
+          samples.length > 0;
+        setHasVoiceProfile(configured);
+        setVoiceSampleCount(samples.length);
+        if (configured) setUseVoiceProfile(true); // on by default when the organisation has set one up
+      })
+      .catch(() => {});
+  }, [API_URL]);
+
+  const toggleVaultDoc = (id: string) => {
+    setError(null);
+    setSelectedVaultIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= MAX_VAULT_SELECTION) {
+        setError(`You can select up to ${MAX_VAULT_SELECTION} documents per generation`);
+        return prev;
+      }
+      return [...prev, id];
+    });
+  };
 
   const validateAndSetFile = (selected: File) => {
     const validTypes = ['.pdf', '.docx', '.doc', '.txt'];
@@ -101,6 +170,7 @@ const CreateAIWriting = () => {
     setFile(null);
     setFileName('');
     setFileSize('');
+    setSaveToVault(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -110,7 +180,11 @@ const CreateAIWriting = () => {
     if (isSubmitting) return;
     if (!title.trim()) { setError('Please enter a document title'); return; }
     if (!selectedType) { setError('Please select a document type'); return; }
-    if (!file) { setError('Please upload a source document'); return; }
+    // CHANGED: a source is an uploaded file OR documents from the Data Vault
+    if (!file && selectedVaultIds.length === 0) {
+      setError('Please upload a source document or select documents from your Data Vault');
+      return;
+    }
 
     const token = localStorage.getItem('token');
     if (!token) { setError('Authentication required. Please log in again.'); return; }
@@ -120,7 +194,6 @@ const CreateAIWriting = () => {
     setCurrentStep('processing');
     setProcessingStep(0);
 
-    // Advance the progress steps while the real request runs (stops on the last step).
     const stepTimer = setInterval(() => {
       setProcessingStep((p) => Math.min(p + 1, processingSteps.length - 1));
     }, 5000);
@@ -131,9 +204,14 @@ const CreateAIWriting = () => {
       formData.append('type', selectedType);
       formData.append('tone', selectedTone);
       formData.append('includeOutline', String(includeOutline));
-      formData.append('file', file);
+      if (file) {
+        formData.append('file', file);
+        formData.append('saveToVault', String(saveToVault));
+      }
+      formData.append('vaultDocumentIds', JSON.stringify(selectedVaultIds)); // NEW
+      formData.append('useVoiceProfile', String(useVoiceProfile));           // NEW
 
-      // Do NOT set Content-Type manually – the browser must add the multipart boundary.
+      // Do NOT set Content-Type manually - the browser must add the multipart boundary.
       const response = await axios.post<ApiResponse>(
         `${API_URL}/api/ai-writing/generate`,
         formData,
@@ -144,31 +222,8 @@ const CreateAIWriting = () => {
       );
 
       const data = response.data?.data;
-
-      // CHANGED: if the API signals failure in a 2xx body, unwrap and show the message
       if (!response.data?.success || !data?.content) {
-        let errorMessage: string =
-          response.data?.message || 'The AI did not return any content. Please try again.';
-
-        // Unwrap double-encoded JSON messages (up to 2 levels deep)
-        if (typeof errorMessage === 'string') {
-          try {
-            const parsed = JSON.parse(errorMessage);
-            if (parsed?.message) {
-              errorMessage = parsed.message;
-              try {
-                const inner = JSON.parse(errorMessage);
-                if (inner?.message) errorMessage = inner.message;
-              } catch {
-                // not nested further
-              }
-            }
-          } catch {
-            // not JSON — keep original message
-          }
-        }
-
-        setError(errorMessage);
+        setError(response.data?.message || 'The AI did not return any content. Please try again.');
         setCurrentStep('create');
         return;
       }
@@ -176,6 +231,9 @@ const CreateAIWriting = () => {
       navigate('/user/ai-writing/result', {
         state: {
           data: {
+            id: data.id,
+            creditsUsed: data.creditsUsed,
+            creditsRemaining: data.creditsRemaining,
             title: title.trim(),
             type: selectedType,
             tone: selectedTone,
@@ -199,42 +257,14 @@ const CreateAIWriting = () => {
     } catch (err: any) {
       console.error('Error generating document:', err);
       const status = err.response?.status;
-
-      // CHANGED: unwrap the double-encoded JSON message from the response body
-      let errorMessage: string | null = null;
-
-      const rawMessage =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        err.response?.data;
-
-      if (typeof rawMessage === 'string') {
-        errorMessage = rawMessage;
-        try {
-          const parsed = JSON.parse(rawMessage);
-          if (parsed?.message) {
-            errorMessage = parsed.message;
-            try {
-              const inner = JSON.parse(errorMessage);
-              if (inner?.message) errorMessage = inner.message;
-            } catch {
-              // not nested further
-            }
-          }
-        } catch {
-          // not JSON — keep raw string
-        }
-      }
-
       setError(
-        errorMessage ||
+        err.response?.data?.message ||
           (err.code === 'ECONNABORTED'
             ? 'The request timed out. Please try again with a shorter document.'
             : status === 402
             ? 'Insufficient credits. Please top up your credits.'
             : 'Failed to generate document')
       );
-
       setCurrentStep('create');
     } finally {
       clearInterval(stepTimer);
@@ -318,11 +348,9 @@ const CreateAIWriting = () => {
         <div className="flex flex-col gap-4">
 
           {/* 1. Title */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
-            <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">
-              <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">
-                1
-              </span>
+          <div className={cardClass}>
+            <label className={`block ${headingClass} mb-1.5`}>
+              <span className={badgeClass}>1</span>
               Document Title
             </label>
             <input
@@ -335,11 +363,9 @@ const CreateAIWriting = () => {
           </div>
 
           {/* 2. Desired output */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
-            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
-              <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">
-                2
-              </span>
+          <div className={cardClass}>
+            <p className={`${headingClass} mb-3`}>
+              <span className={badgeClass}>2</span>
               Desired Output
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -375,11 +401,9 @@ const CreateAIWriting = () => {
           </div>
 
           {/* 3. Tone */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
-            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
-              <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">
-                3
-              </span>
+          <div className={cardClass}>
+            <p className={`${headingClass} mb-3`}>
+              <span className={badgeClass}>3</span>
               Target Tone
             </p>
             <div className="flex flex-wrap gap-2">
@@ -399,34 +423,43 @@ const CreateAIWriting = () => {
             </div>
           </div>
 
-          {/* 4. Upload */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
-            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
-              <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">
-                4
-              </span>
-              Upload Document
+          {/* 4. Source documents */}
+          <div className={cardClass}>
+            <p className={`${headingClass} mb-1`}>
+              <span className={badgeClass}>4</span>
+              Source Documents
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 ml-7">
-              Upload the source document to transform into your desired output
+              Upload a document, select documents from your Data Vault, or both.
             </p>
 
             {file ? (
-              <div className="flex items-center gap-3 p-4 bg-[#FFF8F5] dark:bg-[#C85A32]/10 border border-[#C85A32]/20 rounded-xl">
-                <div className="w-10 h-10 bg-[#C85A32]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-5 h-5 text-[#C85A32]" />
+              <>
+                <div className="flex items-center gap-3 p-4 bg-[#FFF8F5] dark:bg-[#C85A32]/10 border border-[#C85A32]/20 rounded-xl">
+                  <div className="w-10 h-10 bg-[#C85A32]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 text-[#C85A32]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[#0F2D63] dark:text-white truncate">{fileName}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{fileSize}</p>
+                  </div>
+                  <button
+                    onClick={removeFile}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#C85A32]/10 text-gray-400 hover:text-[#C85A32] transition-colors flex-shrink-0"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#0F2D63] dark:text-white truncate">{fileName}</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{fileSize}</p>
-                </div>
-                <button
-                  onClick={removeFile}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#C85A32]/10 text-gray-400 hover:text-[#C85A32] transition-colors flex-shrink-0"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+                <label className="flex items-center gap-2 mt-3 text-xs text-gray-600 dark:text-gray-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={saveToVault}
+                    onChange={(e) => setSaveToVault(e.target.checked)}
+                    className="accent-[#C85A32]"
+                  />
+                  Also save this file to my Data Vault so I can reuse it later
+                </label>
+              </>
             ) : (
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -447,16 +480,109 @@ const CreateAIWriting = () => {
               className="hidden"
               onChange={handleFileUpload}
             />
+
+            {/* Data Vault picker */}
+            <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-[#0F2D63] dark:text-white flex items-center gap-1.5">
+                  <Database className="w-3.5 h-3.5 text-[#C85A32]" />
+                  From my Data Vault
+                  {selectedVaultIds.length > 0 && (
+                    <span className="text-[#C85A32]">({selectedVaultIds.length}/{MAX_VAULT_SELECTION})</span>
+                  )}
+                </p>
+                <button
+                  onClick={() => navigate('/user/data-vault')}
+                  className="text-xs text-[#C85A32] hover:underline"
+                >
+                  Manage vault
+                </button>
+              </div>
+
+              {vaultLoading ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="w-4 h-4 text-[#C85A32] animate-spin" />
+                </div>
+              ) : vaultDocs.length === 0 ? (
+                <p className="text-xs text-gray-400 dark:text-gray-500 py-2">
+                  Your Data Vault is empty. Upload documents once in the Data Vault and reuse them here.
+                </p>
+              ) : (
+                <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                  {vaultDocs.map((doc) => {
+                    const selected = selectedVaultIds.includes(doc.id);
+                    return (
+                      <button
+                        key={doc.id}
+                        onClick={() => toggleVaultDoc(doc.id)}
+                        className={`w-full flex items-center gap-3 p-2.5 rounded-xl border text-left transition-all ${
+                          selected
+                            ? 'border-[#C85A32] bg-[#FFF8F5] dark:bg-[#C85A32]/10'
+                            : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        }`}
+                      >
+                        <div
+                          className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
+                            selected ? 'bg-[#C85A32] border-[#C85A32]' : 'border-gray-300 dark:border-gray-600'
+                          }`}
+                        >
+                          {selected && <Check className="w-3 h-3 text-white" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-[#0F2D63] dark:text-white truncate">{doc.title}</p>
+                          <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                            {doc.wordCount.toLocaleString()} words
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* 5. Outline toggle */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+          {/* 5. Voice profile */}
+          <div className={cardClass}>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className={`${headingClass} mb-0.5`}>
+                  <span className={badgeClass}>5</span>
+                  Use My Voice Profile
+                </p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 ml-7">
+                  {hasVoiceProfile
+                    ? `Write in your organisation's voice${voiceSampleCount > 0 ? ` (${voiceSampleCount} writing sample${voiceSampleCount > 1 ? 's' : ''})` : ''}.`
+                    : 'Not set up yet. Add your organisation’s style and writing samples to get content that sounds like you.'}
+                </p>
+                <button
+                  onClick={() => navigate('/user/voice-profile')}
+                  className="text-xs text-[#C85A32] hover:underline ml-7 mt-1 inline-flex items-center gap-1"
+                >
+                  <Mic2 className="w-3 h-3" />
+                  {hasVoiceProfile ? 'Edit voice profile' : 'Set up voice profile'}
+                </button>
+              </div>
+              <button
+                onClick={() => hasVoiceProfile && setUseVoiceProfile(!useVoiceProfile)}
+                disabled={!hasVoiceProfile}
+                className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed ${
+                  useVoiceProfile ? 'bg-[#C85A32]' : 'bg-gray-200 dark:bg-gray-700'
+                }`}
+              >
+                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow-sm transition-all ${
+                  useVoiceProfile ? 'left-6' : 'left-1'
+                }`}></div>
+              </button>
+            </div>
+          </div>
+
+          {/* 6. Outline toggle */}
+          <div className={cardClass}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
-                  <span className="inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2">
-                    5
-                  </span>
+                <p className={`${headingClass} mb-0.5`}>
+                  <span className={badgeClass}>6</span>
                   Include AI Outline
                 </p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 ml-7">
