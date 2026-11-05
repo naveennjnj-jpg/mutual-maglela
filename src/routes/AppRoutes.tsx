@@ -63,7 +63,8 @@ import Quotes from '@/pages/user/Quotes/Quotes';
 import Plans from '@/pages/user/Plans/Plans';
 import InvoicePaymentSuccess from '@/pages/user/Invoices/InvoicePaymentSuccess';
 import InvoicePaymentCancelled from '@/pages/user/Invoices/InvoicePaymentCancelled';
-
+import DataVault from '@/pages/user/Ai-writing/DataVault';       // apne folder ka path
+import VoiceProfile from '@/pages/user/Ai-writing/VoiceProfile';
 
 
 import AdminDashboard from "@/pages/admin/Dashboard";
@@ -153,6 +154,8 @@ const AppRoutes = () => {
         <Route path="plans" element={<AddCredits />} />
         <Route path="invoice-success" element={<InvoicePaymentSuccess />} />
         <Route path="invoice-cancelled" element={<InvoicePaymentCancelled />} />
+        <Route path="data-vault" element={<DataVault />} />
+        <Route path="voice-profile" element={<VoiceProfile />} />
       </Route>
 
       
