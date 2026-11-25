@@ -63,7 +63,7 @@ const DataVault = () => {
     }
   }, [API_URL]);
 
-  // load on mount + search with a short delay while typing
+  
   useEffect(() => {
     const t = setTimeout(() => loadDocs(search), 300);
     return () => clearTimeout(t);
@@ -186,7 +186,7 @@ const DataVault = () => {
           </div>
         )}
 
-        {/* Upload */}
+ 
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 mb-4">
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -219,7 +219,7 @@ const DataVault = () => {
           />
         </div>
 
-        {/* Search */}
+       
         <div className="relative mb-4">
           <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -231,7 +231,7 @@ const DataVault = () => {
           />
         </div>
 
-        {/* List */}
+       
         {loading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="w-6 h-6 text-[#C85A32] animate-spin" />

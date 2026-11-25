@@ -1,30 +1,23 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus,
   Search,
   Eye,
-  MoreVertical,
   Mic,
   Calendar,
   Loader2,
   AlertCircle,
-  FileText,
   CheckCircle,
   Clock,
   Trash2,
   Copy,
-  Download,
   CreditCard,
-  AlertTriangle
+  AlertTriangle,
+  XCircle
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
-
-
-
-
 
 interface Parameters {
   authority: number;
@@ -86,11 +79,28 @@ interface UserData {
   theme?: string;
   credits?: number;
   initials?: string;
+  creditsBlocked?: boolean;
+  creditsBlockedReason?: string | null;
 }
 
+const PARAM_BADGE_BASE =
+  'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border whitespace-nowrap';
 
+const getParamBadgeClasses = (score: number): string => {
+  if (score >= 80) {
+    return 'bg-[#EEF2FA] text-[#0F2D63] border-[#C9D3E8] dark:bg-[#1B2A4A] dark:text-[#DCE4F5] dark:border-[#2E4270]';
+  }
+  if (score >= 60) {
+    return 'bg-[#FFF4E5] text-[#8A4B0F] border-[#F2C99A] dark:bg-[#3B2A12] dark:text-[#F5C98A] dark:border-[#7A5417]';
+  }
+  return 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600';
+};
 
-
+const getScoreTextClass = (score: number): string => {
+  if (score >= 70) return 'text-[#0F2D63] dark:text-[#DCE4F5]';
+  if (score >= 50) return 'text-[#8A4B0F] dark:text-[#F5C98A]';
+  return 'text-[#8B1F1F] dark:text-[#F3B8B3]';
+};
 
 const AISpeech = () => {
   const navigate = useNavigate();
@@ -107,14 +117,15 @@ const AISpeech = () => {
   const [showNoCreditsModal, setShowNoCreditsModal] = useState(false);
   const fetchCalled = useRef(false);
 
-  
   const [userData, setUserData] = useState<UserData>({
     id: '',
     name: 'User',
     email: 'user@email.com',
     role: 'user',
     credits: 0,
-    initials: 'U'
+    initials: 'U',
+    creditsBlocked: false,
+    creditsBlockedReason: null
   });
 
   useEffect(() => {
@@ -124,35 +135,23 @@ const AISpeech = () => {
     }
   }, []);
 
-  
-  
-  
-
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem('token');
-
         if (!token) {
           setLoading(false);
           return;
         }
 
         const response = await axios.get(`${API_URL}/api/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.data.success && response.data.data) {
           const data = response.data.data;
-
           const nameParts = data.name?.split(' ') || ['U'];
-          const initials = nameParts
-            .map((part: string) => part.charAt(0).toUpperCase())
-            .join('')
-            .slice(0, 2);
-
+          const initials = nameParts.map((part: string) => part.charAt(0).toUpperCase()).join('').slice(0, 2);
           const credits = data.credits || data.creditsBalance || 0;
 
           setUserData({
@@ -163,17 +162,13 @@ const AISpeech = () => {
             avatar: data.avatar || data.profileImage,
             theme: data.theme || 'light',
             credits: credits,
-            initials: initials || 'U'
+            initials: initials || 'U',
+            creditsBlocked: data.creditsBlocked === true,
+            creditsBlockedReason: data.creditsBlockedReason || null,
           });
 
-          
-          if (credits === 0) {
-            setShowNoCreditsModal(true);
-          }
-
-          if (data.theme) {
-            localStorage.setItem('theme', data.theme);
-          }
+          if (credits === 0 && !data.creditsBlocked) setShowNoCreditsModal(true);
+          if (data.theme) localStorage.setItem('theme', data.theme);
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -190,9 +185,7 @@ const AISpeech = () => {
           initials: savedInitials
         }));
 
-        if (savedCredits === 0) {
-          setShowNoCreditsModal(true);
-        }
+        if (savedCredits === 0) setShowNoCreditsModal(true);
       } finally {
         setLoading(false);
       }
@@ -200,10 +193,6 @@ const AISpeech = () => {
 
     fetchUserData();
   }, []);
-
-  
-  
-  
 
   const fetchSpeeches = async () => {
     setLoading(true);
@@ -217,20 +206,13 @@ const AISpeech = () => {
         return;
       }
 
-      const response = await axios.get<ApiResponse>(
-        `${API_URL}/api/auth/ai-speech`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.get<ApiResponse>(`${API_URL}/api/auth/ai-speech`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (response.data.success) {
         const speechesData = response.data.data || [];
-        if (Array.isArray(speechesData) && speechesData.length > 0) {
-          setSpeeches(speechesData);
-        } else {
-          setSpeeches([]);
-        }
+        setSpeeches(Array.isArray(speechesData) && speechesData.length > 0 ? speechesData : []);
       } else {
         setSpeeches([]);
       }
@@ -243,10 +225,6 @@ const AISpeech = () => {
     }
   };
 
-  
-  
-  
-
   const handleDelete = async (id: string) => {
     setDeleteLoading(id);
     try {
@@ -256,12 +234,9 @@ const AISpeech = () => {
         return;
       }
 
-      const response = await axios.delete(
-        `${API_URL}/api/auth/ai-speech/${id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.delete(`${API_URL}/api/auth/ai-speech/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (response.data.success) {
         setSpeeches(speeches.filter(speech => speech._id !== id));
@@ -278,12 +253,8 @@ const AISpeech = () => {
     }
   };
 
-  
-  
-  
-
   const getTopParameters = (parameters: Parameters): { key: string; label: string; value: number }[] => {
-    const entries = Object.entries(parameters);
+    const entries = Object.entries(parameters || {});
     const sorted = entries.sort((a, b) => b[1] - a[1]);
     const top = sorted.slice(0, 2);
     const labels: Record<string, string> = {
@@ -300,66 +271,54 @@ const AISpeech = () => {
     }));
   };
 
-  
-  
-  
+  const getStatusMeta = (status: string) => {
+    const normalized = (status || 'Pending').trim().toLowerCase();
 
-  const getParameterColor = (score: number): string => {
-    if (score >= 80) return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800';
-    if (score >= 60) return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
-    return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800';
-  };
-
-  
-  
-  
-
-  const getStatusColor = (status: string): string => {
-    switch (status) {
-      case 'Approved':
-        return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800';
-      case 'Pending':
-        return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
-      case 'Rejected':
-        return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800';
-      case 'Published':
-        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800';
+    switch (normalized) {
+      case 'approved':
+        return {
+          label: 'Approved',
+          className:
+            'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-200 dark:border-emerald-700',
+          icon: <CheckCircle className="w-3.5 h-3.5 shrink-0 text-emerald-700 dark:text-emerald-300" />,
+        };
+      case 'pending':
+        return {
+          label: 'Pending',
+          className:
+            'bg-amber-100 text-amber-950 border-amber-300 dark:bg-amber-950/80 dark:text-amber-200 dark:border-amber-700',
+          icon: <Clock className="w-3.5 h-3.5 shrink-0 text-amber-800 dark:text-amber-300" />,
+        };
+      case 'rejected':
+        return {
+          label: 'Rejected',
+          className:
+            'bg-rose-100 text-rose-950 border-rose-300 dark:bg-rose-950/80 dark:text-rose-200 dark:border-rose-700',
+          icon: <XCircle className="w-3.5 h-3.5 shrink-0 text-rose-700 dark:text-rose-300" />,
+        };
+      case 'published':
+        return {
+          label: 'Published',
+          className:
+            'bg-blue-100 text-blue-950 border-blue-300 dark:bg-blue-950/80 dark:text-blue-200 dark:border-blue-700',
+          icon: <CheckCircle className="w-3.5 h-3.5 shrink-0 text-blue-700 dark:text-blue-300" />,
+        };
       default:
-        return 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-600';
+        return {
+          label: status || 'Draft',
+          className:
+            'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600',
+          icon: <Clock className="w-3.5 h-3.5 shrink-0 text-slate-700 dark:text-slate-300" />,
+        };
     }
   };
-
-  
-  
-  
 
   const formatDate = (dateString: string): string => {
+    if (!dateString) return '—';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
+    if (Number.isNaN(date.getTime())) return '—';
+    return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
   };
-
-  
-  
-  
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Approved':
-        return <CheckCircle className="w-3.5 h-3.5" />;
-      case 'Published':
-        return <CheckCircle className="w-3.5 h-3.5" />;
-      default:
-        return <Clock className="w-3.5 h-3.5" />;
-    }
-  };
-
-  
-  
-  
 
   const getFilteredSpeeches = () => {
     let filtered = speeches;
@@ -375,13 +334,17 @@ const AISpeech = () => {
 
   const filteredSpeeches = getFilteredSpeeches();
 
-  
-  
-  
-
   const handleCreate = () => {
-    
-    if (userData.credits === 0) {
+    if (userData.creditsBlocked) {
+      setError(
+        userData.creditsBlockedReason
+          ? `Credits blocked by admin: ${userData.creditsBlockedReason}`
+          : 'Your credits are blocked by the admin. Please contact support.'
+      );
+      setTimeout(() => setError(null), 4000);
+      return;
+    }
+    if ((userData.credits ?? 0) <= 0) {
       setShowNoCreditsModal(true);
       return;
     }
@@ -402,39 +365,35 @@ const AISpeech = () => {
     navigate('/user/add-credits');
   };
 
-  
-  
-  
-
   const NoCreditsModal = () => (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-xl">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-xl">
         <div className="text-center">
-          <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="w-7 h-7 sm:w-8 sm:h-8 text-amber-700 dark:text-amber-400" />
           </div>
-          <h3 className="text-xl font-semibold text-[#0F2D63] dark:text-white mb-2">
+          <h3 className="text-lg sm:text-xl font-semibold text-[#0F2D63] dark:text-white mb-2">
             No Credits Available
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-            You have <span className="font-bold text-red-500">0 credits</span>. Please top up your credits to create AI Speech documents.
+            You have <span className="font-bold text-red-600 dark:text-red-400">0 credits</span>. Please top up your credits to create AI Speech documents.
           </p>
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mb-6">
-            <p className="text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
-              <CreditCard className="w-4 h-4" />
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-800 rounded-xl p-3 mb-6">
+            <p className="text-xs text-amber-900 dark:text-amber-200 flex items-center justify-center gap-2 font-medium">
+              <CreditCard className="w-4 h-4 shrink-0" />
               Each AI Speech generation costs 1 credit
             </p>
           </div>
-          <div className="flex gap-3 justify-center">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-center">
             <button
               onClick={() => setShowNoCreditsModal(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+              className="h-10 px-4 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
             >
               Close
             </button>
             <button
               onClick={handleTopUp}
-              className="px-4 py-2 bg-[#C85A32] hover:bg-[#a8472a] text-white text-sm font-medium rounded-xl transition-colors flex items-center gap-2"
+              className="h-10 px-4 bg-[#C85A32] hover:bg-[#a8472a] text-white text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
             >
               <CreditCard className="w-4 h-4" />
               Top Up Credits
@@ -445,34 +404,30 @@ const AISpeech = () => {
     </div>
   );
 
-  
-  
-  
-
   const DeleteModal = ({ id, title }: { id: string; title: string }) => (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-xl">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-xl">
         <div className="text-center">
           <div className="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
             <Trash2 className="w-7 h-7 text-red-600 dark:text-red-400" />
           </div>
-          <h3 className="text-lg font-semibold text-[#0F2D63] dark:text-white mb-2">
+          <h3 className="text-base sm:text-lg font-semibold text-[#0F2D63] dark:text-white mb-2">
             Delete Speech
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
             Are you sure you want to delete <strong className="text-[#0F2D63] dark:text-white">{title}</strong>? This action cannot be undone.
           </p>
-          <div className="flex gap-3 justify-center">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-center">
             <button
               onClick={() => setShowDeleteModal(null)}
-              className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+              className="h-10 px-4 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={() => handleDelete(id)}
               disabled={deleteLoading === id}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center gap-2"
+              className="h-10 px-4 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
             >
               {deleteLoading === id ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -487,28 +442,23 @@ const AISpeech = () => {
     </div>
   );
 
-  
-  
-  
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-4 sm:p-6 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 text-[#C85A32] animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400">Loading speeches...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading speeches...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-4 sm:p-6">
       <div className="max-w-[1500px] mx-auto">
-        
+
         {showNoCreditsModal && <NoCreditsModal />}
 
-        
         {showDeleteModal && (
           <DeleteModal
             id={showDeleteModal}
@@ -516,85 +466,120 @@ const AISpeech = () => {
           />
         )}
 
-        
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm px-6 py-5 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="flex items-center gap-4 flex-1 min-w-0">
-            <div className="w-11 h-11 bg-[#0F2D63] rounded-xl flex items-center justify-center flex-shrink-0">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700 shadow-sm p-4 sm:px-6 sm:py-5 mb-4 sm:mb-5 flex flex-col lg:flex-row lg:items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 bg-[#0F2D63] rounded-xl flex items-center justify-center flex-shrink-0">
               <Mic className="w-5 h-5 text-white" />
             </div>
-            <div className="min-w-0">
-              <h1 className="text-lg font-['Roboto'] font-bold text-[#0F2D63] dark:text-white leading-tight">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-base sm:text-lg font-bold text-[#0F2D63] dark:text-white leading-tight">
                 AI Speech
               </h1>
-              <p className="text-gray-400 dark:text-gray-500 text-xs mt-0.5">
+              <p className="text-gray-600 dark:text-gray-300 text-xs mt-0.5">
                 Calibrate and manage your institutional speech recordings
               </p>
-              
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Credits:
-                </span>
-                <span className={`text-sm font-semibold ${userData.credits === 0 ? 'text-red-500' : 'text-[#0F2D63] dark:text-white'}`}>
+
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                <span className="text-xs text-gray-600 dark:text-gray-300">Credits:</span>
+                <span className={`text-sm font-semibold ${
+                  userData.credits === 0
+                    ? 'text-red-600 dark:text-red-400'
+                    : 'text-[#0F2D63] dark:text-white'
+                }`}>
                   {userData.credits}
                 </span>
-                {userData.credits === 0 && (
+                {userData.credits === 0 && !userData.creditsBlocked && (
                   <button
                     onClick={handleTopUp}
-                    className="text-xs text-[#C85A32] hover:underline font-medium"
+                    className="text-xs text-[#C85A32] hover:text-[#a8472a] hover:underline font-semibold"
                   >
                     Top Up
                   </button>
                 )}
               </div>
-      
-      {(userData.credits ?? 0) < 10 && (
-        <div className="flex items-center gap-1.5 mt-1">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
-          <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-            {userData.credits === 0 
-              ? 'No credits available. Please top up to create AI Speech.' 
-              : `Low credits (${userData.credits}/10). Please top up to continue.`}
-          </span>
-        </div>
-      )}
 
+              {userData.creditsBlocked && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <AlertTriangle className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />
+                  <span className="text-xs text-red-700 dark:text-red-300 font-medium">
+                    Credits blocked by admin
+                  </span>
+                </div>
+              )}
+
+              {!userData.creditsBlocked && (userData.credits ?? 0) < 10 && (userData.credits ?? 0) > 0 && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 flex-shrink-0" />
+                  <span className="text-xs text-amber-900 dark:text-amber-200 font-medium">
+                    Low credits ({userData.credits}/10). Please top up to continue.
+                  </span>
+                </div>
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 flex-shrink-0 w-full lg:w-auto">
+            <div className="relative flex-1 sm:flex-initial">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search speeches…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-[#C85A32] bg-gray-50 dark:bg-gray-900 dark:text-white w-52"
+                className="pl-10 pr-4 h-10 text-sm border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-[#C85A32] bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 w-full sm:w-56"
               />
             </div>
             <button
               onClick={handleCreate}
-              disabled={(userData.credits ?? 10) <= 10}
-              className={`flex items-center gap-2 text-white rounded-xl px-4 py-2 text-sm font-semibold transition-colors whitespace-nowrap ${(userData.credits ?? 10) <= 10
+              disabled={userData.creditsBlocked === true || (userData.credits ?? 0) <= 0}
+              title={
+                userData.creditsBlocked
+                  ? `Credits blocked by admin${userData.creditsBlockedReason ? `: ${userData.creditsBlockedReason}` : ''}`
+                  : undefined
+              }
+              className={`flex items-center justify-center gap-2 text-white rounded-xl px-4 h-10 text-sm font-semibold transition-all whitespace-nowrap ${
+                userData.creditsBlocked
+                  ? 'bg-gray-400 cursor-not-allowed opacity-40 blur-[1px]'
+                  : (userData.credits ?? 0) <= 0
                   ? 'bg-gray-400 cursor-not-allowed opacity-50'
                   : 'bg-[#C85A32] hover:bg-[#a8472a]'
-                }`}
+              }`}
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 shrink-0" />
               Create AI Speech
             </button>
           </div>
         </div>
 
-        
-        {userData.credits === 0 && (
-          <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 mb-4">
-            <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-            <p className="text-sm text-amber-700 dark:text-amber-300 flex-1">
-              <strong>No credits available.</strong> Please top up your credits to create new AI Speech documents.
-            </p>
+        {userData.creditsBlocked && (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-800 rounded-xl px-4 py-3 mb-4">
+            <div className="flex items-start gap-2.5 flex-1 min-w-0">
+              <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-sm text-red-800 dark:text-red-200 font-semibold">
+                  Your credits are blocked by the administrator.
+                </p>
+                <p className="text-xs text-red-700 dark:text-red-300 mt-0.5 break-words">
+                  {userData.creditsBlockedReason
+                    ? `Reason: ${userData.creditsBlockedReason}`
+                    : 'You cannot create new AI Speech documents until the block is lifted.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!userData.creditsBlocked && (userData.credits ?? 0) === 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-800 rounded-xl px-4 py-3 mb-4">
+            <div className="flex items-start sm:items-center gap-2.5 flex-1 min-w-0">
+              <AlertTriangle className="w-5 h-5 text-amber-700 dark:text-amber-400 flex-shrink-0 mt-0.5 sm:mt-0" />
+              <p className="text-sm text-amber-950 dark:text-amber-200 min-w-0">
+                <strong>No credits available.</strong> Please top up your credits to create new AI Speech documents.
+              </p>
+            </div>
             <button
               onClick={handleTopUp}
-              className="flex items-center gap-2 px-3 py-1.5 bg-[#C85A32] hover:bg-[#a8472a] text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
+              className="self-start sm:self-auto flex items-center justify-center gap-2 px-3.5 h-9 bg-[#C85A32] hover:bg-[#a8472a] text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap w-full sm:w-auto"
             >
               <CreditCard className="w-3.5 h-3.5" />
               Top Up Now
@@ -602,168 +587,314 @@ const AISpeech = () => {
           </div>
         )}
 
-        
         {successMessage && (
-          <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm mb-4">
-            <CheckCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{successMessage}</span>
+          <div className="flex items-start gap-2 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 px-4 py-3 rounded-xl text-sm font-medium mb-4">
+            <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-700 dark:text-emerald-300" />
+            <span className="min-w-0 break-words">{successMessage}</span>
           </div>
         )}
         {error && (
-          <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-4">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{error}</span>
+          <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/60 border border-red-300 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-xl text-sm font-medium mb-4">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-700 dark:text-red-300" />
+            <span className="min-w-0 break-words">{error}</span>
           </div>
         )}
 
-        
-        
-        
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <div className="min-w-[900px]">
-              
-              <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-                <div className="col-span-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Speech Name</div>
-                <div className="col-span-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Top Parameters</div>
-                <div className="col-span-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Avg Score</div>
-                <div className="col-span-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Duration</div>
-                <div className="col-span-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Status</div>
-                <div className="col-span-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">Created</div>
-                <div className="col-span-1"></div>
-              </div>
+        {filteredSpeeches.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4 xl:hidden">
+              {filteredSpeeches.map((speech) => {
+                const topParams = getTopParameters(speech.parameters);
+                const statusMeta = getStatusMeta(speech.status);
 
-              
-              {filteredSpeeches.length > 0 ? (
-                filteredSpeeches.map((speech, index) => {
-                  const topParams = getTopParameters(speech.parameters);
-
-                  return (
-                    <div
-                      key={speech._id}
-                      className={`grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${index < filteredSpeeches.length - 1 ? 'border-b border-gray-50 dark:border-gray-700/50' : ''
-                        }`}
-                      onClick={() => handleView(speech)}
-                    >
-                      <div className="col-span-3 flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 bg-[#FFF8F5] dark:bg-[#C85A32]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                return (
+                  <article
+                    key={speech._id}
+                    onClick={() => handleView(speech)}
+                    className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700 shadow-sm p-4 hover:border-[#C85A32]/50 transition-all cursor-pointer flex flex-col justify-between gap-3.5"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <div className="w-9 h-9 bg-[#FFF8F5] dark:bg-[#C85A32]/15 border border-[#C85A32]/15 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
                           <Mic className="w-4 h-4 text-[#C85A32]" />
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-[#0F2D63] dark:text-white truncate">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-sm font-semibold text-[#0F2D63] dark:text-white line-clamp-2 leading-snug break-words">
                             {speech.title}
-                          </p>
-                          <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate">
-                            {speech.identifier}
-                          </p>
+                          </h3>
+                          {speech.identifier && (
+                            <p className="text-[11px] font-mono text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                              {speech.identifier}
+                            </p>
+                          )}
                         </div>
                       </div>
 
-                      <div className="col-span-2 flex items-center gap-1.5 flex-wrap">
+                      <span
+                        className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full border whitespace-nowrap inline-flex items-center gap-1.5 ${statusMeta.className}`}
+                      >
+                        {statusMeta.icon}
+                        <span>{statusMeta.label}</span>
+                      </span>
+                    </div>
+
+                    {topParams.length > 0 && (
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         {topParams.map((param, idx) => (
                           <span
                             key={idx}
-                            className={`text-[10px] font-medium px-2 py-0.5 rounded-full border whitespace-nowrap ${getParameterColor(param.value)}`}
+                            className={`${PARAM_BADGE_BASE} ${getParamBadgeClasses(param.value)}`}
                           >
                             {param.label}: {param.value}%
                           </span>
                         ))}
                       </div>
+                    )}
 
-                      <div className="col-span-2 flex items-center justify-center">
-                        <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1">
-                          <span className={`text-sm font-bold ${speech.avgScore >= 70 ? 'text-green-600 dark:text-green-400' :
-                              speech.avgScore >= 50 ? 'text-amber-600 dark:text-amber-400' :
-                                'text-red-600 dark:text-red-400'
-                            }`}>
-                            {speech.avgScore}
-                          </span>
-                          <span className="text-xs text-gray-400 dark:text-gray-500">/ 100</span>
-                        </div>
-                      </div>
-
-                      <div className="col-span-1 text-xs font-medium text-gray-600 dark:text-gray-400 text-center">
-                        {speech.duration}
-                      </div>
-
-                      <div className="col-span-1 flex items-center justify-center">
-                        <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full border ${getStatusColor(speech.status)} flex items-center gap-1`}>
-                          {getStatusIcon(speech.status)}
-                          {speech.status}
+                    <div className="grid grid-cols-2 gap-2.5 bg-gray-50/90 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700/80 rounded-xl px-3 py-2.5">
+                      <div className="min-w-0">
+                        <span className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                          Avg Score
+                        </span>
+                        <span className={`block text-xs font-bold tabular-nums mt-0.5 ${getScoreTextClass(speech.avgScore)}`}>
+                          {speech.avgScore}
+                          <span className="text-[11px] font-normal text-gray-500 dark:text-gray-400"> / 100</span>
                         </span>
                       </div>
 
-                      <div className="col-span-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                        {formatDate(speech.createdAt)}
+                      <div className="min-w-0 border-l border-gray-200/80 dark:border-gray-700 pl-3">
+                        <span className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                          Duration
+                        </span>
+                        <span className="block text-xs font-semibold text-gray-900 dark:text-gray-100 tabular-nums truncate mt-0.5">
+                          {speech.duration || '—'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2.5 border-t border-gray-100 dark:border-gray-700/80 gap-2">
+                      <div className="text-xs font-medium text-gray-600 dark:text-gray-300 flex items-center gap-1.5 whitespace-nowrap">
+                        <Calendar className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                        <span>{formatDate(speech.createdAt)}</span>
                       </div>
 
-                      <div className="col-span-1 flex items-center justify-end gap-1">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleView(speech);
                           }}
-                          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
-                          title="View"
+                          className="h-9 inline-flex items-center gap-1.5 px-3 text-xs font-semibold rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200/80 dark:hover:bg-gray-600 text-[#0F2D63] dark:text-white transition-colors"
+                          title="View Speech"
                         >
-                          <Eye className="w-3.5 h-3.5" />
+                          <Eye className="w-3.5 h-3.5 shrink-0" />
+                          <span>View</span>
                         </button>
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleCopyContent(speech.content);
                           }}
-                          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
+                          aria-label="Copy speech content"
+                          className="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200/80 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
                           title="Copy Content"
                         >
-                          <Copy className="w-3.5 h-3.5" />
+                          <Copy className="w-4 h-4" />
                         </button>
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setShowDeleteModal(speech._id);
                           }}
-                          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                          title="Delete"
+                          aria-label="Delete speech"
+                          className="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-red-100 dark:hover:bg-red-900/40 text-gray-700 dark:text-gray-200 hover:text-red-700 dark:hover:text-red-300 transition-colors"
+                          title="Delete Speech"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                  );
-                })
-              ) : (
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Mic className="w-10 h-10 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-[#0F2D63] dark:text-white mb-2">
-                    No speeches found
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    {searchTerm ? `No speeches match "${searchTerm}"` : 'Create your first AI Speech'}
-                  </p>
-                  {!searchTerm && (
-                    <button
-                      onClick={handleCreate}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#C85A32] text-white text-sm font-semibold rounded-xl hover:bg-[#a8472a] transition-colors"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Create AI Speech
-                    </button>
-                  )}
-                </div>
-              )}
+                  </article>
+                );
+              })}
             </div>
-          </div>
-        </div>
 
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 px-1">
+            <div className="hidden xl:block bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+              <div className="grid grid-cols-[minmax(220px,2.5fr)_minmax(210px,2fr)_110px_100px_130px_130px_124px] gap-4 px-5 py-3.5 border-b border-gray-200/80 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 items-center">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                  Speech Name
+                </div>
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                  Top Parameters
+                </div>
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider text-center whitespace-nowrap">
+                  Avg Score
+                </div>
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider text-center whitespace-nowrap">
+                  Duration
+                </div>
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider text-center whitespace-nowrap">
+                  Status
+                </div>
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                  Created
+                </div>
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider text-right whitespace-nowrap">
+                  Actions
+                </div>
+              </div>
+
+              {filteredSpeeches.map((speech, index) => {
+                const topParams = getTopParameters(speech.parameters);
+                const statusMeta = getStatusMeta(speech.status);
+
+                return (
+                  <div
+                    key={speech._id}
+                    className={`grid grid-cols-[minmax(220px,2.5fr)_minmax(210px,2fr)_110px_100px_130px_130px_124px] gap-4 px-5 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${
+                      index < filteredSpeeches.length - 1 ? 'border-b border-gray-100 dark:border-gray-700/60' : ''
+                    }`}
+                    onClick={() => handleView(speech)}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 bg-[#FFF8F5] dark:bg-[#C85A32]/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Mic className="w-4 h-4 text-[#C85A32]" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-[#0F2D63] dark:text-white truncate">
+                          {speech.title}
+                        </p>
+                        <p className="text-[11px] font-mono text-gray-500 dark:text-gray-400 truncate">
+                          {speech.identifier}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {topParams.map((param, idx) => (
+                        <span
+                          key={idx}
+                          className={`${PARAM_BADGE_BASE} ${getParamBadgeClasses(param.value)}`}
+                        >
+                          {param.label}: {param.value}%
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-center whitespace-nowrap">
+                      <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-2.5 py-1 tabular-nums">
+                        <span className={`text-sm font-bold ${getScoreTextClass(speech.avgScore)}`}>
+                          {speech.avgScore}
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">/ 100</span>
+                      </div>
+                    </div>
+
+                    <div className="text-xs font-semibold text-gray-700 dark:text-gray-200 text-center tabular-nums whitespace-nowrap">
+                      {speech.duration || '—'}
+                    </div>
+
+                    <div className="flex items-center justify-center whitespace-nowrap">
+                      <span
+                        className={`text-xs font-semibold px-2.5 py-1 rounded-full border inline-flex items-center gap-1.5 ${statusMeta.className}`}
+                      >
+                        {statusMeta.icon}
+                        <span>{statusMeta.label}</span>
+                      </span>
+                    </div>
+
+                    <div className="text-xs font-medium text-gray-600 dark:text-gray-300 flex items-center gap-1.5 whitespace-nowrap">
+                      <Calendar className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                      <span>{formatDate(speech.createdAt)}</span>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleView(speech);
+                        }}
+                        aria-label="View speech"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
+                        title="View"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopyContent(speech.content);
+                        }}
+                        aria-label="Copy speech content"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
+                        title="Copy Content"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowDeleteModal(speech._id);
+                        }}
+                        aria-label="Delete speech"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700 shadow-sm p-8">
+            <EmptyState
+              searchTerm={searchTerm}
+              onCreate={handleCreate}
+            />
+          </div>
+        )}
+
+        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-3 px-1">
           {filteredSpeeches.length} {filteredSpeeches.length === 1 ? 'speech' : 'speeches'} found
         </p>
       </div>
     </div>
   );
 };
+
+const EmptyState: React.FC<{
+  searchTerm: string;
+  onCreate: () => void;
+}> = ({ searchTerm, onCreate }) => (
+  <div className="text-center py-12">
+    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 dark:bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
+      <Mic className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
+    </div>
+    <h3 className="text-base sm:text-lg font-semibold text-[#0F2D63] dark:text-white mb-2">
+      No speeches found
+    </h3>
+    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+      {searchTerm ? `No speeches match "${searchTerm}"` : 'Create your first AI Speech'}
+    </p>
+    {!searchTerm && (
+      <button
+        onClick={onCreate}
+        className="inline-flex items-center gap-2 h-10 px-4 bg-[#C85A32] text-white text-sm font-semibold rounded-xl hover:bg-[#a8472a] transition-colors"
+      >
+        <Plus className="w-4 h-4" />
+        Create AI Speech
+      </button>
+    )}
+  </div>
+);
 
 export default AISpeech;

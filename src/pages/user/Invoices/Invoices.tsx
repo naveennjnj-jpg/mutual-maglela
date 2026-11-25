@@ -664,23 +664,55 @@ const handlePayNow = async (invoice: Invoice) => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-[#F9F7F4] flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl border border-red-200 shadow-sm p-8 max-w-md text-center">
-          <CircleAlert className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-[#0F2D63] mb-2">Error Loading Invoices</h3>
-          <p className="text-sm text-gray-500">{error}</p>
-          <button
-            onClick={fetchInvoices}
-            className="mt-4 px-6 py-2 bg-[#0F2D63] text-white text-sm font-semibold rounded-xl hover:bg-[#0a2050] transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
+
+
+{error && (
+  <div className="min-h-screen bg-[#F9F7F4] flex items-center justify-center p-6">
+    <div className="bg-white rounded-2xl border border-red-200 shadow-sm p-8 max-w-md w-full text-center">
+      <CircleAlert className="w-12 h-12 text-red-500 mx-auto mb-4" />
+
+      <h3 className="text-lg font-bold text-[#0F2D63] mb-2">
+        Error Loading Invoices
+      </h3>
+
+      <p className="text-sm text-gray-600">
+        {error}
+      </p>
+
+      <button
+        onClick={fetchInvoices}
+        className="mt-4 px-6 py-2 bg-[#0F2D63] text-white text-sm font-semibold rounded-xl hover:bg-[#0a2050] transition-colors"
+      >
+        Try Again
+      </button>
+    </div>
+  </div>
+)}
+
+
+{!error && !loading && invoices.length === 0 && (
+  <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+    <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+      <FileText className="w-8 h-8 text-slate-400" />
+    </div>
+
+    <h3 className="text-lg font-semibold text-[#0F2D63] mb-2">
+      No invoices available yet
+    </h3>
+
+    <p className="text-sm text-gray-500 max-w-sm">
+      Your invoices will appear here once they become available.
+    </p>
+  </div>
+)}
+
+
+{!error && !loading && invoices.length > 0 && (
+  <div>
+   
+  </div>
+)}
+
 
   return (
     <div className="min-h-screen bg-[#F9F7F4] p-6 space-y-5">

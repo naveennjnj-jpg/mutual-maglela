@@ -10,7 +10,7 @@ interface SettingsSidebarProps {
 const SettingsSidebar = ({ activeTab, onTabChange }: SettingsSidebarProps) => {
   const tabs = [
     { id: "profile", label: "Profile", icon: User },
-    { id: "notifications", label: "Notifications", icon: Bell },
+    // { id: "notifications", label: "Notifications", icon: Bell },
     { id: "security", label: "Security", icon: Shield },
     { id: "preferences", label: "Preferences", icon: Globe },
   ];

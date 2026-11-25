@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { Mail, Loader2, AlertCircle, Users, User, Calendar, Clock } from 'lucide-react';
+import { Mail, Loader2, AlertCircle, Users, User } from 'lucide-react';
 import { WhatsappChat, LinkedInChat } from "@/utils/svgicons";
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
@@ -30,24 +29,20 @@ interface ApiResponse {
   data?: any;
 }
 
-
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e5e7eb'/%3E%3Ctext x='50' y='50' text-anchor='middle' dy='.35em' font-size='40' fill='%239ca3af' font-family='sans-serif'%3E%3C/text%3E%3C/svg%3E";
 
 const HireExperts = () => {
   const { user } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  
   const [experts, setExperts] = useState<Expert[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isReadMore, setIsReadMore] = useState<{ [key: string]: boolean }>({});
   const [fetchAttempted, setFetchAttempted] = useState(false);
 
-  
   const fetchCalled = useRef(false);
 
-  
   useEffect(() => {
     if (!fetchCalled.current) {
       fetchCalled.current = true;
@@ -55,7 +50,6 @@ const HireExperts = () => {
     }
   }, []);
 
-  
   const getImageUrl = (imagePath: string | null | undefined): string => {
     if (!imagePath) return DEFAULT_AVATAR;
 
@@ -143,7 +137,6 @@ const HireExperts = () => {
     }
   };
 
-  
   const getMockExperts = (): Expert[] => {
     return [
       {
@@ -200,7 +193,6 @@ const HireExperts = () => {
     ];
   };
 
-  
   const toggleReadMore = (id: string | number) => {
     setIsReadMore(prev => ({
       ...prev,
@@ -208,7 +200,6 @@ const HireExperts = () => {
     }));
   };
 
-  
   const openLink = (url?: string) => {
     if (url) {
       if (url.startsWith('mailto:')) {
@@ -219,7 +210,6 @@ const HireExperts = () => {
     }
   };
 
-  
   const getAvailabilityBadge = (status?: string) => {
     switch (status) {
       case 'available':
@@ -233,7 +223,6 @@ const HireExperts = () => {
     }
   };
 
-  
   const ExpertImage = ({ src, alt, className }: { src: string; alt: string; className: string }) => {
     const [imgError, setImgError] = useState(false);
 
@@ -255,10 +244,9 @@ const HireExperts = () => {
     );
   };
 
-  
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-4 sm:p-6 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 text-[#C85A32] animate-spin mx-auto mb-4" />
           <p className="text-gray-500 dark:text-gray-400">Loading experts...</p>
@@ -268,41 +256,38 @@ const HireExperts = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-3 sm:p-6">
       <div className="max-w-[1500px] mx-auto">
-        
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Schedule a call with an expert
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-md">
+          <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm leading-relaxed max-w-md">
             Speak to a trusted expert who specialise in research translation, strategic storytelling, speechwriting and institutional communication.
           </p>
         </div>
 
-        
         {error && (
-          <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-6">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{error}</span>
+          <div className="flex items-start gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-6">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span className="min-w-0 break-words">{error}</span>
           </div>
         )}
 
-        
         {experts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {experts.map((expert) => (
               <div
                 key={expert.id}
-                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 w-full max-w-[480px]"
+                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-4 sm:p-6 w-full"
               >
-                
-                <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-3 mb-4 min-w-0">
                   <div className="relative flex-shrink-0">
                     <ExpertImage
                       src={expert.image}
                       alt={expert.name}
-                      className="w-16 h-16 rounded-full object-cover object-top"
+                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover object-top"
                     />
                     {expert.isVerified && (
                       <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-gray-800">
@@ -316,20 +301,18 @@ const HireExperts = () => {
                       </div>
                     )}
                   </div>
-                  <div>
-                    <h2 className="text-base font-bold text-gray-900 dark:text-white leading-tight">
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight truncate">
                       {expert.name}
                     </h2>
                     {expert.title && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{expert.title}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{expert.title}</p>
                     )}
-                    
                   </div>
                 </div>
 
-                
                 <div className="mb-1">
-                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                     {isReadMore[expert.id.toString()]
                       ? expert.bio
                       : expert.bio.length > 80
@@ -341,13 +324,12 @@ const HireExperts = () => {
                 {expert.bio.length > 80 && (
                   <button
                     onClick={() => toggleReadMore(expert.id)}
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 font-medium mb-4 transition-colors"
+                    className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 font-medium mb-4 transition-colors"
                   >
                     {isReadMore[expert.id.toString()] ? '- Read Less' : '+ Read More'}
                   </button>
                 )}
 
-                
                 {expert.expertise && expert.expertise.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-3">
                     {expert.expertise.slice(0, 3).map((skill, index) => (
@@ -368,49 +350,47 @@ const HireExperts = () => {
 
                 <div className="border-t border-gray-200 dark:border-gray-700 mb-4"></div>
 
-                
-                <div className="flex items-center gap-2">
+                <div className="grid grid-cols-1 gap-2">
                   <button
                     onClick={() => openLink(expert.socialLinks.linkedin)}
                     disabled={!expert.socialLinks.linkedin}
-                    className={`flex-1 flex items-center justify-center gap-1.5 bg-[#0F2D63] hover:bg-[#1a3d7a] text-white rounded-xl py-2.5 text-sm font-semibold transition-colors ${
+                    className={`flex items-center justify-center gap-1.5 bg-[#0F2D63] hover:bg-[#1a3d7a] text-white rounded-xl py-2.5 text-xs sm:text-sm font-semibold transition-colors ${
                       !expert.socialLinks.linkedin ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
                     <LinkedInChat />
-                    LinkedIn
+                    <span>LinkedIn</span>
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => openLink(`mailto:${expert.socialLinks.email}`)}
                     disabled={!expert.socialLinks.email}
-                    className={`flex-1 flex items-center justify-center gap-1.5 bg-[#C85A32] hover:bg-[#a8472a] text-white rounded-xl py-2.5 text-sm font-semibold transition-colors ${
+                    className={`flex items-center justify-center gap-1.5 bg-[#C85A32] hover:bg-[#a8472a] text-white rounded-xl py-2.5 text-xs sm:text-sm font-semibold transition-colors ${
                       !expert.socialLinks.email ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
-                    <Mail  />
-                    Email
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Email</span>
                   </button>
                   <button
                     onClick={() => openLink(expert.socialLinks.whatsapp)}
                     disabled={!expert.socialLinks.whatsapp}
-                    className={`flex-1 flex items-center justify-center gap-1.5 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl py-2.5 text-sm font-semibold transition-colors ${
+                    className={`flex items-center justify-center gap-1.5 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-xl py-2.5 text-xs sm:text-sm font-semibold transition-colors ${
                       !expert.socialLinks.whatsapp ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
                     <WhatsappChat />
-                    WhatsApp
-                  </button>
+                    <span>WhatsApp</span>
+                  </button> */}
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          
           <div className="text-center py-12">
-            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users className="w-10 h-10 text-gray-400" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-[#0F2D63] dark:text-white mb-2">
+            <h3 className="text-base sm:text-lg font-semibold text-[#0F2D63] dark:text-white mb-2">
               No Experts Available
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">

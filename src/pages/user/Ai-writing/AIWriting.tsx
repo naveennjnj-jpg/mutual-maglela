@@ -1,11 +1,9 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus,
   Search,
   Eye,
-  MoreVertical,
   Megaphone,
   Lightbulb,
   PenTool,
@@ -19,17 +17,13 @@ import {
   CheckCircle,
   Trash2,
   Copy,
-  Download,
   Clock,
   CreditCard,
-  AlertTriangle
+  AlertTriangle,
+  XCircle
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
-
-
-
-
 
 interface Parameters {
   authority: number;
@@ -103,11 +97,9 @@ interface UserData {
   theme?: string;
   credits?: number;
   initials?: string;
+  creditsBlocked?: boolean;
+  creditsBlockedReason?: string | null;
 }
-
-
-
-
 
 const AIWriting = () => {
   const navigate = useNavigate();
@@ -124,14 +116,15 @@ const AIWriting = () => {
   const [showNoCreditsModal, setShowNoCreditsModal] = useState(false);
   const fetchCalled = useRef(false);
 
-  
   const [userData, setUserData] = useState<UserData>({
     id: '',
     name: 'User',
     email: 'user@email.com',
     role: 'user',
     credits: 0,
-    initials: 'U'
+    initials: 'U',
+    creditsBlocked: false,
+    creditsBlockedReason: null
   });
 
   useEffect(() => {
@@ -141,7 +134,6 @@ const AIWriting = () => {
     }
   }, []);
 
-  
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -161,7 +153,6 @@ const AIWriting = () => {
         if (response.data.success && response.data.data) {
           const data = response.data.data;
 
-          
           const nameParts = data.name?.split(' ') || ['U'];
           const initials = nameParts
             .map((part: string) => part.charAt(0).toUpperCase())
@@ -178,22 +169,22 @@ const AIWriting = () => {
             avatar: data.avatar || data.profileImage,
             theme: data.theme || 'light',
             credits: credits,
-            initials: initials || 'U'
+            initials: initials || 'U',
+            creditsBlocked: data.creditsBlocked === true,
+            creditsBlockedReason: data.creditsBlockedReason || null,
           });
 
-          
-          if (credits === 0) {
+          if (credits === 0 && !data.creditsBlocked) {
             setShowNoCreditsModal(true);
           }
 
-          
           if (data.theme) {
             localStorage.setItem('theme', data.theme);
           }
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
-        
+
         const savedName = localStorage.getItem('userName') || 'User';
         const savedEmail = localStorage.getItem('userEmail') || 'user@email.com';
         const savedCredits = parseInt(localStorage.getItem('userCredits') || '0');
@@ -207,7 +198,6 @@ const AIWriting = () => {
           initials: savedInitials
         }));
 
-        
         if (savedCredits === 0) {
           setShowNoCreditsModal(true);
         }
@@ -218,10 +208,6 @@ const AIWriting = () => {
 
     fetchUserData();
   }, []);
-
-  
-  
-  
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -261,10 +247,6 @@ const AIWriting = () => {
     }
   };
 
-  
-  
-  
-
   const handleDelete = async (id: string) => {
     setDeleteLoading(id);
     try {
@@ -296,10 +278,6 @@ const AIWriting = () => {
     }
   };
 
-  
-  
-  
-
   const getIconForType = (type: string): React.ReactNode => {
     const iconMap: Record<string, React.ReactNode> = {
       'policy-brief': <BookOpen className="w-4 h-4 text-[#C85A32]" />,
@@ -314,10 +292,6 @@ const AIWriting = () => {
     return iconMap[type] || <FileText className="w-4 h-4 text-[#C85A32]" />;
   };
 
-  
-  
-  
-
   const getTypeLabel = (type: string): string => {
     const labelMap: Record<string, string> = {
       'policy-brief': 'Policy Brief',
@@ -327,14 +301,10 @@ const AIWriting = () => {
       'impact-report': 'Impact Report',
       'summary': 'Summary',
       'blog-post': 'Blog Post',
-      'media-story': 'Media Story',
+      'media-story': 'News Article',
     };
-    return labelMap[type] || type;
+    return labelMap[type] || type || 'Document';
   };
-
-  
-  
-  
 
   const getToneLabel = (tone: string): string => {
     const labelMap: Record<string, string> = {
@@ -344,59 +314,61 @@ const AIWriting = () => {
       'persuasive': 'Persuasive',
       'neutral': 'Neutral',
     };
-    return labelMap[tone] || tone;
+    return labelMap[tone] || tone || 'Neutral';
   };
 
-  
-  
-  
+  const getStatusMeta = (status: string) => {
+    const normalized = (status || 'Pending').trim().toLowerCase();
 
-  const getStatusColor = (status: string): string => {
-    switch (status) {
-      case 'Approved':
-        return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800';
-      case 'Pending':
-        return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
-      case 'Rejected':
-        return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800';
-      case 'Published':
-        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800';
+    switch (normalized) {
+      case 'approved':
+        return {
+          label: 'Approved',
+          className:
+            'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-200 dark:border-emerald-700',
+          icon: <CheckCircle className="w-3.5 h-3.5 shrink-0 text-emerald-700 dark:text-emerald-300" />,
+        };
+      case 'pending':
+        return {
+          label: 'Pending',
+          className:
+            'bg-amber-100 text-amber-950 border-amber-300 dark:bg-amber-950/80 dark:text-amber-200 dark:border-amber-700',
+          icon: <Clock className="w-3.5 h-3.5 shrink-0 text-amber-800 dark:text-amber-300" />,
+        };
+      case 'rejected':
+        return {
+          label: 'Rejected',
+          className:
+            'bg-rose-100 text-rose-950 border-rose-300 dark:bg-rose-950/80 dark:text-rose-200 dark:border-rose-700',
+          icon: <XCircle className="w-3.5 h-3.5 shrink-0 text-rose-700 dark:text-rose-300" />,
+        };
+      case 'published':
+        return {
+          label: 'Published',
+          className:
+            'bg-blue-100 text-blue-950 border-blue-300 dark:bg-blue-950/80 dark:text-blue-200 dark:border-blue-700',
+          icon: <CheckCircle className="w-3.5 h-3.5 shrink-0 text-blue-700 dark:text-blue-300" />,
+        };
       default:
-        return 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-600';
+        return {
+          label: status || 'Draft',
+          className:
+            'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600',
+          icon: <Clock className="w-3.5 h-3.5 shrink-0 text-slate-700 dark:text-slate-300" />,
+        };
     }
   };
-
-  
-  
-  
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Approved':
-        return <CheckCircle className="w-3.5 h-3.5" />;
-      case 'Published':
-        return <CheckCircle className="w-3.5 h-3.5" />;
-      default:
-        return <Clock className="w-3.5 h-3.5" />;
-    }
-  };
-
-  
-  
-  
 
   const formatDate = (dateString: string): string => {
+    if (!dateString) return '—';
     const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return '—';
     return date.toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
-
-  
-  
-  
 
   const getFilteredDocuments = () => {
     let filtered = documents;
@@ -413,13 +385,17 @@ const AIWriting = () => {
 
   const filteredDocuments = getFilteredDocuments();
 
-  
-  
-  
-
   const handleCreate = () => {
-    
-    if (userData.credits === 0) {
+    if (userData.creditsBlocked) {
+      setError(
+        userData.creditsBlockedReason
+          ? `Credits blocked by admin: ${userData.creditsBlockedReason}`
+          : 'Your credits are blocked by the admin. Please contact support.'
+      );
+      setTimeout(() => setError(null), 4000);
+      return;
+    }
+    if ((userData.credits ?? 0) <= 0) {
       setShowNoCreditsModal(true);
       return;
     }
@@ -440,33 +416,29 @@ const AIWriting = () => {
     navigate('/user/add-credits');
   };
 
-  
-  
-  
-
   const NoCreditsModal = () => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-xl">
         <div className="text-center">
           <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+            <AlertTriangle className="w-8 h-8 text-amber-700 dark:text-amber-400" />
           </div>
           <h3 className="text-xl font-semibold text-[#0F2D63] dark:text-white mb-2">
             No Credits Available
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-            You have <span className="font-bold text-red-500">0 credits</span>. Please top up your credits to create AI Writing documents.
+            You have <span className="font-bold text-red-600 dark:text-red-400">0 credits</span>. Please top up your credits to create AI Writing documents.
           </p>
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mb-6">
-            <p className="text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
-              <CreditCard className="w-4 h-4" />
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-800 rounded-xl p-3 mb-6">
+            <p className="text-xs text-amber-900 dark:text-amber-200 flex items-center justify-center gap-2 font-medium">
+              <CreditCard className="w-4 h-4 shrink-0" />
               Each AI Writing generation costs 1 credit
             </p>
           </div>
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => setShowNoCreditsModal(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
             >
               Close
             </button>
@@ -483,10 +455,6 @@ const AIWriting = () => {
     </div>
   );
 
-  
-  
-  
-
   const DeleteModal = ({ id, title }: { id: string; title: string }) => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-xl">
@@ -497,13 +465,13 @@ const AIWriting = () => {
           <h3 className="text-lg font-semibold text-[#0F2D63] dark:text-white mb-2">
             Delete Document
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
             Are you sure you want to delete <strong className="text-[#0F2D63] dark:text-white">{title}</strong>? This action cannot be undone.
           </p>
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => setShowDeleteModal(null)}
-              className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
             >
               Cancel
             </button>
@@ -525,28 +493,22 @@ const AIWriting = () => {
     </div>
   );
 
-  
-  
-  
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-4 sm:p-6 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 text-[#C85A32] animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400">Loading documents...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading documents...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-4 sm:p-6">
       <div className="max-w-[1500px] mx-auto">
-        
         {showNoCreditsModal && <NoCreditsModal />}
 
-        
         {showDeleteModal && (
           <DeleteModal
             id={showDeleteModal}
@@ -554,70 +516,105 @@ const AIWriting = () => {
           />
         )}
 
-        
-        <div className="flex items-start justify-between mb-6">
-          <div>
+  
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+          <div className="min-w-0">
             <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-1">
               AI Tools
             </p>
             <h1 className="text-2xl font-['Roboto'] font-bold text-[#0F2D63] dark:text-white">
               AI Writing
             </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+            <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
               Generate and manage institutional communication narratives
             </p>
-            
+
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-xs text-gray-500 dark:text-gray-400">
+              <span className="text-xs text-gray-600 dark:text-gray-300">
                 Credits:
               </span>
-              <span className={`text-sm font-semibold ${userData.credits === 0 ? 'text-red-500' : 'text-[#0F2D63] dark:text-white'}`}>
+              <span className={`text-sm font-semibold ${userData.credits === 0 ? 'text-red-600 dark:text-red-400' : 'text-[#0F2D63] dark:text-white'}`}>
                 {userData.credits}
               </span>
               {userData.credits === 0 && (
                 <button
                   onClick={handleTopUp}
-                  className="text-xs text-[#C85A32] hover:underline font-medium"
+                  className="text-xs text-[#C85A32] hover:underline font-semibold"
                 >
                   Top Up
                 </button>
               )}
             </div>
-                  
-      {(userData.credits ?? 0) < 10 && (
-        <div className="flex items-center gap-1.5 mt-1">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
-          <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-            {userData.credits === 0 
-              ? 'No credits available. Please top up to create AI Speech.' 
-              : `Low credits (${userData.credits}/10). Please top up to continue.`}
-          </span>
-        </div>
-      )}
+
+            {userData.creditsBlocked && (
+              <div className="flex items-center gap-1.5 mt-1">
+                <AlertTriangle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                <span className="text-xs text-red-700 dark:text-red-300 font-medium">
+                  Credits blocked by admin
+                </span>
+              </div>
+            )}
+
+            {!userData.creditsBlocked && (userData.credits ?? 0) < 10 && (userData.credits ?? 0) > 0 && (
+              <div className="flex items-center gap-1.5 mt-1">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+                <span className="text-xs text-amber-900 dark:text-amber-200 font-medium">
+                  Low credits ({userData.credits}/10). Please top up to continue.
+                </span>
+              </div>
+            )}
           </div>
+
           <button
             onClick={handleCreate}
-            disabled={(userData.credits ?? 10) <= 10}
-            className={`flex items-center gap-2 text-white rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${(userData.credits ?? 10) <= 10
+            disabled={userData.creditsBlocked === true || (userData.credits ?? 0) <= 0}
+            title={
+              userData.creditsBlocked
+                ? `Credits blocked by admin${userData.creditsBlockedReason ? `: ${userData.creditsBlockedReason}` : ''}`
+                : undefined
+            }
+            className={`self-start sm:self-auto shrink-0 flex items-center gap-2 text-white rounded-xl px-4 py-2.5 text-sm font-semibold transition-all whitespace-nowrap ${
+              userData.creditsBlocked
+                ? 'bg-gray-400 cursor-not-allowed opacity-40 blur-[1px]'
+                : (userData.credits ?? 0) <= 0
                 ? 'bg-gray-400 cursor-not-allowed opacity-50'
                 : 'bg-[#C85A32] hover:bg-[#a8472a]'
-              }`}
+            }`}
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 shrink-0" />
             Create AI Writing
           </button>
         </div>
 
-        
-        {userData.credits === 0 && (
-          <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 mb-4">
-            <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-            <p className="text-sm text-amber-700 dark:text-amber-300 flex-1">
-              <strong>No credits available.</strong> Please top up your credits to create new AI Writing documents.
-            </p>
+    
+        {userData.creditsBlocked && (
+          <div className="flex items-start gap-3 bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-800 rounded-xl px-4 py-3 mb-4">
+            <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-red-800 dark:text-red-200 font-semibold">
+                Your credits are blocked by the administrator.
+              </p>
+              <p className="text-xs text-red-700 dark:text-red-300 mt-0.5">
+                {userData.creditsBlockedReason
+                  ? `Reason: ${userData.creditsBlockedReason}`
+                  : 'You cannot create new AI Writing documents until the block is lifted.'}
+              </p>
+            </div>
+          </div>
+        )}
+
+     
+        {!userData.creditsBlocked && (userData.credits ?? 0) === 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-800 rounded-xl px-4 py-3 mb-4">
+            <div className="flex items-start sm:items-center gap-3 flex-1">
+              <AlertTriangle className="w-5 h-5 text-amber-700 dark:text-amber-400 flex-shrink-0 mt-0.5 sm:mt-0" />
+              <p className="text-sm text-amber-950 dark:text-amber-200">
+                <strong>No credits available.</strong> Please top up your credits to create new AI Writing documents.
+              </p>
+            </div>
             <button
               onClick={handleTopUp}
-              className="flex items-center gap-2 px-3 py-1.5 bg-[#C85A32] hover:bg-[#a8472a] text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
+              className="self-start sm:self-auto flex items-center gap-2 px-3 py-1.5 bg-[#C85A32] hover:bg-[#a8472a] text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
             >
               <CreditCard className="w-3.5 h-3.5" />
               Top Up Now
@@ -625,181 +622,310 @@ const AIWriting = () => {
           </div>
         )}
 
-        
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-5">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700 shadow-sm p-3.5 sm:p-4 mb-5">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search documents by title, type or content…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-[#C85A32] bg-gray-50 dark:bg-gray-900 dark:text-white placeholder-gray-400 transition-all"
+              className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-[#C85A32] bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
             />
           </div>
         </div>
 
-        
+  
         {successMessage && (
-          <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm mb-4">
-            <CheckCircle className="w-4 h-4 flex-shrink-0" />
+          <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 px-4 py-3 rounded-xl text-sm font-medium mb-4">
+            <CheckCircle className="w-4 h-4 flex-shrink-0 text-emerald-700 dark:text-emerald-300" />
             <span>{successMessage}</span>
           </div>
         )}
         {error && (
-          <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-4">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <div className="flex items-center gap-2 bg-red-50 dark:bg-red-950/60 border border-red-300 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-xl text-sm font-medium mb-4">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-700 dark:text-red-300" />
             <span>{error}</span>
           </div>
         )}
 
+     
+        {filteredDocuments.length > 0 ? (
+          <>
+         
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4 xl:hidden">
+              {filteredDocuments.map((doc) => {
+                const wordCount = doc.metadata?.wordCount || doc.charCount || 0;
+                const statusMeta = getStatusMeta(doc.status);
+
+                return (
+                  <article
+                    key={doc._id}
+                    onClick={() => handleView(doc)}
+                    className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700 shadow-sm p-4 hover:border-[#C85A32]/50 transition-all cursor-pointer flex flex-col justify-between gap-3.5"
+                  >
+            
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <div className="w-9 h-9 bg-[#FFF8F5] dark:bg-[#C85A32]/15 border border-[#C85A32]/15 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                          {getIconForType(doc.metadata?.type || '')}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-sm font-semibold text-[#0F2D63] dark:text-white line-clamp-2 leading-snug break-words">
+                            {doc.title}
+                          </h3>
+                          {doc.identifier && (
+                            <p className="text-[11px] font-mono text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                              {doc.identifier}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <span
+                        className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full border whitespace-nowrap inline-flex items-center gap-1.5 ${statusMeta.className}`}
+                      >
+                        {statusMeta.icon}
+                        <span>{statusMeta.label}</span>
+                      </span>
+                    </div>
+
+               
+                    <div className="grid grid-cols-3 gap-2 bg-gray-50/90 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700/80 rounded-xl px-3 py-2.5">
+                      <div className="min-w-0">
+                        <span className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                          Type
+                        </span>
+                        <span className="block text-xs font-medium text-gray-800 dark:text-gray-200 truncate mt-0.5">
+                          {getTypeLabel(doc.metadata?.type || '')}
+                        </span>
+                      </div>
+
+                      <div className="min-w-0 border-l border-gray-200/80 dark:border-gray-700 pl-2.5">
+                        <span className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                          Tone
+                        </span>
+                        <span className="block text-xs font-medium text-gray-800 dark:text-gray-200 truncate mt-0.5">
+                          {getToneLabel(doc.metadata?.tone || 'neutral')}
+                        </span>
+                      </div>
+
+                      <div className="min-w-0 border-l border-gray-200/80 dark:border-gray-700 pl-2.5">
+                        <span className="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                          Words
+                        </span>
+                        <span className="block text-xs font-semibold text-gray-900 dark:text-gray-100 tabular-nums mt-0.5">
+                          {wordCount.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+
+                
+                    <div className="flex items-center justify-between pt-2.5 border-t border-gray-100 dark:border-gray-700/80 gap-2">
+                      <div className="text-xs font-medium text-gray-600 dark:text-gray-300 flex items-center gap-1.5 whitespace-nowrap">
+                        <Calendar className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                        <span>{formatDate(doc.createdAt)}</span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleView(doc);
+                          }}
+                          className="h-9 inline-flex items-center gap-1.5 px-3 text-xs font-semibold rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200/80 dark:hover:bg-gray-600 text-[#0F2D63] dark:text-white transition-colors"
+                          title="View Document"
+                        >
+                          <Eye className="w-3.5 h-3.5 shrink-0" />
+                          <span>View</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopyContent(doc.content);
+                          }}
+                          aria-label="Copy document content"
+                          className="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200/80 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
+                          title="Copy Content"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowDeleteModal(doc._id);
+                          }}
+                          aria-label="Delete document"
+                          className="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-red-100 dark:hover:bg-red-900/40 text-gray-700 dark:text-gray-200 hover:text-red-700 dark:hover:text-red-300 transition-colors"
+                          title="Delete Document"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="hidden xl:block bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
         
-        
-        
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-          
-          <div className="overflow-x-auto w-full">
-            <div className="min-w-[900px]">
-              
-              <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-                <div className="col-span-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+              <div className="grid grid-cols-[minmax(240px,3fr)_135px_115px_90px_135px_130px_124px] gap-4 px-5 py-3.5 border-b border-gray-200/80 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 items-center">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
                   Document
                 </div>
-                <div className="col-span-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
                   Type
                 </div>
-                <div className="col-span-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
                   Tone
                 </div>
-                <div className="col-span-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-right">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider text-right whitespace-nowrap">
                   Words
                 </div>
-                <div className="col-span-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider text-center whitespace-nowrap">
                   Status
                 </div>
-                <div className="col-span-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
                   Created
                 </div>
-                <div className="col-span-1"></div>
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider text-right whitespace-nowrap">
+                  Actions
+                </div>
               </div>
 
-              
-              {filteredDocuments.length > 0 ? (
-                filteredDocuments.map((doc, index) => (
+           
+              {filteredDocuments.map((doc, index) => {
+                const wordCount = doc.metadata?.wordCount || doc.charCount || 0;
+                const statusMeta = getStatusMeta(doc.status);
+
+                return (
                   <div
                     key={doc._id}
-                    className={`grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${index < filteredDocuments.length - 1 ? 'border-b border-gray-50 dark:border-gray-700/50' : ''
-                      }`}
+                    className={`grid grid-cols-[minmax(240px,3fr)_135px_115px_90px_135px_130px_124px] gap-4 px-5 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${
+                      index < filteredDocuments.length - 1 ? 'border-b border-gray-100 dark:border-gray-700/60' : ''
+                    }`}
                     onClick={() => handleView(doc)}
                   >
-                    
-                    <div className="col-span-4 flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 bg-[#FFF8F5] dark:bg-[#C85A32]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 bg-[#FFF8F5] dark:bg-[#C85A32]/15 rounded-lg flex items-center justify-center flex-shrink-0">
                         {getIconForType(doc.metadata?.type || '')}
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-[#0F2D63] dark:text-white truncate">
                           {doc.title}
                         </p>
-                        <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate">
+                        <p className="text-[11px] font-mono text-gray-500 dark:text-gray-400 truncate">
                           {doc.identifier}
                         </p>
                       </div>
                     </div>
 
-                    
-                    <div className="col-span-2">
-                      <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-lg">
+              
+                    <div className="whitespace-nowrap">
+                      <span className="inline-block text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-2.5 py-1 rounded-lg">
                         {getTypeLabel(doc.metadata?.type || '')}
                       </span>
                     </div>
 
-                    
-                    <div className="col-span-2 text-xs text-gray-500 dark:text-gray-400">
+                    <div className="text-xs font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap">
                       {getToneLabel(doc.metadata?.tone || 'neutral')}
                     </div>
 
-                    
-                    <div className="col-span-1 text-xs text-gray-500 dark:text-gray-400 text-right">
-                      {doc.metadata?.wordCount || doc.charCount || 0}
+                  
+                    <div className="text-xs font-semibold text-gray-700 dark:text-gray-200 text-right tabular-nums whitespace-nowrap">
+                      {wordCount.toLocaleString()}
                     </div>
 
-                    
-                    <div className="col-span-1 flex items-center justify-center">
-                      <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full border ${getStatusColor(doc.status)} flex items-center gap-1`}>
-                        {getStatusIcon(doc.status)}
-                        {doc.status}
+                  
+                    <div className="flex items-center justify-center whitespace-nowrap">
+                      <span
+                        className={`text-xs font-semibold px-2.5 py-1 rounded-full border inline-flex items-center gap-1.5 ${statusMeta.className}`}
+                      >
+                        {statusMeta.icon}
+                        <span>{statusMeta.label}</span>
                       </span>
                     </div>
 
-                    
-                    <div className="col-span-1 text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {formatDate(doc.createdAt)}
+              
+                    <div className="text-xs font-medium text-gray-600 dark:text-gray-300 flex items-center gap-1.5 whitespace-nowrap">
+                      <Calendar className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                      <span>{formatDate(doc.createdAt)}</span>
                     </div>
 
-                    
-                    <div className="col-span-1 flex items-center justify-end gap-1">
+                   
+                    <div className="flex items-center justify-end gap-1.5">
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleView(doc);
                         }}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
+                        aria-label="View document"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
                         title="View"
                       >
-                        <Eye className="w-3.5 h-3.5" />
+                        <Eye className="w-4 h-4" />
                       </button>
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleCopyContent(doc.content);
                         }}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
+                        aria-label="Copy document content"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-[#0F2D63] dark:hover:text-[#C85A32] transition-colors"
                         title="Copy Content"
                       >
-                        <Copy className="w-3.5 h-3.5" />
+                        <Copy className="w-4 h-4" />
                       </button>
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowDeleteModal(doc._id);
                         }}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                        aria-label="Delete document"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                         title="Delete"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FileText className="w-10 h-10 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-[#0F2D63] dark:text-white mb-2">
-                    No documents found
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    {searchTerm ? `No documents match "${searchTerm}"` : 'Create your first AI Writing document'}
-                  </p>
-                  {!searchTerm && (
-                    <button
-                      onClick={handleCreate}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#C85A32] text-white text-sm font-semibold rounded-xl hover:bg-[#a8472a] transition-colors"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Create AI Writing
-                    </button>
-                  )}
-                </div>
-              )}
+                );
+              })}
             </div>
+          </>
+        ) : (
+          /* Empty State */
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700 shadow-sm text-center py-12 px-4">
+            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-[#0F2D63] dark:text-white mb-2">
+              No documents found
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              {searchTerm ? `No documents match "${searchTerm}"` : 'Create your first AI Writing document'}
+            </p>
+            {!searchTerm && (
+              <button
+                onClick={handleCreate}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#C85A32] text-white text-sm font-semibold rounded-xl hover:bg-[#a8472a] transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Create AI Writing
+              </button>
+            )}
           </div>
-        </div>
+        )}
 
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 px-1">
+        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-3 px-1">
           {filteredDocuments.length} {filteredDocuments.length === 1 ? 'document' : 'documents'} found
         </p>
       </div>

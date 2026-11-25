@@ -18,11 +18,19 @@ import {
   X,
   Plus,
   Coins,
-  AlertCircle
+  AlertCircle,
+  BookOpen
 } from 'lucide-react';
 
+interface GlobalDocument {
+  id: string;
+  title: string;
+  category: string;
+  version: number;
+}
+
 interface ResultData {
-  id?: string; // CHANGED: database id (needed to save edits)
+  id?: string;
   title: string;
   type: string;
   tone: string;
@@ -33,6 +41,7 @@ interface ResultData {
   author: string;
   creditsUsed?: number;
   creditsRemaining?: number;
+  globalDocuments?: GlobalDocument[];
 }
 
 interface UserData {
@@ -44,7 +53,7 @@ interface UserData {
   initials?: string;
 }
 
-// CHANGED: "policy-brief" -> "Policy Brief" for display
+
 const formatLabel = (value: string) =>
   (value || '')
     .split('-')
@@ -55,8 +64,7 @@ const Result = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // CHANGED: no more fake mock result. If the page is opened without generated data
-  // (refresh / direct URL) the "No content found" screen is shown instead.
+
   const [resultData, setResultData] = useState<ResultData | null>(
     (location.state?.data as ResultData) || null
   );
@@ -72,14 +80,14 @@ const Result = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'; // CHANGED: was 5000 (all other pages use 8000)
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'; 
 
   
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(resultData?.title || '');
   const [editContent, setEditContent] = useState(resultData?.content || '');
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null); // CHANGED: replaces alert()
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   
   const fetchUpdatedUserData = async () => {
@@ -175,7 +183,7 @@ const Result = () => {
     setIsEditing(!isEditing);
   };
 
-  // CHANGED: edits are now really saved to the database (before: setTimeout + local state only, lost on refresh)
+
   const handleSaveChanges = async () => {
     if (!resultData) return;
 
@@ -275,6 +283,7 @@ const Result = () => {
   }
 
   const fullMarkdownContent = getFullMarkdownContent();
+  const globalDocuments = resultData.globalDocuments || [];
 
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
@@ -474,6 +483,38 @@ const Result = () => {
           </div>
         </div>
 
+        {/* Reference Documents Used */}
+        {globalDocuments.length > 0 && (
+          <div className="mt-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <BookOpen className="w-4 h-4 text-[#C85A32]" />
+              <h4 className="text-sm font-semibold text-[#0F2D63] dark:text-white">
+                Reference Documents Used ({globalDocuments.length})
+              </h4>
+            </div>
+            <div className="space-y-2">
+              {globalDocuments.map((gd) => (
+                <div
+                  key={gd.id}
+                  className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-700"
+                >
+                  <div className="w-8 h-8 bg-[#FFF8F5] dark:bg-[#C85A32]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <BookOpen className="w-4 h-4 text-[#C85A32]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-[#0F2D63] dark:text-white truncate">
+                      {gd.title}
+                    </p>
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                      {formatLabel(gd.category)} · Version {gd.version}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         
         <div className="mt-6 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 flex items-start gap-3">
           <span className="text-amber-500 text-lg flex-shrink-0 mt-0.5">⚠️</span>
@@ -518,6 +559,5 @@ const Result = () => {
   );
 };
 
-// CHANGED: getMockResult() removed - fake "Annual Report Executive Summary" content was shown whenever the page was opened without data.
 
 export default Result;

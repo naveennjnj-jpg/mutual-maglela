@@ -1,4 +1,3 @@
-// Global mocks, loaded for every test file via vitest.config.ts -> setupFiles.
 import { vi } from "vitest";
 
 vi.mock("@/context/AuthContext", async () => {

@@ -5,8 +5,7 @@ import fs from "fs";
 
 const ASSET_RE = /\.(png|jpe?g|svg|webp|gif|avif|ico|mp4|webm|pdf)$/i;
 
-// Resolve any image/media import that is missing on disk to a stub string,
-// so tests don't fail on assets that aren't part of the checkout.
+
 const stubMissingAssets = () => ({
   name: "stub-missing-assets",
   enforce: "pre" as const,
@@ -30,7 +29,7 @@ export default defineConfig({
   plugins: [stubMissingAssets(), react()],
   resolve: {
     alias: [
-      // Only used when src/components/ui is not present (e.g. partial checkout)
+     
       ...(hasRealUi
         ? []
         : [

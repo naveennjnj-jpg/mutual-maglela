@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-     console.log('Loading user with token:', token);
+  
 
       if (!token) {
         setLoading(false);
@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await axios.get<AuthResponse>('/api/auth/me', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('User data loaded:', response);
+  
       
       setUser(response.data.data);
       setIsAuthenticated(true);

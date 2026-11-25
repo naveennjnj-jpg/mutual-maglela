@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -30,10 +29,6 @@ import {
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 
-
-
-
-
 interface Project {
   _id: string;
   identifier: string;
@@ -59,17 +54,9 @@ interface ApiResponse {
   data?: Project[];
 }
 
-
-
-
-
 const Projects = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-
-  
-  
-  
 
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("ai-writing");
@@ -89,10 +76,6 @@ const Projects = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  
-  
-  
-
   const mainTabs = [
     { id: "ai-writing", label: "AI Writing", icon: WandSparkles, iconColor: "text-purple-600" },
     { id: "ai-speech", label: "AI Speech", icon: Mic, iconColor: "text-blue-600" },
@@ -104,10 +87,6 @@ const Projects = () => {
     { id: "revision", label: "In Revision", icon: CircleAlert },
     { id: "completed", label: "Completed", icon: CircleCheck },
   ];
-
-  
-  
-  
 
   useEffect(() => {
     fetchProjects();
@@ -127,9 +106,7 @@ const Projects = () => {
       }
 
       const response = await axios.get<ApiResponse>(`${API_URL}/api/auth/projects`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.data.success) {
@@ -151,38 +128,26 @@ const Projects = () => {
     }
   };
 
-  
-  
-  
-
   const uploadDocument = async (file: File): Promise<string> => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("You must be logged in to upload files.");
-      }
+      if (!token) throw new Error("You must be logged in to upload files.");
 
       const formData = new FormData();
       formData.append("document", file);
 
-      const response = await axios.post(
-        `${API_URL}/api/auth/upload-document`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-          onUploadProgress: (progressEvent) => {
-            if (progressEvent.total) {
-              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-              setUploadProgress(percentCompleted);
-            }
-          },
-        }
-      );
-
-      console.log("Upload Response:", response.data);
+      const response = await axios.post(`${API_URL}/api/auth/upload-document`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setUploadProgress(percentCompleted);
+          }
+        },
+      });
 
       if (!response.data.success) {
         throw new Error(response.data.message || "Document upload failed");
@@ -195,14 +160,10 @@ const Projects = () => {
     }
   };
 
-  
-  
-  
-
   const updateProjectStatus = async (
-    projectId: string, 
-    newStatus: string, 
-    note?: string, 
+    projectId: string,
+    newStatus: string,
+    note?: string,
     attachment?: File | null
   ) => {
     setIsUpdating(true);
@@ -219,7 +180,6 @@ const Projects = () => {
 
       let attachmentUrl = "";
 
-      
       if (attachment) {
         try {
           attachmentUrl = await uploadDocument(attachment);
@@ -230,38 +190,22 @@ const Projects = () => {
         }
       }
 
-      
-      const payload: any = {
-        status: newStatus,
-      };
+      const payload: any = { status: newStatus };
+      if (note) payload.feedbacknote = note;
+      if (attachmentUrl) payload.feedbackadminattachment = attachmentUrl;
 
-      if (note) {
-        payload.feedbacknote = note;
-      }
-
-      if (attachmentUrl) {
-        payload.feedbackadminattachment = attachmentUrl;
-      }
-
-      const response = await axios.put(
-        `${API_URL}/api/admin/projects/${projectId}`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.put(`${API_URL}/api/admin/projects/${projectId}`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       if (response.data.success) {
-        
         await fetchProjects();
-        
         setShowFeedbackModal(false);
         setShowDetailView(false);
         setSelectedProject(null);
-        
         setFeedbackNote("");
         setFeedbackAttachment(null);
         setFeedbackAction(null);
@@ -279,10 +223,6 @@ const Projects = () => {
       setIsUpdating(false);
     }
   };
-
-  
-  
-  
 
   const handleCreateProject = () => {
     navigate("/user/projects/create");
@@ -307,7 +247,6 @@ const Projects = () => {
     setSelectedProject(null);
   };
 
-  
   const handleApprove = () => {
     if (selectedProject) {
       updateProjectStatus(selectedProject._id, "Completed");
@@ -327,37 +266,32 @@ const Projects = () => {
   const handleSubmitFeedback = async () => {
     if (!selectedProject || !feedbackAction) return;
 
-    
     if (!feedbackNote.trim()) {
       setError("Please enter a note");
       return;
     }
 
     let newStatus = "";
-    if (feedbackAction === "feedback") {
-      newStatus = "In Progress";
-    } else if (feedbackAction === "reject") {
-      newStatus = "On Hold";
-    }
+    if (feedbackAction === "feedback") newStatus = "In Progress";
+    else if (feedbackAction === "reject") newStatus = "On Hold";
 
-    await updateProjectStatus(
-      selectedProject._id,
-      newStatus,
-      feedbackNote,
-      feedbackAttachment
-    );
+    await updateProjectStatus(selectedProject._id, newStatus, feedbackNote, feedbackAttachment);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      
+
       if (file.size > 10 * 1024 * 1024) {
         setError("File size must be less than 10MB");
         return;
       }
-      
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+      const allowedTypes = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf', 'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
       if (!allowedTypes.includes(file.type)) {
         setError("Please upload a valid file (JPG, PNG, GIF, WebP, PDF, DOC, DOCX)");
         return;
@@ -372,22 +306,14 @@ const Projects = () => {
     setUploadProgress(0);
   };
 
-  
-  
-  
-
   const getFilteredProjects = () => {
     let filtered = projects;
 
-    
     filtered = filtered.filter(p => p.proceedOption === activeTab);
 
-    
     if (statusFilter === "active") {
-      filtered = filtered.filter(p => 
-        p.status === "Pending" || 
-        p.status === "In Progress" || 
-        p.status === "On Hold"
+      filtered = filtered.filter(p =>
+        p.status === "Pending" || p.status === "In Progress" || p.status === "On Hold"
       );
     } else if (statusFilter === "revision") {
       filtered = filtered.filter(p => p.status === "Under Review");
@@ -395,7 +321,6 @@ const Projects = () => {
       filtered = filtered.filter(p => p.status === "Completed" || p.status === "publish");
     }
 
-    
     if (searchTerm) {
       filtered = filtered.filter((project) =>
         project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -409,22 +334,16 @@ const Projects = () => {
 
   const filteredProjects = getFilteredProjects();
 
-  
-  
-  
-
   const getMainTabCount = (tabId: string) => {
     return projects.filter(p => p.proceedOption === tabId).length;
   };
 
   const getStatusTabCount = (statusId: string) => {
     const filtered = projects.filter(p => p.proceedOption === activeTab);
-    
+
     if (statusId === "active") {
-      return filtered.filter(p => 
-        p.status === "Pending" || 
-        p.status === "In Progress" || 
-        p.status === "On Hold"
+      return filtered.filter(p =>
+        p.status === "Pending" || p.status === "In Progress" || p.status === "On Hold"
       ).length;
     } else if (statusId === "revision") {
       return filtered.filter(p => p.status === "Under Review").length;
@@ -433,10 +352,6 @@ const Projects = () => {
     }
     return 0;
   };
-
-  
-  
-  
 
   const getFullAttachmentUrl = (attachmentPath: string | null) => {
     if (!attachmentPath) return null;
@@ -458,52 +373,30 @@ const Projects = () => {
   const getFileIcon = (filename: string) => {
     const ext = getFileExtension(filename);
     const iconMap: Record<string, string> = {
-      'pdf': '📄',
-      'doc': '📝',
-      'docx': '📝',
-      'xls': '📊',
-      'xlsx': '📊',
-      'ppt': '📽️',
-      'pptx': '📽️',
-      'txt': '📃',
-      'zip': '📦',
-      'rar': '📦',
-      'jpg': '🖼️',
-      'jpeg': '🖼️',
-      'png': '🖼️',
-      'gif': '🖼️',
-      'webp': '🖼️',
+      'pdf': '📄', 'doc': '📝', 'docx': '📝', 'xls': '📊', 'xlsx': '📊',
+      'ppt': '📽️', 'pptx': '📽️', 'txt': '📃', 'zip': '📦', 'rar': '📦',
+      'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️', 'webp': '🖼️',
     };
     return iconMap[ext] || '📎';
   };
 
   const getPriorityStyles = (priority: string) => {
     switch (priority) {
-      case "high":
-        return "bg-red-50 text-red-500";
-      case "medium":
-        return "bg-amber-50 text-amber-600";
-      case "low":
-        return "bg-green-50 text-green-500";
-      case "critical":
-        return "bg-purple-50 text-purple-600";
-      default:
-        return "bg-gray-50 text-gray-500";
+      case "high": return "bg-red-50 text-red-500";
+      case "medium": return "bg-amber-50 text-amber-600";
+      case "low": return "bg-green-50 text-green-500";
+      case "critical": return "bg-purple-50 text-purple-600";
+      default: return "bg-gray-50 text-gray-500";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "high":
-        return "text-red-500";
-      case "medium":
-        return "text-amber-600";
-      case "low":
-        return "text-green-500";
-      case "critical":
-        return "text-purple-600";
-      default:
-        return "text-gray-500";
+      case "high": return "text-red-500";
+      case "medium": return "text-amber-600";
+      case "low": return "text-green-500";
+      case "critical": return "text-purple-600";
+      default: return "text-gray-500";
     }
   };
 
@@ -539,69 +432,33 @@ const Projects = () => {
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string; className: string; icon: JSX.Element }> = {
-      "Pending": { 
-        label: "Pending", 
-        className: "bg-gray-100 text-gray-600",
-        icon: <Clock className="w-3 h-3" />
-      },
-      "In Progress": { 
-        label: "In Progress", 
-        className: "bg-blue-100 text-blue-600",
-        icon: <Clock className="w-3 h-3" />
-      },
-      "Under Review": { 
-        label: "In Revision", 
-        className: "bg-amber-50 border-amber-100 text-amber-700",
-        icon: <CircleAlert className="w-3 h-3" />
-      },
-      "Completed": { 
-        label: "Completed", 
-        className: "bg-green-100 text-green-600",
-        icon: <CircleCheck className="w-3 h-3" />
-      },
-      "On Hold": { 
-        label: "On Hold", 
-        className: "bg-yellow-100 text-yellow-600",
-        icon: <Clock className="w-3 h-3" />
-      },
-      "Cancelled": { 
-        label: "Cancelled", 
-        className: "bg-red-100 text-red-600",
-        icon: <CircleAlert className="w-3 h-3" />
-      },
-      "publish": { 
-        label: "Published", 
-        className: "bg-emerald-100 text-emerald-600",
-        icon: <CircleCheck className="w-3 h-3" />
-      },
+      "Pending": { label: "Pending", className: "bg-gray-100 text-gray-600", icon: <Clock className="w-3 h-3" /> },
+      "In Progress": { label: "In Progress", className: "bg-blue-100 text-blue-600", icon: <Clock className="w-3 h-3" /> },
+      "Under Review": { label: "In Revision", className: "bg-amber-50 border-amber-100 text-amber-700", icon: <CircleAlert className="w-3 h-3" /> },
+      "Completed": { label: "Completed", className: "bg-green-100 text-green-600", icon: <CircleCheck className="w-3 h-3" /> },
+      "On Hold": { label: "On Hold", className: "bg-yellow-100 text-yellow-600", icon: <Clock className="w-3 h-3" /> },
+      "Cancelled": { label: "Cancelled", className: "bg-red-100 text-red-600", icon: <CircleAlert className="w-3 h-3" /> },
+      "publish": { label: "Published", className: "bg-emerald-100 text-emerald-600", icon: <CircleCheck className="w-3 h-3" /> },
     };
-    return statusMap[status] || { 
-      label: status, 
-      className: "bg-gray-100 text-gray-600",
-      icon: <Clock className="w-3 h-3" />
-    };
+    return statusMap[status] || { label: status, className: "bg-gray-100 text-gray-600", icon: <Clock className="w-3 h-3" /> };
   };
-
-  
-  
-  
 
   const FeedbackModal = () => {
     if (!showFeedbackModal) return null;
 
     const isFeedback = feedbackAction === "feedback";
     const title = isFeedback ? "Request Feedback" : "Reject Project";
-    const description = isFeedback 
-      ? "Add a note and optional attachment for the admin" 
+    const description = isFeedback
+      ? "Add a note and optional attachment for the admin"
       : "Provide a reason — admin will redo the project";
 
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-xl max-w-[500px] w-full max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white z-10">
-            <div>
-              <h3 className="text-lg font-bold text-[#0F2D63]">{title}</h3>
-              <p className="text-sm text-gray-500">{description}</p>
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+        <div className="bg-white rounded-t-2xl sm:rounded-2xl border border-gray-100 shadow-xl max-w-[500px] w-full max-h-[92vh] sm:max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100 sticky top-0 bg-white z-10 gap-2">
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-bold text-[#0F2D63]">{title}</h3>
+              <p className="text-xs sm:text-sm text-gray-500">{description}</p>
             </div>
             <button
               onClick={() => {
@@ -612,13 +469,13 @@ const Projects = () => {
                 setError(null);
                 setUploadProgress(0);
               }}
-              className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-xl transition-colors shrink-0"
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
           </div>
 
-          <div className="p-6 space-y-4">
+          <div className="p-4 sm:p-6 space-y-4">
             <div>
               <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                 Your Note <span className="text-red-500">*</span>
@@ -646,22 +503,22 @@ const Projects = () => {
                   id="feedbackAttachment"
                   accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx"
                 />
-                <label 
-                  htmlFor="feedbackAttachment" 
+                <label
+                  htmlFor="feedbackAttachment"
                   className="flex items-center gap-3 p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-[#C85A32] transition-colors cursor-pointer bg-gray-50 hover:bg-gray-100"
                 >
-                  <Upload className="w-5 h-5 text-gray-400" />
-                  <span className="text-sm text-gray-500">
+                  <Upload className="w-5 h-5 text-gray-400 shrink-0" />
+                  <span className="text-xs sm:text-sm text-gray-500 truncate">
                     {feedbackAttachment ? feedbackAttachment.name : "Click to attach a file (max 10MB)"}
                   </span>
                 </label>
-                
+
                 {feedbackAttachment && (
-                  <div className="mt-2 flex items-center justify-between bg-gray-50 rounded-xl p-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">{getFileIcon(feedbackAttachment.name)}</span>
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 truncate max-w-[200px]">
+                  <div className="mt-2 flex items-center justify-between bg-gray-50 rounded-xl p-3 gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-2xl shrink-0">{getFileIcon(feedbackAttachment.name)}</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-700 truncate">
                           {feedbackAttachment.name}
                         </p>
                         <p className="text-xs text-gray-400">
@@ -671,7 +528,7 @@ const Projects = () => {
                     </div>
                     <button
                       onClick={removeAttachment}
-                      className="p-1 hover:bg-gray-200 rounded-lg transition-colors"
+                      className="p-1 hover:bg-gray-200 rounded-lg transition-colors shrink-0"
                     >
                       <X className="w-4 h-4 text-gray-400" />
                     </button>
@@ -681,7 +538,7 @@ const Projects = () => {
                 {uploadProgress > 0 && uploadProgress < 100 && (
                   <div className="mt-2">
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-[#C85A32] h-2 rounded-full transition-all duration-300"
                         style={{ width: `${uploadProgress}%` }}
                       ></div>
@@ -695,11 +552,11 @@ const Projects = () => {
             {error && (
               <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
                 <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>{error}</span>
+                <span className="min-w-0 break-words">{error}</span>
               </div>
             )}
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
               <button
                 onClick={() => {
                   setShowFeedbackModal(false);
@@ -739,317 +596,289 @@ const Projects = () => {
     );
   };
 
-  
-  
-  
+  const ProjectDetailView = () => {
+    if (!selectedProject) return null;
 
+    const attachmentUrl = getFullAttachmentUrl(selectedProject.attachments);
+    const fileName = selectedProject.attachments ? getFileNameFromPath(selectedProject.attachments) : null;
+    const fileIcon = fileName ? getFileIcon(fileName) : null;
 
+    const adminAttachmentUrl = getFullAttachmentUrl(selectedProject.adminattachment || null);
+    const adminFileName = selectedProject.adminattachment ? getFileNameFromPath(selectedProject.adminattachment) : null;
+    const adminFileIcon = adminFileName ? getFileIcon(adminFileName) : null;
 
+    const statusInfo = getStatusBadge(selectedProject.status);
+    const isRevision = selectedProject.status === "Under Review";
+    const isCompleted = selectedProject.status === "Completed" || selectedProject.status === "publish";
 
+    return (
+      <>
+        <div className="min-h-screen bg-[#F9F7F4] p-3 sm:p-6">
+          <div className="max-w-[700px] mx-auto space-y-4 sm:space-y-5">
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 hover:text-[#0F2D63] transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to My Projects
+            </button>
 
-const ProjectDetailView = () => {
-  if (!selectedProject) return null;
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${statusInfo.className} mb-3`}>
+                {statusInfo.icon}
+                {statusInfo.label}
+              </span>
+              <h1 className="text-lg sm:text-xl font-['Roboto'] font-bold text-[#0F2D63] leading-tight mb-1 break-words">
+                {selectedProject.title || "Untitled"}
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-400">{selectedProject.type || "No type"}</p>
+            </div>
 
-  const attachmentUrl = getFullAttachmentUrl(selectedProject.attachments);
-  const fileName = selectedProject.attachments ? getFileNameFromPath(selectedProject.attachments) : null;
-  const fileIcon = fileName ? getFileIcon(fileName) : null;
-
-  const adminAttachmentUrl = getFullAttachmentUrl(selectedProject.adminattachment || null);
-  const adminFileName = selectedProject.adminattachment ? getFileNameFromPath(selectedProject.adminattachment) : null;
-  const adminFileIcon = adminFileName ? getFileIcon(adminFileName) : null;
-
-  const statusInfo = getStatusBadge(selectedProject.status);
-  const isRevision = selectedProject.status === "Under Review";
-  const isCompleted = selectedProject.status === "Completed" || selectedProject.status === "publish";
-
-  return (
-    <>
-      <div className="min-h-screen bg-[#F9F7F4] p-6">
-        <div className="max-w-[700px] mx-auto space-y-5">
-          
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#0F2D63] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to My Projects
-          </button>
-
-          
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${statusInfo.className} mb-3`}>
-              {statusInfo.icon}
-              {statusInfo.label}
-            </span>
-            <h1 className="text-xl font-['Roboto'] font-bold text-[#0F2D63] leading-tight mb-1">
-              {selectedProject.title || "Untitled"}
-            </h1>
-            <p className="text-sm text-gray-400">{selectedProject.type || "No type"}</p>
-          </div>
-
-          
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Project Description</p>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {selectedProject.description || "No description provided"}
-            </p>
-          </div>
-
-          
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Priority</p>
-              <p className={`text-sm font-bold capitalize ${getPriorityColor(selectedProject.priority)}`}>
-                {selectedProject.priority}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Project Description</p>
+              <p className="text-sm text-gray-700 leading-relaxed break-words">
+                {selectedProject.description || "No description provided"}
               </p>
             </div>
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Deadline</p>
-              <p className="text-sm font-bold text-[#0F2D63] flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                {formatDate(selectedProject.deadline)}
-              </p>
-            </div>
-          </div>
 
-          
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <div className="flex items-center gap-2 mb-3">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Attached Files</p>
-              <span className="bg-gray-100 text-gray-600 text-[8px] font-bold px-1.5 py-0.5 rounded-full">USER</span>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Priority</p>
+                <p className={`text-sm font-bold capitalize ${getPriorityColor(selectedProject.priority)}`}>
+                  {selectedProject.priority}
+                </p>
+              </div>
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Deadline</p>
+                <p className="text-sm font-bold text-[#0F2D63] flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                  {formatDate(selectedProject.deadline)}
+                </p>
+              </div>
             </div>
-            {selectedProject.attachments ? (
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#0F2D63]/10 rounded-xl flex items-center justify-center text-2xl">
-                    {fileIcon}
+
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Attached Files</p>
+                <span className="bg-gray-100 text-gray-600 text-[8px] font-bold px-1.5 py-0.5 rounded-full">USER</span>
+              </div>
+              {selectedProject.attachments ? (
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200 gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 bg-[#0F2D63]/10 rounded-xl flex items-center justify-center text-2xl shrink-0">
+                      {fileIcon}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-700 truncate">{fileName}</p>
+                      <p className="text-xs text-gray-400">Click to view or download</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">{fileName}</p>
-                    <p className="text-xs text-gray-400">Click to view or download</p>
+                  <div className="flex gap-2 shrink-0">
+                    <a
+                      href={attachmentUrl || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                      title="View file"
+                    >
+                      <ExternalLink className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
+                    </a>
+                    <a
+                      href={attachmentUrl || '#'}
+                      download={fileName || 'download'}
+                      className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                      title="Download file"
+                    >
+                      <Download className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
+                    </a>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <a 
-                    href={attachmentUrl || '#'} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-                    title="View file"
-                  >
-                    <ExternalLink className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
-                  </a>
-                  <a 
-                    href={attachmentUrl || '#'} 
-                    download={fileName || 'download'} 
-                    className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-                    title="Download file"
-                  >
-                    <Download className="w-4 h-4 text-gray-500 hover:text-[#0F2D63]" />
-                  </a>
+              ) : (
+                <p className="text-sm text-gray-300 italic">No files attached by user.</p>
+              )}
+            </div>
+
+            {(isRevision || isCompleted) && (selectedProject.adminnote || selectedProject.adminattachment) && (
+              <div className={`rounded-2xl border p-4 sm:p-5 ${
+                isRevision
+                  ? 'bg-blue-50 border-blue-200'
+                  : 'bg-green-50 border-green-200'
+              }`}>
+                <div className="flex items-center gap-2 mb-4 flex-wrap">
+                  <span className="text-lg">{isRevision ? '📋' : '✅'}</span>
+                  <p className={`text-[10px] font-bold uppercase tracking-wider ${
+                    isRevision ? 'text-blue-600' : 'text-green-600'
+                  }`}>
+                    {isRevision ? 'Admin Submission' : 'Admin Final Submission'}
+                  </p>
+                  <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${
+                    isRevision ? 'bg-blue-200 text-blue-700' : 'bg-green-200 text-green-700'
+                  }`}>
+                    ADMIN
+                  </span>
+                </div>
+
+                {selectedProject.adminnote && (
+                  <div className="mb-4">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Note from Admin</p>
+                    <div className="bg-white rounded-xl p-4 border border-gray-100">
+                      <p className="text-sm text-gray-700 leading-relaxed break-words">
+                        {selectedProject.adminnote}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedProject.adminattachment && (
+                  <div>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Admin Attachment</p>
+                    <div className={`flex items-center justify-between p-3 bg-white rounded-xl border gap-2 ${
+                      isRevision ? 'border-blue-100' : 'border-green-100'
+                    }`}>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-2xl shrink-0 ${
+                          isRevision ? 'bg-blue-100' : 'bg-green-100'
+                        }`}>
+                          {adminFileIcon}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-700 truncate">{adminFileName}</p>
+                          <p className="text-xs text-gray-400">Admin provided file — click to view or download</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <a
+                          href={adminAttachmentUrl || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`p-2 rounded-lg transition-colors ${
+                            isRevision ? 'hover:bg-blue-200' : 'hover:bg-green-200'
+                          }`}
+                          title="View admin file"
+                        >
+                          <ExternalLink className={`w-4 h-4 ${
+                            isRevision ? 'text-blue-600 hover:text-blue-800' : 'text-green-600 hover:text-green-800'
+                          }`} />
+                        </a>
+                        <a
+                          href={adminAttachmentUrl || '#'}
+                          download={adminFileName || 'download'}
+                          className={`p-2 rounded-lg transition-colors ${
+                            isRevision ? 'hover:bg-blue-200' : 'hover:bg-green-200'
+                          }`}
+                          title="Download admin file"
+                        >
+                          <Download className={`w-4 h-4 ${
+                            isRevision ? 'text-blue-600 hover:text-blue-800' : 'text-green-600 hover:text-green-800'
+                          }`} />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {isRevision && (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 space-y-3">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">What would you like to do?</p>
+
+                <button
+                  onClick={handleApprove}
+                  disabled={isUpdating}
+                  className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl border-2 border-gray-100 hover:border-green-300 hover:bg-green-50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0 group-hover:bg-green-200 transition-colors">
+                    {isUpdating ? (
+                      <Loader2 className="w-4 h-4 text-green-600 animate-spin" />
+                    ) : (
+                      <ThumbsUp className="w-[18px] h-[18px] text-green-600" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-800">Approve</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Accept the work — moves to Completed</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={handleRequestFeedback}
+                  disabled={isUpdating}
+                  className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl border-2 border-gray-100 hover:border-amber-300 hover:bg-amber-50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-200 transition-colors">
+                    <MessageSquare className="w-[18px] h-[18px] text-amber-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-800">Request Feedback</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Add a note and optional attachment for the admin</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={handleReject}
+                  disabled={isUpdating}
+                  className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl border-2 border-gray-100 hover:border-red-300 hover:bg-red-50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0 group-hover:bg-red-200 transition-colors">
+                    <ThumbsDown className="w-[18px] h-[18px] text-red-500" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-800">Reject</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Provide a reason — admin will redo the project</p>
+                  </div>
+                </button>
+              </div>
+            )}
+
+            {isCompleted && (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 space-y-3">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Project Completed</p>
+                <div className="flex items-center gap-3 p-4 bg-green-50 rounded-2xl border border-green-200">
+                  <CircleCheck className="w-6 h-6 text-green-600 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-green-700">This project has been completed</p>
+                    <p className="text-xs text-green-600 mt-0.5">You can view the final submission below</p>
+                  </div>
                 </div>
               </div>
-            ) : (
-              <p className="text-sm text-gray-300 italic">No files attached by user.</p>
             )}
           </div>
-
-          
-          {(isRevision || isCompleted) && (selectedProject.adminnote || selectedProject.adminattachment) && (
-            <div className={`rounded-2xl border p-5 ${
-              isRevision 
-                ? 'bg-blue-50 border-blue-200' 
-                : 'bg-green-50 border-green-200'
-            }`}>
-              
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-lg">
-                  {isRevision ? '📋' : '✅'}
-                </span>
-                <p className={`text-[10px] font-bold uppercase tracking-wider ${
-                  isRevision ? 'text-blue-600' : 'text-green-600'
-                }`}>
-                  {isRevision ? 'Admin Submission' : 'Admin Final Submission'}
-                </p>
-                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${
-                  isRevision ? 'bg-blue-200 text-blue-700' : 'bg-green-200 text-green-700'
-                }`}>
-                  ADMIN
-                </span>
-              </div>
-
-              
-              {selectedProject.adminnote && (
-                <div className="mb-4">
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Note from Admin</p>
-                  <div className="bg-white rounded-xl p-4 border border-gray-100">
-                    <p className="text-sm text-gray-700 leading-relaxed">
-                      {selectedProject.adminnote}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              
-              {selectedProject.adminattachment && (
-                <div>
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Admin Attachment</p>
-                  <div className={`flex items-center justify-between p-3 bg-white rounded-xl border ${
-                    isRevision ? 'border-blue-100' : 'border-green-100'
-                  }`}>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-2xl ${
-                        isRevision ? 'bg-blue-100' : 'bg-green-100'
-                      }`}>
-                        {adminFileIcon}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">{adminFileName}</p>
-                        <p className="text-xs text-gray-400">Admin provided file — click to view or download</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <a 
-                        href={adminAttachmentUrl || '#'} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className={`p-2 rounded-lg transition-colors ${
-                          isRevision ? 'hover:bg-blue-200' : 'hover:bg-green-200'
-                        }`}
-                        title="View admin file"
-                      >
-                        <ExternalLink className={`w-4 h-4 ${
-                          isRevision ? 'text-blue-600 hover:text-blue-800' : 'text-green-600 hover:text-green-800'
-                        }`} />
-                      </a>
-                      <a 
-                        href={adminAttachmentUrl || '#'} 
-                        download={adminFileName || 'download'} 
-                        className={`p-2 rounded-lg transition-colors ${
-                          isRevision ? 'hover:bg-blue-200' : 'hover:bg-green-200'
-                        }`}
-                        title="Download admin file"
-                      >
-                        <Download className={`w-4 h-4 ${
-                          isRevision ? 'text-blue-600 hover:text-blue-800' : 'text-green-600 hover:text-green-800'
-                        }`} />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          
-          {isRevision && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-3">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">What would you like to do?</p>
-              
-              <button
-                onClick={handleApprove}
-                disabled={isUpdating}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-green-300 hover:bg-green-50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0 group-hover:bg-green-200 transition-colors">
-                  {isUpdating ? (
-                    <Loader2 className="w-[18px] h-[18px] text-green-600 animate-spin" />
-                  ) : (
-                    <ThumbsUp className="w-[18px] h-[18px] text-green-600" />
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">Approve</p>
-                  <p className="text-xs text-gray-400 mt-0.5">Accept the work — moves to Completed</p>
-                </div>
-              </button>
-              
-              <button
-                onClick={handleRequestFeedback}
-                disabled={isUpdating}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-amber-300 hover:bg-amber-50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-200 transition-colors">
-                  <MessageSquare className="w-[18px] h-[18px] text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">Request Feedback</p>
-                  <p className="text-xs text-gray-400 mt-0.5">Add a note and optional attachment for the admin</p>
-                </div>
-              </button>
-              
-              <button
-                onClick={handleReject}
-                disabled={isUpdating}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-red-300 hover:bg-red-50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0 group-hover:bg-red-200 transition-colors">
-                  <ThumbsDown className="w-[18px] h-[18px] text-red-500" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">Reject</p>
-                  <p className="text-xs text-gray-400 mt-0.5">Provide a reason — admin will redo the project</p>
-                </div>
-              </button>
-            </div>
-          )}
-
-          
-          {isCompleted && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-3">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Project Completed</p>
-              <div className="flex items-center gap-3 p-4 bg-green-50 rounded-2xl border border-green-200">
-                <CircleCheck className="w-6 h-6 text-green-600 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-semibold text-green-700">This project has been completed</p>
-                  <p className="text-xs text-green-600 mt-0.5">You can view the final submission below</p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
-      </div>
-      <FeedbackModal />
-    </>
-  );
-};
-
-  
-  
-  
+        <FeedbackModal />
+      </>
+    );
+  };
 
   if (showDetailView && selectedProject) {
     return <ProjectDetailView />;
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F7F4] p-6">
+    <div className="min-h-screen bg-[#F9F7F4] p-3 sm:p-6">
       <div className="max-w-[1200px] mx-auto">
-        
-        <div className="flex items-start justify-between mb-6">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4 sm:mb-6">
+          <div className="min-w-0">
             <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-1">Workspace</p>
-            <h1 className="text-2xl font-['Roboto'] font-bold text-[#0F2D63]">My Projects</h1>
-            <p className="text-gray-500 text-sm mt-1">{totalProjects} projects total</p>
+            <h1 className="text-xl sm:text-2xl font-['Roboto'] font-bold text-[#0F2D63]">My Projects</h1>
+            <p className="text-gray-500 text-xs sm:text-sm mt-1">{totalProjects} projects total</p>
           </div>
           <button
             onClick={handleCreateProject}
-            className="flex items-center gap-2 bg-[#C85A32] hover:bg-[#a8472a] text-white rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors"
+            className="flex items-center justify-center gap-2 bg-[#C85A32] hover:bg-[#a8472a] text-white rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors w-full sm:w-auto shrink-0"
           >
             <Plus className="w-4 h-4" /> New Project
           </button>
         </div>
 
-        
         {error && (
-          <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-xl text-sm mb-4">
-            <AlertCircle className="w-4 h-4" />
-            <span>{error}</span>
+          <div className="flex items-start gap-2 bg-yellow-50 border border-yellow-200 text-yellow-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm mb-4">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span className="flex-1 min-w-0 break-words">{error}</span>
           </div>
         )}
 
-        
-        <div className="flex gap-1 bg-white border border-gray-100 rounded-2xl p-1.5 shadow-sm mb-6">
+        <div className="flex gap-1 bg-white border border-gray-100 rounded-2xl p-1.5 shadow-sm mb-4 sm:mb-6 overflow-x-auto [scrollbar-width:none]">
           {mainTabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -1068,7 +897,7 @@ const ProjectDetailView = () => {
                   setActiveTab(tab.id);
                   setStatusFilter("active");
                 }}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 px-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
                   isActive
                     ? "bg-[#0F2D63] text-white shadow-sm"
                     : "text-gray-500 hover:text-[#0F2D63]"
@@ -1077,9 +906,9 @@ const ProjectDetailView = () => {
                 <span className={isActive ? "text-white" : iconColor}>
                   <Icon className="w-3.5 h-3.5" />
                 </span>
-                {tab.label}
+                <span className="hidden xs:inline sm:inline">{tab.label}</span>
                 <span
-                  className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
+                  className={`text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full font-bold ${
                     isActive
                       ? "bg-white/20 text-white"
                       : "bg-gray-100 text-gray-500"
@@ -1092,8 +921,7 @@ const ProjectDetailView = () => {
           })}
         </div>
 
-        
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-5">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 sm:p-4 mb-4 sm:mb-5">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -1106,8 +934,7 @@ const ProjectDetailView = () => {
           </div>
         </div>
 
-        
-        <div className="flex gap-1.5 mb-5">
+        <div className="flex gap-1.5 mb-4 sm:mb-5 overflow-x-auto [scrollbar-width:none] pb-1">
           {statusTabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = statusFilter === tab.id;
@@ -1123,7 +950,7 @@ const ProjectDetailView = () => {
               <button
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-semibold border transition-all whitespace-nowrap shrink-0 ${
                   isActive
                     ? "bg-[#0F2D63] text-white border-[#0F2D63]"
                     : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
@@ -1147,19 +974,16 @@ const ProjectDetailView = () => {
           })}
         </div>
 
-        
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 text-[#C85A32] animate-spin" />
           </div>
         ) : (
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
             {filteredProjects.length > 0 ? (
               filteredProjects.map((project) => {
                 const priorityClass = getPriorityStyles(project.priority);
                 const colorBar = getColorBar(project.type);
-                const statusInfo = getStatusBadge(project.status);
                 const isRevision = project.status === "Under Review";
                 const isCompleted = project.status === "Completed" || project.status === "publish";
 
@@ -1169,9 +993,9 @@ const ProjectDetailView = () => {
                     className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-all group"
                   >
                     <div className={`h-1 ${colorBar}`}></div>
-                    <div className="p-5">
+                    <div className="p-4 sm:p-5">
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <h3 className="font-bold text-[#0F2D63] text-sm leading-tight flex-1">
+                        <h3 className="font-bold text-[#0F2D63] text-sm leading-tight flex-1 min-w-0 break-words">
                           {project.title || "Untitled Project"}
                         </h3>
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize flex-shrink-0 ${priorityClass}`}>
@@ -1183,17 +1007,16 @@ const ProjectDetailView = () => {
                         {project.description || "No description"}
                       </p>
 
-                      <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
+                      <div className="flex items-center gap-2 text-xs text-gray-400 mb-4 flex-wrap">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {formatDate(project.deadline)}
                         </span>
-                        <span className="bg-gray-100 px-2 py-0.5 rounded-full">
+                        <span className="bg-gray-100 px-2 py-0.5 rounded-full truncate max-w-[120px]">
                           {project.type || "No type"}
                         </span>
                       </div>
 
-                      
                       {isRevision && project.adminnote && (
                         <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 mb-3 text-xs">
                           <p className="font-semibold text-amber-700 mb-1">Admin submitted a revision</p>
@@ -1201,7 +1024,6 @@ const ProjectDetailView = () => {
                         </div>
                       )}
 
-                      
                       {isCompleted && project.adminnote && (
                         <div className="bg-green-50 border border-green-100 rounded-xl p-3 mb-3 text-xs">
                           <p className="font-semibold text-green-700 mb-1">✅ Admin final submission</p>
@@ -1232,10 +1054,10 @@ const ProjectDetailView = () => {
               })
             ) : (
               <div className="col-span-full text-center py-12">
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-10 h-10 text-gray-400" />
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-[#0F2D63] mb-2">No projects found</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-[#0F2D63] mb-2">No projects found</h3>
                 <p className="text-sm text-gray-500 mb-4">
                   {searchTerm ? `No projects match "${searchTerm}"` : `No ${statusFilter} ${mainTabs.find(t => t.id === activeTab)?.label || ''} projects found`}
                 </p>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -13,9 +13,7 @@ import {
   Check,
   Loader2,
   AlertCircle,
-  Upload,
-  Database,
-  Mic2
+  Upload
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
@@ -26,24 +24,14 @@ interface ApiResponse {
   data?: any;
 }
 
-interface VaultDoc {
-  id: string;
-  title: string;
-  fileName: string;
-  wordCount: number;
-}
-
-const MAX_VAULT_SELECTION = 5;
-
 const DOCUMENT_TYPES = [
   { value: 'policy-brief', label: 'Policy Brief', icon: BookOpen },
   { value: 'op-ed', label: 'Op-Ed', icon: PenTool },
   { value: 'impact-report', label: 'Impact Report', icon: Lightbulb },
   { value: 'speech', label: 'Speech', icon: Megaphone },
-  { value: 'press-release', label: 'Press Release', icon: Megaphone },
   { value: 'summary', label: 'Summary', icon: FileText },
-  { value: 'media-story', label: 'Media Story', icon: Heart },
-  { value: 'blog-post', label: 'Blog Post', icon: PenTool },
+  { value: 'media-story', label: 'News Article', icon: Heart },
+  { value: 'blog-post', label: 'Profile Article', icon: PenTool },
 ];
 
 const TONE_OPTIONS = [
@@ -60,11 +48,6 @@ const processingSteps = [
   { label: 'Structuring your document…' },
   { label: 'Finalising output…' },
 ];
-
-const cardClass = 'bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5';
-const headingClass = 'text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider';
-const badgeClass =
-  'inline-flex w-5 h-5 bg-[#0F2D63] dark:bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2';
 
 const CreateAIWriting = () => {
   const navigate = useNavigate();
@@ -83,59 +66,6 @@ const CreateAIWriting = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<'create' | 'processing'>('create');
   const [processingStep, setProcessingStep] = useState(0);
-
-  // NEW: Data Vault + Voice Profile
-  const [vaultDocs, setVaultDocs] = useState<VaultDoc[]>([]);
-  const [vaultLoading, setVaultLoading] = useState(true);
-  const [selectedVaultIds, setSelectedVaultIds] = useState<string[]>([]);
-  const [saveToVault, setSaveToVault] = useState(false);
-  const [hasVoiceProfile, setHasVoiceProfile] = useState(false);
-  const [voiceSampleCount, setVoiceSampleCount] = useState(0);
-  const [useVoiceProfile, setUseVoiceProfile] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setVaultLoading(false);
-      return;
-    }
-    const headers = { Authorization: `Bearer ${token}` };
-
-    axios
-      .get(`${API_URL}/api/vault/documents`, { headers, params: { kind: 'source' } })
-      .then((res) => setVaultDocs(res.data?.data || []))
-      .catch(() => {})
-      .finally(() => setVaultLoading(false));
-
-    axios
-      .get(`${API_URL}/api/voice-profile`, { headers })
-      .then((res) => {
-        const data = res.data?.data;
-        if (!data) return;
-        const p = data.profile || {};
-        const samples = data.samples || [];
-        const configured =
-          !!(p.organisationName || p.description || p.audience || p.writingStyle || p.guidelines ||
-             p.preferredTone || (p.preferredTerms || []).length || (p.avoidTerms || []).length) ||
-          samples.length > 0;
-        setHasVoiceProfile(configured);
-        setVoiceSampleCount(samples.length);
-        if (configured) setUseVoiceProfile(true); // on by default when the organisation has set one up
-      })
-      .catch(() => {});
-  }, [API_URL]);
-
-  const toggleVaultDoc = (id: string) => {
-    setError(null);
-    setSelectedVaultIds((prev) => {
-      if (prev.includes(id)) return prev.filter((x) => x !== id);
-      if (prev.length >= MAX_VAULT_SELECTION) {
-        setError(`You can select up to ${MAX_VAULT_SELECTION} documents per generation`);
-        return prev;
-      }
-      return [...prev, id];
-    });
-  };
 
   const validateAndSetFile = (selected: File) => {
     const validTypes = ['.pdf', '.docx', '.doc', '.txt'];
@@ -170,7 +100,6 @@ const CreateAIWriting = () => {
     setFile(null);
     setFileName('');
     setFileSize('');
-    setSaveToVault(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -180,11 +109,7 @@ const CreateAIWriting = () => {
     if (isSubmitting) return;
     if (!title.trim()) { setError('Please enter a document title'); return; }
     if (!selectedType) { setError('Please select a document type'); return; }
-    // CHANGED: a source is an uploaded file OR documents from the Data Vault
-    if (!file && selectedVaultIds.length === 0) {
-      setError('Please upload a source document or select documents from your Data Vault');
-      return;
-    }
+    if (!file) { setError('Please upload a source document'); return; }
 
     const token = localStorage.getItem('token');
     if (!token) { setError('Authentication required. Please log in again.'); return; }
@@ -204,14 +129,8 @@ const CreateAIWriting = () => {
       formData.append('type', selectedType);
       formData.append('tone', selectedTone);
       formData.append('includeOutline', String(includeOutline));
-      if (file) {
-        formData.append('file', file);
-        formData.append('saveToVault', String(saveToVault));
-      }
-      formData.append('vaultDocumentIds', JSON.stringify(selectedVaultIds)); // NEW
-      formData.append('useVoiceProfile', String(useVoiceProfile));           // NEW
+      formData.append('file', file);
 
-      // Do NOT set Content-Type manually - the browser must add the multipart boundary.
       const response = await axios.post<ApiResponse>(
         `${API_URL}/api/ai-writing/generate`,
         formData,
@@ -231,9 +150,6 @@ const CreateAIWriting = () => {
       navigate('/user/ai-writing/result', {
         state: {
           data: {
-            id: data.id,
-            creditsUsed: data.creditsUsed,
-            creditsRemaining: data.creditsRemaining,
             title: title.trim(),
             type: selectedType,
             tone: selectedTone,
@@ -277,13 +193,13 @@ const CreateAIWriting = () => {
   };
 
   const renderProcessing = () => (
-    <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 flex items-center justify-center p-6">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xl p-10 w-full max-w-sm text-center">
+    <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 flex items-center justify-center p-4 sm:p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xl p-6 sm:p-10 w-full max-w-sm text-center">
         <div className="w-16 h-16 bg-[#FFF8F5] dark:bg-[#C85A32]/10 rounded-full flex items-center justify-center mx-auto mb-5">
           <div className="w-8 h-8 border-2 border-[#C85A32]/30 border-t-[#C85A32] rounded-full animate-spin"></div>
         </div>
         <h3 className="font-semibold text-[#0F2D63] dark:text-white mb-1">Generating Your Content</h3>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">This can take up to a minute…</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">This can take up to a minute…</p>
         <div className="space-y-2.5">
           {processingSteps.map((step, index) => {
             const isCompleted = index < processingStep;
@@ -299,15 +215,15 @@ const CreateAIWriting = () => {
               >
                 <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
                   {isCompleted ? (
-                    <div className="w-5 h-5 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                      <Check className="w-3 h-3 text-green-500" />
+                    <div className="w-5 h-5 bg-[#EEF2FA] dark:bg-[#1B2A4A] rounded-full flex items-center justify-center">
+                      <Check className="w-3 h-3 text-[#0F2D63] dark:text-[#DCE4F5]" />
                     </div>
                   ) : isActive ? (
                     <div className="w-3 h-3 border-2 border-[#C85A32]/40 border-t-[#C85A32] rounded-full animate-spin"></div>
                   ) : null}
                 </div>
                 <span className={`text-xs ${
-                  isActive ? 'text-[#0F2D63] dark:text-white font-medium' : 'text-gray-400 dark:text-gray-500'
+                  isActive ? 'text-[#0F2D63] dark:text-white font-medium' : 'text-gray-500 dark:text-gray-400'
                 }`}>
                   {step.label}
                 </span>
@@ -320,13 +236,13 @@ const CreateAIWriting = () => {
   );
 
   const renderCreate = () => (
-    <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-4 sm:p-6">
       <div className="max-w-[680px] mx-auto">
 
         <div className="flex items-center gap-3 mb-6">
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-[#0F2D63] dark:hover:text-white transition-colors"
+            className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-[#0F2D63] dark:hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
@@ -334,23 +250,25 @@ const CreateAIWriting = () => {
           <span className="text-gray-300 dark:text-gray-600">/</span>
           <div>
             <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest">AI Tools</p>
-            <h1 className="text-xl font-['Roboto'] font-bold text-[#0F2D63] dark:text-white">Create AI Writing</h1>
+            <h1 className="text-lg sm:text-xl font-['Roboto'] font-bold text-[#0F2D63] dark:text-white">Create AI Writing</h1>
           </div>
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-4">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{error}</span>
+          <div className="flex items-start gap-2 bg-[#FDECEA] dark:bg-[#3B1515] border border-[#F3B8B3] dark:border-[#7A2B2B] text-[#8B1F1F] dark:text-[#F3B8B3] px-4 py-3 rounded-xl text-sm mb-4">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span className="min-w-0 break-words">{error}</span>
           </div>
         )}
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 sm:gap-4">
 
-          {/* 1. Title */}
-          <div className={cardClass}>
-            <label className={`block ${headingClass} mb-1.5`}>
-              <span className={badgeClass}>1</span>
+       
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 sm:p-5">
+            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+              <span className="inline-flex w-5 h-5 bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2 align-middle">
+                1
+              </span>
               Document Title
             </label>
             <input
@@ -358,17 +276,19 @@ const CreateAIWriting = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Q3 Partnership Announcement"
-              className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#C85A32] mt-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-white placeholder-gray-400 transition-all"
+              className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#C85A32] bg-white dark:bg-gray-900 text-gray-800 dark:text-white placeholder-gray-400 transition-all"
             />
           </div>
 
-          {/* 2. Desired output */}
-          <div className={cardClass}>
-            <p className={`${headingClass} mb-3`}>
-              <span className={badgeClass}>2</span>
+      
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 sm:p-5">
+            <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+              <span className="inline-flex w-5 h-5 bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2 align-middle">
+                2
+              </span>
               Desired Output
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2">
               {DOCUMENT_TYPES.map((type) => {
                 const Icon = type.icon;
                 const isSelected = selectedType === type.value;
@@ -376,17 +296,17 @@ const CreateAIWriting = () => {
                   <button
                     key={type.value}
                     onClick={() => setSelectedType(type.value)}
-                    className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all ${
+                    className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all min-h-[52px] ${
                       isSelected
                         ? 'border-[#C85A32] bg-[#FFF8F5] dark:bg-[#C85A32]/10'
-                        : 'border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                   >
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
                       isSelected ? 'bg-[#C85A32]' : 'bg-gray-100 dark:bg-gray-700'
                     }`}>
                       <Icon className={`w-3.5 h-3.5 ${
-                        isSelected ? 'text-white' : 'text-gray-500 dark:text-gray-400'
+                        isSelected ? 'text-white' : 'text-gray-600 dark:text-gray-300'
                       }`} />
                     </div>
                     <span className={`text-xs font-semibold ${
@@ -400,10 +320,12 @@ const CreateAIWriting = () => {
             </div>
           </div>
 
-          {/* 3. Tone */}
-          <div className={cardClass}>
-            <p className={`${headingClass} mb-3`}>
-              <span className={badgeClass}>3</span>
+       
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 sm:p-5">
+            <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+              <span className="inline-flex w-5 h-5 bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2 align-middle">
+                3
+              </span>
               Target Tone
             </p>
             <div className="flex flex-wrap gap-2">
@@ -411,10 +333,10 @@ const CreateAIWriting = () => {
                 <button
                   key={tone.value}
                   onClick={() => setSelectedTone(tone.value)}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all min-h-[38px] ${
                     selectedTone === tone.value
-                      ? 'bg-[#0F2D63] text-white border-[#0F2D63] dark:bg-[#0F2D63]'
-                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      ? 'bg-[#0F2D63] text-white border-[#0F2D63]'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
                 >
                   {tone.label}
@@ -423,52 +345,44 @@ const CreateAIWriting = () => {
             </div>
           </div>
 
-          {/* 4. Source documents */}
-          <div className={cardClass}>
-            <p className={`${headingClass} mb-1`}>
-              <span className={badgeClass}>4</span>
-              Source Documents
+       
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 sm:p-5">
+            <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+              <span className="inline-flex w-5 h-5 bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2 align-middle">
+                4
+              </span>
+              Upload Document
             </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 ml-7">
-              Upload a document, select documents from your Data Vault, or both.
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 ml-7">
+              Upload the source document to transform into your desired output
             </p>
 
             {file ? (
-              <>
-                <div className="flex items-center gap-3 p-4 bg-[#FFF8F5] dark:bg-[#C85A32]/10 border border-[#C85A32]/20 rounded-xl">
-                  <div className="w-10 h-10 bg-[#C85A32]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-5 h-5 text-[#C85A32]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[#0F2D63] dark:text-white truncate">{fileName}</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{fileSize}</p>
-                  </div>
-                  <button
-                    onClick={removeFile}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#C85A32]/10 text-gray-400 hover:text-[#C85A32] transition-colors flex-shrink-0"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+              <div className="flex items-center gap-3 p-3 sm:p-4 bg-[#FFF8F5] dark:bg-[#C85A32]/10 border border-[#C85A32]/30 rounded-xl">
+                <div className="w-10 h-10 bg-[#C85A32]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-5 h-5 text-[#C85A32]" />
                 </div>
-                <label className="flex items-center gap-2 mt-3 text-xs text-gray-600 dark:text-gray-300 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={saveToVault}
-                    onChange={(e) => setSaveToVault(e.target.checked)}
-                    className="accent-[#C85A32]"
-                  />
-                  Also save this file to my Data Vault so I can reuse it later
-                </label>
-              </>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-[#0F2D63] dark:text-white truncate">{fileName}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{fileSize}</p>
+                </div>
+                <button
+                  onClick={removeFile}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#C85A32]/10 text-gray-500 hover:text-[#C85A32] transition-colors flex-shrink-0"
+                  aria-label="Remove file"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             ) : (
               <button
                 onClick={() => fileInputRef.current?.click()}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
-                className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl hover:border-[#C85A32] hover:bg-[#FFF8F5] dark:hover:bg-[#C85A32]/5 transition-all group"
+                className="w-full flex items-center justify-center gap-2 p-4 min-h-[64px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-[#C85A32] hover:bg-[#FFF8F5] dark:hover:bg-[#C85A32]/5 transition-all group"
               >
-                <Upload className="w-5 h-5 text-gray-400 group-hover:text-[#C85A32] transition-colors" />
-                <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-[#C85A32] transition-colors">
+                <Upload className="w-5 h-5 text-gray-500 group-hover:text-[#C85A32] transition-colors flex-shrink-0" />
+                <span className="text-sm text-gray-600 dark:text-gray-300 group-hover:text-[#C85A32] transition-colors text-center">
                   Click to upload or drag and drop
                 </span>
               </button>
@@ -480,119 +394,29 @@ const CreateAIWriting = () => {
               className="hidden"
               onChange={handleFileUpload}
             />
-
-            {/* Data Vault picker */}
-            <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-[#0F2D63] dark:text-white flex items-center gap-1.5">
-                  <Database className="w-3.5 h-3.5 text-[#C85A32]" />
-                  From my Data Vault
-                  {selectedVaultIds.length > 0 && (
-                    <span className="text-[#C85A32]">({selectedVaultIds.length}/{MAX_VAULT_SELECTION})</span>
-                  )}
-                </p>
-                <button
-                  onClick={() => navigate('/user/data-vault')}
-                  className="text-xs text-[#C85A32] hover:underline"
-                >
-                  Manage vault
-                </button>
-              </div>
-
-              {vaultLoading ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="w-4 h-4 text-[#C85A32] animate-spin" />
-                </div>
-              ) : vaultDocs.length === 0 ? (
-                <p className="text-xs text-gray-400 dark:text-gray-500 py-2">
-                  Your Data Vault is empty. Upload documents once in the Data Vault and reuse them here.
-                </p>
-              ) : (
-                <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
-                  {vaultDocs.map((doc) => {
-                    const selected = selectedVaultIds.includes(doc.id);
-                    return (
-                      <button
-                        key={doc.id}
-                        onClick={() => toggleVaultDoc(doc.id)}
-                        className={`w-full flex items-center gap-3 p-2.5 rounded-xl border text-left transition-all ${
-                          selected
-                            ? 'border-[#C85A32] bg-[#FFF8F5] dark:bg-[#C85A32]/10'
-                            : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
-                        }`}
-                      >
-                        <div
-                          className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
-                            selected ? 'bg-[#C85A32] border-[#C85A32]' : 'border-gray-300 dark:border-gray-600'
-                          }`}
-                        >
-                          {selected && <Check className="w-3 h-3 text-white" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-[#0F2D63] dark:text-white truncate">{doc.title}</p>
-                          <p className="text-[10px] text-gray-400 dark:text-gray-500">
-                            {doc.wordCount.toLocaleString()} words
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
           </div>
 
-          {/* 5. Voice profile */}
-          <div className={cardClass}>
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className={`${headingClass} mb-0.5`}>
-                  <span className={badgeClass}>5</span>
-                  Use My Voice Profile
-                </p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 ml-7">
-                  {hasVoiceProfile
-                    ? `Write in your organisation's voice${voiceSampleCount > 0 ? ` (${voiceSampleCount} writing sample${voiceSampleCount > 1 ? 's' : ''})` : ''}.`
-                    : 'Not set up yet. Add your organisation’s style and writing samples to get content that sounds like you.'}
-                </p>
-                <button
-                  onClick={() => navigate('/user/voice-profile')}
-                  className="text-xs text-[#C85A32] hover:underline ml-7 mt-1 inline-flex items-center gap-1"
-                >
-                  <Mic2 className="w-3 h-3" />
-                  {hasVoiceProfile ? 'Edit voice profile' : 'Set up voice profile'}
-                </button>
-              </div>
-              <button
-                onClick={() => hasVoiceProfile && setUseVoiceProfile(!useVoiceProfile)}
-                disabled={!hasVoiceProfile}
-                className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed ${
-                  useVoiceProfile ? 'bg-[#C85A32]' : 'bg-gray-200 dark:bg-gray-700'
-                }`}
-              >
-                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow-sm transition-all ${
-                  useVoiceProfile ? 'left-6' : 'left-1'
-                }`}></div>
-              </button>
-            </div>
-          </div>
-
-          {/* 6. Outline toggle */}
-          <div className={cardClass}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`${headingClass} mb-0.5`}>
-                  <span className={badgeClass}>6</span>
+  
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 sm:p-5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-0.5">
+                  <span className="inline-flex w-5 h-5 bg-[#0F2D63] text-white text-[10px] font-bold rounded-full items-center justify-center mr-2 align-middle">
+                    5
+                  </span>
                   Include AI Outline
                 </p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 ml-7">
+                <p className="text-xs text-gray-500 dark:text-gray-400 ml-7">
                   Auto-generate a structured outline before writing
                 </p>
               </div>
               <button
                 onClick={() => setIncludeOutline(!includeOutline)}
+                role="switch"
+                aria-checked={includeOutline}
+                aria-label="Include AI outline"
                 className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${
-                  includeOutline ? 'bg-[#C85A32]' : 'bg-gray-200 dark:bg-gray-700'
+                  includeOutline ? 'bg-[#C85A32]' : 'bg-gray-300 dark:bg-gray-600'
                 }`}
               >
                 <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow-sm transition-all ${
@@ -602,7 +426,7 @@ const CreateAIWriting = () => {
             </div>
           </div>
 
-          {/* Generate */}
+        
           <button
             onClick={handleGenerate}
             disabled={isSubmitting}
@@ -621,14 +445,14 @@ const CreateAIWriting = () => {
             )}
           </button>
 
-          {/* Disclaimer */}
-          <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 flex items-start gap-3">
-            <span className="text-amber-500 text-lg flex-shrink-0 mt-0.5">⚠️</span>
-            <div>
-              <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1.5">
+
+          <div className="bg-[#F4F6FB] dark:bg-[#1B2A4A] border border-[#C9D3E8] dark:border-[#2E4270] border-l-4 border-l-[#C85A32] rounded-xl p-4 sm:p-5 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-[#C85A32] flex-shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-[#0F2D63] dark:text-white uppercase tracking-wider mb-1.5">
                 Disclaimer
               </p>
-              <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+              <p className="text-xs text-[#334155] dark:text-[#DCE4F5] leading-relaxed">
                 AI-generated content from Magalela Media Services may contain inaccuracies and is not intended for immediate publication. All outputs must be submitted to an editor for final review and approval.
               </p>
             </div>

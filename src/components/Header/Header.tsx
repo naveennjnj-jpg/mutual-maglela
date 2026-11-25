@@ -497,7 +497,7 @@ const Header = () => {
               </div>
 
               <NavLink
-                to="/blog"
+                to="/insights"
                 className="text-sm transition-all duration-300 px-3 py-2 rounded-lg text-white hover:bg-white/10"
                 onClick={() => setIsMenuOpen(false)}
               >

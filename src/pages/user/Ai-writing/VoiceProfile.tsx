@@ -229,7 +229,7 @@ const VoiceProfile = () => {
 
         <div className="flex flex-col gap-4">
 
-          {/* Organisation */}
+        
           <div className={cardClass}>
             <label className={labelClass}>Organisation name</label>
             <input
@@ -262,7 +262,7 @@ const VoiceProfile = () => {
             />
           </div>
 
-          {/* Tone + style */}
+     
           <div className={cardClass}>
             <p className={labelClass}>Usual tone</p>
             <div className="flex flex-wrap gap-2 mb-4">
@@ -292,7 +292,7 @@ const VoiceProfile = () => {
             />
           </div>
 
-          {/* Terminology + guidelines */}
+         
           <div className={cardClass}>
             <label className={labelClass}>Preferred terminology</label>
             <input
@@ -332,7 +332,7 @@ const VoiceProfile = () => {
             {saving ? 'Saving...' : 'Save Voice Profile'}
           </button>
 
-          {/* Writing samples */}
+         
           <div className={cardClass}>
             <div className="flex items-center justify-between mb-1">
               <p className={`${labelClass} mb-0`}>Writing samples</p>

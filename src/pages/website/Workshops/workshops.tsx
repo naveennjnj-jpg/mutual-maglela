@@ -43,7 +43,7 @@ const WorkshopPage = () => {
     
     const handleCreateAccount = () => {
         setShowRequestModal(false);
-        window.location.href = 'https://magalela-media.figma.site/login';
+        window.location.href = '/login';
     };
 
     

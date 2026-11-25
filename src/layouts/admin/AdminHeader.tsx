@@ -1,13 +1,11 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { 
-  Menu, 
-  X, 
-  Bell, 
-  Search, 
-  Settings, 
-  HelpCircle,
+import {
+  Menu,
+  X,
+  Bell,
+  Search,
+  Settings,
   ChevronDown,
   MessageSquare,
   Calendar,
@@ -28,10 +26,10 @@ import {
   UserCheck,
   FileSpreadsheet,
   Activity,
-    FolderKanban,
+  FolderKanban,
   CircleAlert,
   CircleCheck,
-  Timer
+  Timer,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
@@ -40,6 +38,9 @@ import { toast } from "sonner";
 interface AdminHeaderProps {
   onMenuClick?: () => void;
   isSidebarOpen?: boolean;
+  adminName?: string;
+  adminEmail?: string;
+  adminInitials?: string;
 }
 
 interface UserData {
@@ -64,32 +65,30 @@ interface Notification {
   timestamp: Date;
 }
 
-
 const iconMap: Record<string, any> = {
-  Users: Users,
-  FolderKanban: FolderKanban,
-  UserCheck: UserCheck,
-  CreditCard: CreditCard,
-  Activity: Activity,
-  Clock: Clock,
-  CircleAlert: CircleAlert,
-  CircleCheck: CircleCheck,
-  Timer: Timer,
-  FileText: FileText,
-  Settings: Settings,
-  MessageSquare: MessageSquare,
-  Calendar: Calendar,
-  User: User,
-  Shield: Shield,
-  Home: Home,
-  BarChart3: BarChart3,
-  Store: Store,
-  FileSpreadsheet: FileSpreadsheet,
-  UserCog: UserCog,
-  Briefcase: Briefcase,
-  LayoutDashboard: LayoutDashboard
+  Users,
+  FolderKanban,
+  UserCheck,
+  CreditCard,
+  Activity,
+  Clock,
+  CircleAlert,
+  CircleCheck,
+  Timer,
+  FileText,
+  Settings,
+  MessageSquare,
+  Calendar,
+  User,
+  Shield,
+  Home,
+  BarChart3,
+  Store,
+  FileSpreadsheet,
+  UserCog,
+  Briefcase,
+  LayoutDashboard,
 };
-
 
 const getColorForIcon = (icon: string): string => {
   const colorMap: Record<string, string> = {
@@ -114,11 +113,10 @@ const getColorForIcon = (icon: string): string => {
     FileSpreadsheet: "text-green-500",
     UserCog: "text-slate-500",
     Briefcase: "text-amber-600",
-    LayoutDashboard: "text-gray-700"
+    LayoutDashboard: "text-gray-700",
   };
   return colorMap[icon] || "text-gray-500";
 };
-
 
 const getBgColorForIcon = (icon: string): string => {
   const colorMap: Record<string, string> = {
@@ -143,14 +141,17 @@ const getBgColorForIcon = (icon: string): string => {
     FileSpreadsheet: "bg-green-500/10",
     UserCog: "bg-slate-500/10",
     Briefcase: "bg-amber-500/10",
-    LayoutDashboard: "bg-gray-500/10"
+    LayoutDashboard: "bg-gray-500/10",
   };
   return colorMap[icon] || "bg-gray-500/10";
 };
 
-const AdminHeader = ({ 
-  onMenuClick, 
-  isSidebarOpen = true
+const AdminHeader = ({
+  onMenuClick,
+  isSidebarOpen = true,
+  adminName,
+  adminEmail,
+  adminInitials,
 }: AdminHeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -161,75 +162,70 @@ const AdminHeader = ({
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  
-  
+
   const [userData, setUserData] = useState<UserData>({
-    id: '',
-    name: 'Admin',
-    email: 'admin@email.com',
-    role: 'admin',
-    initials: 'A'
+    id: "",
+    name: adminName || "Admin",
+    email: adminEmail || "admin@email.com",
+    role: "admin",
+    initials: adminInitials || "A",
   });
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationsLoading, setNotificationsLoading] = useState(true);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        
+        const token = localStorage.getItem("token");
         if (!token) {
           setLoading(false);
           return;
         }
 
         const response = await axios.get(`${API_URL}/api/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.data.success && response.data.data) {
           const data = response.data.data;
-          
-          
-          const nameParts = data.name?.split(' ') || ['A'];
+          const nameParts = data.name?.split(" ") || ["A"];
           const initials = nameParts
             .map((part: string) => part.charAt(0).toUpperCase())
-            .join('')
+            .join("")
             .slice(0, 2);
 
           setUserData({
             id: data.id || data._id,
-            name: data.name || 'Admin',
-            email: data.email || 'admin@email.com',
-            role: data.role || 'admin',
+            name: data.name || "Admin",
+            email: data.email || "admin@email.com",
+            role: data.role || "admin",
             avatar: data.avatar || data.profileImage,
-            theme: data.theme || 'light',
-            initials: initials || 'A'
+            theme: data.theme || "light",
+            initials: initials || "A",
           });
 
-          
-          if (data.theme) {
-            localStorage.setItem('theme', data.theme);
-          }
+          if (data.theme) localStorage.setItem("theme", data.theme);
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        
-        const savedName = localStorage.getItem('userName') || 'Admin';
-        const savedEmail = localStorage.getItem('userEmail') || 'admin@email.com';
-        const savedInitials = savedName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
-        
-        setUserData(prev => ({
+        console.error("Error fetching user data:", error);
+        const savedName = localStorage.getItem("userName") || adminName || "Admin";
+        const savedEmail = localStorage.getItem("userEmail") || adminEmail || "admin@email.com";
+        const savedInitials =
+          adminInitials ||
+          savedName
+            .split(" ")
+            .map((n: string) => n[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2);
+        setUserData((prev) => ({
           ...prev,
           name: savedName,
           email: savedEmail,
-          initials: savedInitials
+          initials: savedInitials,
         }));
       } finally {
         setLoading(false);
@@ -239,69 +235,66 @@ const AdminHeader = ({
     fetchUserData();
   }, []);
 
+ useEffect(() => {
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setNotificationsLoading(false);
+        return;
+      }
+
+      const response = await axios.get(`${API_URL}/api/admin/notifications`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data.success && response.data.data) {
+        const activities = response.data.data;
+
   
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        
-        if (!token) {
-          setNotificationsLoading(false);
-          return;
-        }
+        const unreadOnly = activities.filter((a: any) => !a.read);
 
-        
-        const response = await axios.get(`${API_URL}/api/admin/notifications`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.data.success && response.data.data) {
-          const activities = response.data.data;
-          
-          
-          const transformedNotifications: Notification[] = activities.map((activity: any, index: number) => ({
+        const transformedNotifications: Notification[] = unreadOnly.map(
+          (activity: any, index: number) => ({
             id: activity.id || `${index}-${activity.time}`,
             title: activity.title,
             description: activity.description,
             time: activity.time,
-            icon: activity.icon || 'Activity',
-            color: getColorForIcon(activity.icon || 'Activity'),
-            bgColor: getBgColorForIcon(activity.icon || 'Activity'),
-            read: activity.read || index >= 5, 
-            timestamp: activity.timestamp || new Date(Date.now() - (index + 1) * 60000)
-          }));
+            icon: activity.icon || "Activity",
+            color: getColorForIcon(activity.icon || "Activity"),
+            bgColor: getBgColorForIcon(activity.icon || "Activity"),
+            read: false,
+            timestamp:
+              activity.timestamp || new Date(Date.now() - (index + 1) * 60000),
+          })
+        );
 
-          setNotifications(transformedNotifications.slice(0, 10)); 
-        } else {
-          
-          setNotifications([]);
-        }
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-        
+        setNotifications(transformedNotifications.slice(0, 10));
+      } else {
         setNotifications([]);
-      } finally {
-        setNotificationsLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      setNotifications([]);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
 
-    fetchNotifications();
+  fetchNotifications();
+  const interval = setInterval(fetchNotifications, 30000);
+  return () => clearInterval(interval);
+}, []);
 
-    
-    const interval = setInterval(fetchNotifications, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setIsProfileOpen(false);
       }
-      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
         setIsNotificationsOpen(false);
       }
     };
@@ -315,73 +308,53 @@ const AdminHeader = ({
     navigate("/login");
   };
 
-  
-  const getNotificationIcon = (iconName: string) => {
-    return iconMap[iconName] || Activity;
-  };
+  const getNotificationIcon = (iconName: string) => iconMap[iconName] || Activity;
 
-  
-  const markAsRead = async (id: string) => {
-    try {
-      
-      setNotifications(prev => 
-        prev.map(notif => 
-          notif.id === id ? { ...notif, read: true } : notif
-        )
+const markAsRead = async (id: string) => {
+  const snapshot = notifications;
+
+
+  setNotifications((prev) => prev.filter((n) => n.id !== id));
+
+  try {
+    const token = localStorage.getItem("token");
+    if (token) {
+      await axios.patch(
+        `${API_URL}/api/admin/notifications/${id}/read`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      
-      const token = localStorage.getItem('token');
-      if (token) {
-        await axios.patch(
-          `${API_URL}/api/admin/notifications/${id}/read`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      }
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
     }
-  };
+  } catch (error) {
+    console.error("Error marking notification as read:", error);
+    setNotifications(snapshot);
+    toast.error("Failed to mark notification as read");
+  }
+};
 
-  
-  const markAllAsRead = async () => {
-    try {
-      
-      setNotifications(prev => 
-        prev.map(notif => ({ ...notif, read: true }))
+const markAllAsRead = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (token) {
+      await axios.patch(
+        `${API_URL}/api/admin/notifications/read-all`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      
-      const token = localStorage.getItem('token');
-      if (token) {
-        await axios.patch(
-          `${API_URL}/api/admin/notifications/read-all`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      }
-      
-      toast.success('All notifications marked as read');
-    } catch (error) {
-      console.error('Error marking all as read:', error);
-      toast.error('Failed to mark notifications as read');
     }
-  };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+    setNotifications([]);
+    toast.success("All notifications marked as read");
+  } catch (error) {
+    console.error("Error marking all as read:", error);
+    toast.error("Failed to mark notifications as read");
+  }
+};
 
-  const adminNavItems = [
-    { title: "Settings", path: "/admin/settings", icon: Settings2 },
-  ];
+const unreadCount = notifications.length;
+
+
+  const adminNavItems = [{ title: "Settings", path: "/admin/settings", icon: Settings2 }];
 
   const getPageTitle = () => {
     const currentPath = location.pathname;
@@ -389,26 +362,30 @@ const AdminHeader = ({
       "/admin": "Dashboard",
       "/admin/users": "Users Management",
       "/admin/projects": "Projects",
-      "/admin/workshops": "Workshops",
+      "/admin/experts": "Manage Experts",
+      "/admin/schedule": "My Schedule",
+      "/admin/workshop-requests": "Workshop Requests",
+      "/admin/credit-plans": "Credit Plans",
+      "/admin/subscriptions": "Subscriptions",
+      "/admin/invoices": "Invoices",
+      "/admin/data-vault": "Magalela Data Vault",
       "/admin/narrative-engine": "AI Writing",
       "/admin/voice-calibrator": "AI Speech",
-      "/admin/invoices": "Invoices",
       "/admin/settings": "Settings",
       "/admin/analytics": "Analytics",
-      "/admin/subscriptions": "Subscriptions",
     };
     return titles[currentPath] || "Dashboard";
   };
 
   return (
     <>
-      <header 
+      {/* FIXED: header now spans full width on mobile (left-0), only shifts on lg+ */}
+      <header
         className={`bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 h-16 fixed top-0 right-0 z-40 transition-all duration-300 ${
-          isSidebarOpen ? 'left-[260px]' : 'left-[72px]'
+          isSidebarOpen ? "left-0 lg:left-[260px]" : "left-0 lg:left-[72px]"
         }`}
       >
         <div className="flex items-center justify-between h-full px-4 lg:px-8">
-          
           <div className="flex items-center gap-3">
             <button
               onClick={onMenuClick}
@@ -424,7 +401,6 @@ const AdminHeader = ({
             </div>
           </div>
 
-          
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
@@ -433,7 +409,6 @@ const AdminHeader = ({
               <Search className="w-5 h-5" />
             </button>
 
-            
             <div className="relative" ref={notificationRef}>
               <button
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
@@ -445,62 +420,72 @@ const AdminHeader = ({
                 )}
               </button>
 
-              {isNotificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                    <h3 className="font-semibold text-[#0F2D63] dark:text-white">Notifications</h3>
-                    
-                  </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    {notificationsLoading ? (
-                      <div className="flex items-center justify-center py-8">
-                        <div className="animate-spin w-6 h-6 border-2 border-[#C85A32] border-t-transparent rounded-full"></div>
-                      </div>
-                    ) : notifications.length > 0 ? (
-                      notifications.map((notification) => {
-                        const IconComponent = getNotificationIcon(notification.icon);
-                        return (
-                          <div
-                            key={notification.id}
-                            onClick={() => markAsRead(notification.id)}
-                            className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer ${
-                              !notification.read ? "bg-[#C85A32]/5 dark:bg-[#C85A32]/10" : ""
-                            }`}
-                          >
-                            <div className={`${notification.bgColor} rounded-lg p-2 shrink-0`}>
-                              <IconComponent className={`w-4 h-4 ${notification.color}`} />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-[#1C1C1C] dark:text-white truncate">
-                                {notification.title}
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                {notification.description}
-                              </p>
-                              <p className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {notification.time}
-                              </p>
-                            </div>
-                            {!notification.read && (
-                              <div className="w-2 h-2 bg-[#C85A32] rounded-full shrink-0 mt-2"></div>
-                            )}
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-8">
-                        <Bell className="w-8 h-8 text-gray-300 dark:text-gray-600 mb-2" />
-                        <p className="text-sm text-gray-500 dark:text-gray-400">No notifications</p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500">All caught up!</p>
-                      </div>
-                    )}
-                  </div>
-                  <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-2 text-center">
-                    
-                  </div>
-                </div>
-              )}
+{isNotificationsOpen && (
+  <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50">
+    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+      <h3 className="font-semibold text-[#0F2D63] dark:text-white">
+        Notifications
+      </h3>
+      {unreadCount > 0 && (
+        <button
+          onClick={markAllAsRead}
+          className="text-xs text-[#C85A32] hover:underline font-medium"
+        >
+          Mark all read
+        </button>
+      )}
+    </div>
+    <div className="max-h-80 overflow-y-auto">
+      {notificationsLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin w-6 h-6 border-2 border-[#C85A32] border-t-transparent rounded-full"></div>
+        </div>
+      ) : notifications.length > 0 ? (
+        notifications.map((notification) => {
+          const IconComponent = getNotificationIcon(notification.icon);
+          return (
+            <div
+              key={notification.id}
+              onClick={() => markAsRead(notification.id)}
+              className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer bg-[#C85A32]/5 dark:bg-[#C85A32]/10"
+            >
+              <div
+                className={`${notification.bgColor} rounded-lg p-2 shrink-0`}
+              >
+                <IconComponent
+                  className={`w-4 h-4 ${notification.color}`}
+                />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-[#1C1C1C] dark:text-white truncate">
+                  {notification.title}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  {notification.description}
+                </p>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {notification.time}
+                </p>
+              </div>
+              <div className="w-2 h-2 bg-[#C85A32] rounded-full shrink-0 mt-2"></div>
+            </div>
+          );
+        })
+      ) : (
+        <div className="flex flex-col items-center justify-center py-8">
+          <Bell className="w-8 h-8 text-gray-300 dark:text-gray-600 mb-2" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            No notifications
+          </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            All caught up!
+          </p>
+        </div>
+      )}
+    </div>
+  </div>
+)}
             </div>
 
             <Link
@@ -510,7 +495,6 @@ const AdminHeader = ({
               <Home className="w-4 h-4" />
             </Link>
 
-            
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -518,24 +502,28 @@ const AdminHeader = ({
                 disabled={loading}
               >
                 {userData.avatar ? (
-                  <img 
-                    src={userData.avatar} 
-                    alt={userData.name} 
-                    className="w-8 h-8 rounded-full object-cover" 
+                  <img
+                    src={userData.avatar}
+                    alt={userData.name}
+                    className="w-8 h-8 rounded-full object-cover"
                   />
                 ) : (
                   <div className="w-7 h-7 bg-[#0F2D63] rounded-full flex items-center justify-center">
                     <span className="text-white text-xs font-bold">
-                      {loading ? '...' : userData.initials}
+                      {loading ? "..." : userData.initials}
                     </span>
                   </div>
                 )}
                 <div className="hidden sm:block text-left">
                   <p className="text-sm font-medium text-[#1C1C1C] dark:text-white">
-                    {loading ? 'Loading...' : userData.name}
+                    {loading ? "Loading..." : userData.name}
                   </p>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-400 transition-transform ${
+                    isProfileOpen ? "rotate-180" : ""
+                  }`}
+                />
               </button>
 
               {isProfileOpen && (
@@ -576,7 +564,6 @@ const AdminHeader = ({
           </div>
         </div>
 
-        
         {isMobileSearchOpen && (
           <div className="md:hidden absolute top-16 left-0 right-0 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 p-3 shadow-lg">
             <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2">
@@ -587,7 +574,10 @@ const AdminHeader = ({
                 className="bg-transparent border-none outline-none text-sm text-gray-700 dark:text-gray-300 w-full"
                 autoFocus
               />
-              <button onClick={() => setIsMobileSearchOpen(false)} className="text-gray-400">
+              <button
+                onClick={() => setIsMobileSearchOpen(false)}
+                className="text-gray-400"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -595,7 +585,6 @@ const AdminHeader = ({
         )}
       </header>
 
-      
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-7 w-full max-w-sm shadow-xl">

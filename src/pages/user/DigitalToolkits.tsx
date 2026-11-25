@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Search,
@@ -40,7 +39,6 @@ const DigitalToolkits = () => {
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  
   const [toolkits, setToolkits] = useState<Toolkit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,10 +49,8 @@ const DigitalToolkits = () => {
 
   const fetchCalled = useRef(false);
 
-  
   const filterOptions = ['All', 'Template', 'Visual Kit', 'Guide', 'Video Course', 'Toolkit', 'Free Only'];
 
-  
   useEffect(() => {
     if (!fetchCalled.current) {
       fetchCalled.current = true;
@@ -68,21 +64,15 @@ const DigitalToolkits = () => {
 
     try {
       const token = localStorage.getItem("token");
-
       if (!token) {
         setError('Authentication required. Please login again.');
         setLoading(false);
         return;
       }
 
-      const response = await axios.get(
-        `${API_URL}/api/toolkits`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/toolkits`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (response.data.success) {
         const toolkitsData = response.data.data?.toolkits || response.data.data || [];
@@ -102,7 +92,6 @@ const DigitalToolkits = () => {
     }
   };
 
-  
   const getIconForType = (type: string): React.ReactNode => {
     const iconMap: Record<string, React.ReactNode> = {
       'Guide': <BookOpen className="w-5 h-5 text-[#C85A32]" />,
@@ -114,7 +103,6 @@ const DigitalToolkits = () => {
     return iconMap[type] || <FileText className="w-5 h-5 text-[#C85A32]" />;
   };
 
-  
   const getMockToolkits = (): Toolkit[] => {
     return [
       {
@@ -232,7 +220,6 @@ const DigitalToolkits = () => {
     ];
   };
 
-  
   const handleAddToCart = async (toolkit: Toolkit) => {
     if (!user) {
       setError('Please login to purchase toolkits');
@@ -244,14 +231,12 @@ const DigitalToolkits = () => {
 
     try {
       const token = localStorage.getItem("token");
-
       if (!token) {
         setError('Authentication required. Please login again.');
         setProcessingId(null);
         return;
       }
 
-      
       const orderData = {
         userEmail: user.email,
         billingInfo: {
@@ -275,7 +260,6 @@ const DigitalToolkits = () => {
         }]
       };
 
-      
       const response = await fetch(`${API_URL}/api/toolkit/create-order`, {
         method: 'POST',
         headers: {
@@ -296,19 +280,15 @@ const DigitalToolkits = () => {
         throw new Error(result.message || 'Payment initiation failed');
       }
 
-      
       if (result.success && result.orderId) {
         localStorage.setItem('pendingOrderId', result.orderId);
         localStorage.setItem('pendingPayment', 'true');
         localStorage.setItem('orderItems', JSON.stringify([toolkit]));
-        console.log('✅ Order ID stored in localStorage:', result.orderId);
-          
-  localStorage.setItem('toolkitReturnUrl', window.location.href);
+        localStorage.setItem('toolkitReturnUrl', window.location.href);
       }
 
       setSuccessMessage('Redirecting to payment...');
 
-      
       if (result.paymentUrl && result.paymentData) {
         const form = document.createElement('form');
         form.method = 'POST';
@@ -338,14 +318,11 @@ const DigitalToolkits = () => {
     }
   };
 
-  
   const handleFreeDownload = (toolkit: Toolkit) => {
-    console.log('Downloading free toolkit:', toolkit.id);
     setSuccessMessage(`Downloading ${toolkit.title}...`);
     setTimeout(() => setSuccessMessage(null), 3000);
   };
 
-  
   const getFilteredToolkits = () => {
     let filtered = toolkits;
 
@@ -370,7 +347,7 @@ const DigitalToolkits = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-4 sm:p-6 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 text-[#C85A32] animate-spin mx-auto mb-4" />
           <p className="text-gray-500 dark:text-gray-400">Loading toolkits...</p>
@@ -380,33 +357,32 @@ const DigitalToolkits = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900 p-3 sm:p-6">
       <div className="max-w-[1500px] mx-auto">
-        
-        <div className="flex items-start justify-between mb-6">
-          <div>
+
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5 sm:mb-6">
+          <div className="min-w-0">
             <p className="text-[#C85A32] text-xs font-semibold uppercase tracking-widest mb-1">
               Workspace
             </p>
-            <h1 className="text-2xl font-['Roboto'] font-bold text-[#0F2D63] dark:text-white">
+            <h1 className="text-xl sm:text-2xl font-bold text-[#0F2D63] dark:text-white">
               Digital Toolkits
             </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+            <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-1">
               Browse and download professional communication resources
             </p>
           </div>
 
-          
           {user && (
-            <div className="flex items-center gap-3 bg-white dark:bg-gray-800 rounded-xl px-4 py-2 border border-gray-100 dark:border-gray-700 shadow-sm">
-              <div className="w-8 h-8 rounded-full bg-[#C85A32]/10 flex items-center justify-center">
+            <div className="flex items-center gap-3 bg-white dark:bg-gray-800 rounded-xl px-3 sm:px-4 py-2 border border-gray-100 dark:border-gray-700 shadow-sm w-full sm:w-auto">
+              <div className="w-8 h-8 rounded-full bg-[#C85A32]/10 flex items-center justify-center flex-shrink-0">
                 <User className="w-4 h-4 text-[#C85A32]" />
               </div>
-              <div className="text-left">
-                <p className="text-xs font-semibold text-[#0F2D63] dark:text-white">
+              <div className="text-left min-w-0">
+                <p className="text-xs font-semibold text-[#0F2D63] dark:text-white truncate">
                   {user.name || 'User'}
                 </p>
-                <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate">
                   {user.email}
                 </p>
               </div>
@@ -414,25 +390,22 @@ const DigitalToolkits = () => {
           )}
         </div>
 
-        
         {successMessage && (
-          <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm mb-4">
-            <CheckCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{successMessage}</span>
+          <div className="flex items-start gap-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm mb-4">
+            <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span className="min-w-0 break-words">{successMessage}</span>
           </div>
         )}
 
-        
         {error && (
-          <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-4">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{error}</span>
+          <div className="flex items-start gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-4">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span className="min-w-0 break-words">{error}</span>
           </div>
         )}
 
-        
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-6 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-          <div className="relative flex-1">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-3 sm:p-4 mb-5 sm:mb-6 flex flex-col gap-3">
+          <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
@@ -442,16 +415,17 @@ const DigitalToolkits = () => {
               className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-[#C85A32] bg-gray-50 dark:bg-gray-900 dark:text-white placeholder-gray-400 transition-all"
             />
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Funnel className="w-4 h-4 text-gray-400" />
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1 [scrollbar-width:none]">
+            <Funnel className="w-4 h-4 text-gray-400 shrink-0" />
             {filterOptions.map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activeFilter === filter
-                  ? 'bg-[#C85A32] text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${
+                  activeFilter === filter
+                    ? 'bg-[#C85A32] text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
               >
                 {filter}
               </button>
@@ -459,37 +433,31 @@ const DigitalToolkits = () => {
           </div>
         </div>
 
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
           {filteredToolkits.length > 0 ? (
             filteredToolkits.map((toolkit) => (
               <div
                 key={toolkit.id}
-                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 flex flex-col hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 sm:p-5 flex flex-col hover:shadow-md transition-shadow"
               >
-                
                 <div className="w-10 h-10 bg-[#FFF8F5] dark:bg-[#C85A32]/10 rounded-xl flex items-center justify-center mb-3">
                   {getIconForType(toolkit.type)}
                 </div>
 
-                
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <h3 className="text-sm font-semibold text-[#0F2D63] dark:text-white leading-snug flex-1">
                     {toolkit.title}
                   </h3>
                 </div>
 
-                
                 <span className="text-[10px] text-gray-400 dark:text-gray-500 mb-2">
                   {toolkit.type}
                 </span>
 
-                
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 flex-1">
                   {toolkit.description}
                 </p>
 
-                
                 <div className="flex flex-wrap gap-1 mb-3">
                   {toolkit.tags.map((tag, index) => (
                     <span
@@ -501,7 +469,6 @@ const DigitalToolkits = () => {
                   ))}
                 </div>
 
-                
                 <div className="flex items-center gap-2 mb-3 text-xs text-gray-400 dark:text-gray-500">
                   <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
                   <span className="font-medium text-[#0F2D63] dark:text-white">{toolkit.rating}</span>
@@ -510,8 +477,7 @@ const DigitalToolkits = () => {
                   <span>{toolkit.downloads.toLocaleString()}</span>
                 </div>
 
-                
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <span className={`text-sm font-semibold ${toolkit.isFree ? 'text-green-600 dark:text-green-400' : 'text-[#0F2D63] dark:text-white'}`}>
                     {toolkit.isFree ? 'Free' : `R${toolkit.price}`}
                   </span>
@@ -542,10 +508,10 @@ const DigitalToolkits = () => {
             ))
           ) : (
             <div className="col-span-full text-center py-12">
-              <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-10 h-10 text-gray-400" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-[#0F2D63] dark:text-white mb-2">
+              <h3 className="text-base sm:text-lg font-semibold text-[#0F2D63] dark:text-white mb-2">
                 No toolkits found
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
@@ -555,7 +521,6 @@ const DigitalToolkits = () => {
           )}
         </div>
 
-        
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-4 px-1">
           {filteredToolkits.length} {filteredToolkits.length === 1 ? 'toolkit' : 'toolkits'} available
         </p>

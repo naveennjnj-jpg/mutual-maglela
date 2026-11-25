@@ -9,7 +9,6 @@ afterEach(() => {
   localStorage.clear();
 });
 
-// ---- Suppress expected test warnings ----
 
 const originalConsoleError = console.error;
 
@@ -19,17 +18,17 @@ beforeAll(() => {
       .map((arg) => (typeof arg === "string" ? arg : String(arg)))
       .join(" ");
 
-    // React act() warnings
+    
     if (message.includes("not wrapped in act")) {
       return;
     }
 
-    // React Router warnings for intentionally tested/missing routes
+
     if (message.includes("No routes matched location")) {
       return;
     }
 
-    // Keep all other console.error messages visible
+  
     originalConsoleError(...args);
   });
 });
@@ -38,7 +37,7 @@ afterAll(() => {
   vi.restoreAllMocks();
 });
 
-// ---- jsdom gaps ----
+
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
@@ -90,5 +89,5 @@ URL.createObjectURL = vi.fn(() => "blob:mock");
 
 URL.revokeObjectURL = vi.fn();
 
-// Silence noisy app console.log output in test runs
+
 vi.spyOn(console, "log").mockImplementation(() => {});

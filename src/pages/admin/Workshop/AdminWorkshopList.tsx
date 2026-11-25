@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -91,11 +90,9 @@ const AdminWorkshopList = () => {
         }
       );
 
-      console.log('Workshops response:', response.data);
-
       if (response.data.success) {
         let workshopsData: Workshop[] = [];
-        
+
         if (response.data.data === null) {
           workshopsData = [];
         } else if (Array.isArray(response.data.data)) {
@@ -103,7 +100,7 @@ const AdminWorkshopList = () => {
         } else if (typeof response.data.data === 'object') {
           workshopsData = [response.data.data];
         }
-        
+
         setWorkshops(workshopsData);
       } else {
         setError(response.data.message || 'Failed to load workshops');
@@ -119,12 +116,10 @@ const AdminWorkshopList = () => {
   const filterWorkshops = () => {
     let filtered = [...workshops];
 
-    
     if (activeTab !== 'all') {
       filtered = filtered.filter(w => w.status === activeTab);
     }
 
-    
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(w =>
@@ -197,18 +192,18 @@ const AdminWorkshopList = () => {
   };
 
   const getLocationIcon = (attendanceType: string) => {
-    return attendanceType === 'online' ? 
-      <Monitor className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" /> : 
+    return attendanceType === 'online' ?
+      <Monitor className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" /> :
       <MapPin className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />;
   };
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { 
-      day: 'numeric', 
-      month: 'short', 
-      year: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
     });
   };
 
@@ -237,19 +232,18 @@ const AdminWorkshopList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F6FB] p-6 space-y-5">
-      
+    <div className="min-h-screen bg-[#F4F6FB] p-3 sm:p-6 space-y-4 sm:space-y-5">
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-[#C85A32] mb-1">Operations</p>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-[#0F2D63]">Workshop Requests</h1>
-            <p className="text-sm text-gray-500 mt-0.5">All workshop enquiries submitted by users and guests</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-[#0F2D63]">Workshop Requests</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">All workshop enquiries submitted by users and guests</p>
           </div>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors w-full sm:w-auto shrink-0"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             Refresh
@@ -257,13 +251,12 @@ const AdminWorkshopList = () => {
         </div>
       </div>
 
-      
-      <div className="flex gap-1 bg-white border border-gray-100 rounded-2xl p-1.5 shadow-sm overflow-x-auto">
+      <div className="flex gap-1 bg-white border border-gray-100 rounded-2xl p-1.5 shadow-sm overflow-x-auto [scrollbar-width:none]">
         {['all', 'pending', 'upcoming', 'completed', 'cancelled'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
+            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
               activeTab === tab
                 ? 'bg-[#0F2D63] text-white shadow-sm'
                 : 'text-gray-500 hover:text-[#0F2D63]'
@@ -271,7 +264,7 @@ const AdminWorkshopList = () => {
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
             <span
-              className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
+              className={`text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full font-bold ${
                 activeTab === tab
                   ? 'bg-white/20 text-white'
                   : 'bg-gray-100 text-gray-500'
@@ -283,8 +276,7 @@ const AdminWorkshopList = () => {
         ))}
       </div>
 
-      
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 sm:p-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
           <input
@@ -297,121 +289,198 @@ const AdminWorkshopList = () => {
         </div>
       </div>
 
-      
       {error && (
         <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{error}</span>
-          <button onClick={handleRefresh} className="ml-auto text-red-700 font-semibold hover:underline">
+          <span className="min-w-0 break-words">{error}</span>
+          <button onClick={handleRefresh} className="ml-auto text-red-700 font-semibold hover:underline shrink-0">
             Retry
           </button>
         </div>
       )}
 
-      
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="hidden md:block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {filteredWorkshops.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Calendar className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-[#0F2D63] mb-2">No workshops found</h3>
-            <p className="text-sm text-gray-500">
-              {searchTerm ? `No workshops match "${searchTerm}"` : 'No workshop requests available'}
-            </p>
+          <EmptyState searchTerm={searchTerm} />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm table-fixed">
+              <thead>
+                <tr className="border-b border-gray-100 bg-[#f9fafb]">
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[32%]">
+                    Requester
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[26%]">
+                    Service
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[20%]">
+                    Details
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[12%]">
+                    Status
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[10%]">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {filteredWorkshops.map((workshop) => (
+                  <tr key={workshop._id} className="hover:bg-[#f9fafb] transition-colors">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-[#0F2D63] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                          {getInitials(workshop.firstName, workshop.lastName)}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <p className="font-semibold text-[#0F2D63] text-sm truncate">
+                              {workshop.firstName || 'Unknown'} {workshop.lastName || ''}
+                            </p>
+                            <span className={`flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                              workshop.userId ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'
+                            }`}>
+                              {workshop.userId ? 'Logged In' : 'Guest'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-400 truncate">{workshop.email || 'No email'}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-semibold border ${getServiceColor(workshop.serviceType)}`}>
+                        {getServiceIcon(workshop.serviceType)}
+                        <span className="truncate">{workshop.serviceType?.replace('-', ' ') || 'Workshop'}</span>
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="flex flex-col gap-1 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          {getLocationIcon(workshop.attendanceType)}
+                          <span className="capitalize">{workshop.attendanceType === 'online' ? 'online' : 'in-person'}</span>
+                          <span className="text-gray-300">·</span>
+                          <Clock className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                          {workshop.duration}h
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Users className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                          {workshop.participants || 0} attendees
+                        </span>
+                        {workshop.date && (
+                          <span className="flex items-center gap-1 text-[#0F2D63] font-medium">
+                            <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                            {formatDate(workshop.date)}
+                            {workshop.time && ` · ${formatTime(workshop.time)}`}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      {getStatusBadge(workshop.status)}
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      <button
+                        onClick={() => handleViewWorkshop(workshop._id)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors ml-auto"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="md:hidden flex flex-col gap-3">
+        {filteredWorkshops.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+            <EmptyState searchTerm={searchTerm} />
           </div>
         ) : (
-          <table className="w-full text-sm table-fixed">
-            <thead>
-              <tr className="border-b border-gray-100 bg-[#f9fafb]">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[32%]">
-                  Requester
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[26%]">
-                  Service
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[20%]">
-                  Details
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[12%]">
-                  Status
-                </th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-[10%]">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {filteredWorkshops.map((workshop) => (
-                <tr key={workshop._id} className="hover:bg-[#f9fafb] transition-colors">
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-full bg-[#0F2D63] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                        {getInitials(workshop.firstName, workshop.lastName)}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <p className="font-semibold text-[#0F2D63] text-sm truncate">
-                            {workshop.firstName || 'Unknown'} {workshop.lastName || ''}
-                          </p>
-                          <span className={`flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                            workshop.userId ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'
-                          }`}>
-                            {workshop.userId ? 'Logged In' : 'Guest'}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-400 truncate">{workshop.email || 'No email'}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-semibold border ${getServiceColor(workshop.serviceType)}`}>
-                      {getServiceIcon(workshop.serviceType)}
-                      <span className="truncate">{workshop.serviceType?.replace('-', ' ') || 'Workshop'}</span>
+          filteredWorkshops.map((workshop) => (
+            <div
+              key={workshop._id}
+              className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#0F2D63] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                  {getInitials(workshop.firstName, workshop.lastName)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="font-semibold text-[#0F2D63] text-sm truncate">
+                      {workshop.firstName || 'Unknown'} {workshop.lastName || ''}
+                    </p>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                      workshop.userId ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {workshop.userId ? 'Logged In' : 'Guest'}
                     </span>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <div className="flex flex-col gap-1 text-xs text-gray-500">
-                      <span className="flex items-center gap-1">
-                        {getLocationIcon(workshop.attendanceType)}
-                        <span className="capitalize">{workshop.attendanceType === 'online' ? 'online' : 'in-person'}</span>
-                        <span className="text-gray-300">·</span>
-                        <Clock className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                        {workshop.duration}h
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                        {workshop.participants || 0} attendees
-                      </span>
-                      {workshop.date && (
-                        <span className="flex items-center gap-1 text-[#0F2D63] font-medium">
-                          <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-                          {formatDate(workshop.date)}
-                          {workshop.time && ` · ${formatTime(workshop.time)}`}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    {getStatusBadge(workshop.status)}
-                  </td>
-                  <td className="px-4 py-3.5 text-right">
-                    <button
-                      onClick={() => handleViewWorkshop(workshop._id)}
-                      className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors ml-auto"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                  <p className="text-xs text-gray-400 truncate mt-0.5">{workshop.email || 'No email'}</p>
+                </div>
+                <div className="shrink-0">{getStatusBadge(workshop.status)}</div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-semibold border ${getServiceColor(workshop.serviceType)}`}>
+                  {getServiceIcon(workshop.serviceType)}
+                  <span className="truncate">{workshop.serviceType?.replace('-', ' ') || 'Workshop'}</span>
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mt-3 text-xs">
+                <div className="flex items-center gap-1.5 text-gray-500 min-w-0">
+                  {getLocationIcon(workshop.attendanceType)}
+                  <span className="capitalize truncate">{workshop.attendanceType === 'online' ? 'online' : 'in-person'}</span>
+                  <span className="text-gray-300">·</span>
+                  <Clock className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                  <span className="shrink-0">{workshop.duration}h</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-gray-500 min-w-0">
+                  <Users className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                  <span className="truncate">{workshop.participants || 0} attendees</span>
+                </div>
+                {workshop.date && (
+                  <div className="flex items-center gap-1.5 text-[#0F2D63] font-medium col-span-2 min-w-0">
+                    <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span className="truncate">
+                      {formatDate(workshop.date)}
+                      {workshop.time && ` · ${formatTime(workshop.time)}`}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={() => handleViewWorkshop(workshop._id)}
+                className="w-full flex items-center justify-center gap-1.5 mt-3 pt-3 border-t border-gray-100 text-xs font-semibold text-[#0F2D63] hover:text-[#C85A32] transition-colors"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                View Workshop
+              </button>
+            </div>
+          ))
         )}
       </div>
     </div>
   );
 };
+
+const EmptyState: React.FC<{ searchTerm: string }> = ({ searchTerm }) => (
+  <div className="text-center py-12">
+    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <Calendar className="w-8 h-8 text-gray-400" />
+    </div>
+    <h3 className="text-lg font-semibold text-[#0F2D63] mb-2">No workshops found</h3>
+    <p className="text-sm text-gray-500">
+      {searchTerm ? `No workshops match "${searchTerm}"` : 'No workshop requests available'}
+    </p>
+  </div>
+);
 
 export default AdminWorkshopList;

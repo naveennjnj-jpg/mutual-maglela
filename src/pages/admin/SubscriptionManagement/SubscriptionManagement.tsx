@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Plus,
@@ -81,12 +80,10 @@ const SubscriptionManagement = () => {
     isActive: true,
   });
 
-  
   useEffect(() => {
     fetchPlans();
   }, []);
 
-  
   useEffect(() => {
     if (success || error) {
       const timer = setTimeout(() => {
@@ -96,10 +93,6 @@ const SubscriptionManagement = () => {
       return () => clearTimeout(timer);
     }
   }, [success, error]);
-
-  
-  
-  
 
   const fetchPlans = async () => {
     setLoading(true);
@@ -209,10 +202,6 @@ const SubscriptionManagement = () => {
     }
   };
 
-  
-  
-  
-
   const getFeatureDisplay = (features: string[]) => {
     const displayCount = 3;
     const shownFeatures = features.slice(0, displayCount);
@@ -304,7 +293,7 @@ const SubscriptionManagement = () => {
       };
 
       const response = await createPlan(payload);
-      
+
       if (response.success) {
         setSuccess(response.message || "Plan created successfully");
         await fetchPlans();
@@ -349,7 +338,7 @@ const SubscriptionManagement = () => {
 
   const handleUpdatePlan = async () => {
     if (!editingPlan) return;
-    
+
     if (!formData.tier || !formData.name || !formData.monthlyPrice) {
       setError("Please fill in all required fields");
       return;
@@ -381,7 +370,7 @@ const SubscriptionManagement = () => {
       };
 
       const response = await updatePlan(editingPlan._id || editingPlan.id, payload);
-      
+
       if (response.success) {
         setSuccess(response.message || "Plan updated successfully");
         await fetchPlans();
@@ -407,7 +396,7 @@ const SubscriptionManagement = () => {
 
     try {
       const response = await deletePlan(planId);
-      
+
       if (response.success) {
         setSuccess(response.message || `Plan "${planName}" deleted successfully`);
         await fetchPlans();
@@ -487,17 +476,16 @@ const SubscriptionManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F6FB] p-6 space-y-6">
-      
-      <div className="flex items-start justify-between">
-        <div>
+    <div className="min-h-screen bg-[#F4F6FB] p-3 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-widest text-[#C85A32] mb-1">
             Credit Management
           </p>
-          <h1 className="text-2xl font-bold text-[#0F2D63]">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#0F2D63]">
             Subscription Management
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
             Manage the pricing plans shown on the public pricing page. Changes
             are live immediately.
           </p>
@@ -507,36 +495,34 @@ const SubscriptionManagement = () => {
             resetForm();
             setShowNewPlanModal(true);
           }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#0F2D63] text-white text-sm font-semibold rounded-xl hover:bg-[#0a2050] transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0F2D63] text-white text-sm font-semibold rounded-xl hover:bg-[#0a2050] transition-colors w-full sm:w-auto shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
           Add New Plan
         </button>
       </div>
 
-      
       {success && (
-        <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
-          <CheckCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{success}</span>
-          <button onClick={() => setSuccess(null)} className="ml-auto">
+        <div className="flex items-start gap-2 bg-green-50 border border-green-200 text-green-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm">
+          <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <span className="flex-1 min-w-0 break-words">{success}</span>
+          <button onClick={() => setSuccess(null)} className="shrink-0">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {error && (
-        <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{error}</span>
-          <button onClick={() => setError(null)} className="ml-auto">
+        <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm">
+          <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <span className="flex-1 min-w-0 break-words">{error}</span>
+          <button onClick={() => setError(null)} className="shrink-0">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
           <p className="text-2xl font-bold text-[#0F2D63]">{plans.length}</p>
           <p className="text-xs text-gray-500 mt-0.5">Total Plans</p>
@@ -555,15 +541,14 @@ const SubscriptionManagement = () => {
         </div>
       </div>
 
-      
       {plans.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 sm:p-12 text-center">
           <Coins className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500 font-medium">No subscription plans found</p>
           <p className="text-sm text-gray-400 mt-1">Create your first subscription plan</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {plans.map((plan) => {
             const isActive = plan.isActive;
             const isPopular = plan.isPopular;
@@ -577,17 +562,14 @@ const SubscriptionManagement = () => {
                 }`}
               >
                 {isPopular && <div className="h-1 bg-[#C85A32]" />}
-                <div className="p-5 flex gap-5 items-start">
-                  
-                  <div className="mt-1 text-gray-200 cursor-grab flex-shrink-0">
+                <div className="p-3 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-5 items-start">
+                  <div className="hidden sm:block mt-1 text-gray-200 cursor-grab flex-shrink-0">
                     <GripVertical className="w-[18px] h-[18px]" />
                   </div>
 
-                  
-                  <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
+                  <div className="flex-1 min-w-0 w-full grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
                           {plan.tier}
                         </span>
@@ -598,7 +580,7 @@ const SubscriptionManagement = () => {
                           </span>
                         )}
                       </div>
-                      <p className="font-bold text-[#0F2D63] text-base">
+                      <p className="font-bold text-[#0F2D63] text-base break-words">
                         {plan.name}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
@@ -606,24 +588,23 @@ const SubscriptionManagement = () => {
                       </p>
                     </div>
 
-                    
-                    <div className="space-y-2">
+                    <div className="space-y-2 min-w-0">
                       <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">
                         Pricing & Credits
                       </p>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <div className="flex items-center gap-1.5 bg-[#fff4f0] border border-[#f5c9b8] rounded-lg px-2.5 py-1">
                           <Coins className="w-3 h-3 text-[#C85A32]" />
                           <span className="text-xs font-bold text-[#C85A32]">
                             {plan.creditsMonthly} cr {plan.periodLabel}
                           </span>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1 w-fit">
-                        <Coins className="w-3 h-3 text-emerald-600" />
-                        <span className="text-xs font-bold text-emerald-700">
-                          {plan.creditsYearly} cr / yr
-                        </span>
+                        <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1">
+                          <Coins className="w-3 h-3 text-emerald-600" />
+                          <span className="text-xs font-bold text-emerald-700">
+                            {plan.creditsYearly} cr / yr
+                          </span>
+                        </div>
                       </div>
                       <p className="text-sm font-semibold text-[#0F2D63]">
                         {plan.monthlyPrice}{" "}
@@ -640,8 +621,7 @@ const SubscriptionManagement = () => {
                       </p>
                     </div>
 
-                    
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">
                         {(plan.features || []).length} Features
                       </p>
@@ -664,24 +644,22 @@ const SubscriptionManagement = () => {
                     </div>
                   </div>
 
-                  
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-1 flex-shrink-0 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 sm:border-transparent">
                     <button
                       onClick={() => handleTogglePopular(plan._id || plan.id, isPopular)}
-                      className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+                      className={`h-8 px-2.5 sm:w-8 sm:h-8 flex items-center justify-center gap-1 rounded-lg transition-colors ${
                         isPopular
                           ? "bg-[#fff4f0] text-[#C85A32]"
                           : "hover:bg-gray-100 text-gray-300"
                       }`}
                       title={isPopular ? "Unset as popular" : "Mark as popular"}
                     >
-                      <Star
-                        className={`w-3.5 h-3.5 ${isPopular ? "fill-[#C85A32]" : ""}`}
-                      />
+                      <Star className={`w-3.5 h-3.5 ${isPopular ? "fill-[#C85A32]" : ""}`} />
+                      <span className="text-xs sm:hidden">Popular</span>
                     </button>
                     <button
                       onClick={() => handleToggleActive(plan._id || plan.id, isActive)}
-                      className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+                      className={`h-8 px-2.5 sm:w-8 sm:h-8 flex items-center justify-center gap-1 rounded-lg transition-colors ${
                         isActive
                           ? "hover:bg-gray-100 text-gray-400"
                           : "hover:bg-gray-100 text-gray-300"
@@ -689,20 +667,23 @@ const SubscriptionManagement = () => {
                       title={isActive ? "Hide from users" : "Show to users"}
                     >
                       <Eye className="w-3.5 h-3.5" />
+                      <span className="text-xs sm:hidden">{isActive ? "Hide" : "Show"}</span>
                     </button>
                     <button
                       onClick={() => handleEditPlan(plan)}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors"
+                      className="h-8 px-2.5 sm:w-8 sm:h-8 flex items-center justify-center gap-1 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors"
                       title="Edit plan"
                     >
                       <Pencil className="w-3.5 h-3.5" />
+                      <span className="text-xs sm:hidden">Edit</span>
                     </button>
                     <button
                       onClick={() => handleDeletePlan(plan._id || plan.id, plan.name)}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                      className="h-8 px-2.5 sm:w-8 sm:h-8 flex items-center justify-center gap-1 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors ml-auto sm:ml-0"
                       title="Delete plan"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
+                      <span className="text-xs sm:hidden">Delete</span>
                     </button>
                   </div>
                 </div>
@@ -712,13 +693,11 @@ const SubscriptionManagement = () => {
         </div>
       )}
 
-      
       {showNewPlanModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            
-            <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
-              <h3 className="font-bold text-[#0F2D63] text-lg">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-2xl z-10">
+              <h3 className="font-bold text-[#0F2D63] text-base sm:text-lg">
                 {editingPlan ? "Edit Plan" : "Add New Plan"}
               </h3>
               <button
@@ -726,34 +705,31 @@ const SubscriptionManagement = () => {
                   setShowNewPlanModal(false);
                   resetForm();
                 }}
-                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400"
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 shrink-0"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            
-            <div className="p-6 space-y-5">
-              
+            <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
               {success && (
-                <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
-                  <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                  <span>{success}</span>
+                <div className="flex items-start gap-2 bg-green-50 border border-green-200 text-green-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm">
+                  <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span className="flex-1 min-w-0 break-words">{success}</span>
                 </div>
               )}
               {error && (
-                <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span>{error}</span>
+                <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span className="flex-1 min-w-0 break-words">{error}</span>
                 </div>
               )}
 
-              
               <div>
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
                   Plan Identity
                 </p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                       Tier Label *
@@ -783,47 +759,39 @@ const SubscriptionManagement = () => {
                 </div>
               </div>
 
-              
-              
               <div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                    Target Audience
-                  </label>
-                  <input
-                    type="text"
-                    name="audience"
-                    value={formData.audience}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Individual Academics & Early-Career Researchers"
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#0F2D63] bg-white"
-                  />
-                </div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  Target Audience
+                </label>
+                <input
+                  type="text"
+                  name="audience"
+                  value={formData.audience}
+                  onChange={handleInputChange}
+                  placeholder="e.g. Individual Academics & Early-Career Researchers"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#0F2D63] bg-white"
+                />
               </div>
 
-              
               <div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                    Who It's For
-                  </label>
-                  <input
-                    type="text"
-                    name="targetAudience"
-                    value={formData.targetAudience}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Postdocs, lecturers, and doctoral candidates..."
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#0F2D63] bg-white"
-                  />
-                </div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  Who It's For
+                </label>
+                <input
+                  type="text"
+                  name="targetAudience"
+                  value={formData.targetAudience}
+                  onChange={handleInputChange}
+                  placeholder="e.g. Postdocs, lecturers, and doctoral candidates..."
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#0F2D63] bg-white"
+                />
               </div>
 
-              
               <div>
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
                   Pricing & Credits
                 </p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                       Monthly Price *
@@ -876,7 +844,7 @@ const SubscriptionManagement = () => {
                       className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#0F2D63] bg-white"
                     />
                   </div>
-                  <div>
+                  <div className="sm:col-span-2">
                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                       Period Label
                     </label>
@@ -892,12 +860,11 @@ const SubscriptionManagement = () => {
                 </div>
               </div>
 
-              
               <div>
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
                   Call to Action
                 </p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                       Button Label
@@ -927,7 +894,6 @@ const SubscriptionManagement = () => {
                 </div>
               </div>
 
-              
               <div>
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
                   Features <span className="text-gray-300 font-normal normal-case tracking-normal">
@@ -943,15 +909,14 @@ const SubscriptionManagement = () => {
                 />
               </div>
 
-              
-              <div className="flex items-center gap-6 pt-1">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 pt-1">
                 <label className="flex items-center gap-2.5 cursor-pointer">
                   <input
                     type="checkbox"
                     name="isPopular"
                     checked={formData.isPopular}
                     onChange={handleCheckboxChange}
-                    className="w-4 h-4 rounded accent-[#C85A32]"
+                    className="w-4 h-4 rounded accent-[#C85A32] shrink-0"
                   />
                   <span className="text-sm text-gray-700 font-medium">
                     Mark as Most Popular
@@ -963,7 +928,7 @@ const SubscriptionManagement = () => {
                     name="isActive"
                     checked={formData.isActive}
                     onChange={handleCheckboxChange}
-                    className="w-4 h-4 rounded accent-[#0F2D63]"
+                    className="w-4 h-4 rounded accent-[#0F2D63] shrink-0"
                   />
                   <span className="text-sm text-gray-700 font-medium">
                     Active (visible on pricing page)
@@ -971,8 +936,7 @@ const SubscriptionManagement = () => {
                 </label>
               </div>
 
-              
-              <div className="flex gap-3 pt-2 border-t border-gray-100">
+              <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2 border-t border-gray-100">
                 <button
                   onClick={() => {
                     setShowNewPlanModal(false);

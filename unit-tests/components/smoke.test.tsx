@@ -1,7 +1,4 @@
-/**
- * Smoke tests: every module under src/components renders without throwing.
- * Network, auth and heavy third-party libs are mocked (see vi.mock below).
- */
+
 import { describe, it, expect, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";

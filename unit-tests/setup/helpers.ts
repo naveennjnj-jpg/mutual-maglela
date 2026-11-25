@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 
-/** Props that satisfy the common shapes (modals, forms, steps, lists). */
+
 export const genericProps: Record<string, any> = {
   open: true, isOpen: true, show: true, visible: true,
   onClose: vi.fn(), onOpenChange: vi.fn(), onSubmit: vi.fn(), onNext: vi.fn(), onBack: vi.fn(),
@@ -18,7 +18,7 @@ export const genericProps: Record<string, any> = {
 
 type Found = { label: string; Component: unknown };
 
-/** Collect every exported React component (function / forwardRef / memo) from a glob result. */
+
 export function collectComponents(modules: Record<string, any>, stripPrefix: string): Found[] {
   const out: Found[] = [];
   for (const [path, mod] of Object.entries(modules)) {
@@ -27,7 +27,7 @@ export function collectComponents(modules: Record<string, any>, stripPrefix: str
       typeof v === "function" || (v && typeof v === "object" && ("$$typeof" in v));
     const name = (k: string) => (k === "default" ? base : `${base} › ${k}`);
     for (const [k, v] of Object.entries(mod)) {
-      // Component names start with an uppercase letter or are the default export
+   
       if (isComp(v) && (k === "default" || /^[A-Z]/.test(k))) out.push({ label: name(k), Component: v });
     }
   }

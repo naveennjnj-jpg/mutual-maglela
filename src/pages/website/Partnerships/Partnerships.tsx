@@ -26,7 +26,7 @@ const Home = () => {
                 description="We partner with universities, research networks, NGOs, foundations, and corporate teams to build communications infrastructure that amplifies mission, builds trust, and drives lasting impact across Africa and beyond."
                 primaryButton={{
                     text: "Start Your Partnership",
-                    link: "/#partnerships"
+                    link: "/onboarding"
                 }}
                 secondaryButton={{
                     text: "View Case Studies",

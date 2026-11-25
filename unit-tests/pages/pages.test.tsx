@@ -1,4 +1,4 @@
-/** Smoke tests: every page under src/pages renders inside a router without throwing. */
+
 import { describe, it, expect, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
@@ -7,7 +7,7 @@ import { genericProps, collectComponents } from "../setup/helpers";
 
 const modules = import.meta.glob("../../src/pages/**/*.tsx", { eager: true });
 
-/** Add `"path/File.tsx": "reason"` for pages with a known source bug (marked it.fails). */
+
 const KNOWN_SOURCE_BUGS: Record<string, string> = {};
 
 describe("pages smoke", () => {

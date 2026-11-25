@@ -1,16 +1,29 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 import HeroSection from "@/components/Common/HeroSection";
 import StatsSection from "@/components/Common/StatsSection";
 import AboutCTA from "@/components/Partnerships/AboutCTA";
-import { useNavigate } from "react-router-dom";
 import ContactForm from "@/components/Contact/ContactForm";
 import GeneralFAQ from "@/components/Contact/GeneralFAQ";
 
-
-
 const Home = () => {
-    const navigate = useNavigate();
+    const location = useLocation();
+
+    // Scroll to hash section when URL changes (e.g. /#faq)
+    useEffect(() => {
+        if (location.hash) {
+            const id = location.hash.replace("#", "");
+            // Small delay to ensure the section is mounted
+            const timer = setTimeout(() => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [location]);
 
     return (
         <>
@@ -24,11 +37,10 @@ const Home = () => {
                 }}
                 secondaryButton={{
                     text: "View FAQs",
-                    link: "/#faq"
+                    link: "#faq"
                 }}
                 image="https://images.unsplash.com/photo-1638262052640-82e94d64664a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1400&q=80"
             />
-
 
             <StatsSection
                 stats={[

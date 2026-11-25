@@ -63,12 +63,12 @@ import Quotes from '@/pages/user/Quotes/Quotes';
 import Plans from '@/pages/user/Plans/Plans';
 import InvoicePaymentSuccess from '@/pages/user/Invoices/InvoicePaymentSuccess';
 import InvoicePaymentCancelled from '@/pages/user/Invoices/InvoicePaymentCancelled';
-import DataVault from '@/pages/user/Ai-writing/DataVault';       // apne folder ka path
+import DataVault from '@/pages/user/Ai-writing/DataVault';   
 import VoiceProfile from '@/pages/user/Ai-writing/VoiceProfile';
 
 
 import AdminDashboard from "@/pages/admin/Dashboard";
-import Users from "@/pages/admin/Users";
+import Users from "@/pages/admin/users/Users";
 import ManageExperts from "@/pages/admin/Manageexperts/ManageExperts";
 import CreateExpert from "@/pages/admin/Manageexperts/AddEditExpert";
 import AdminWorkshopList from "@/pages/admin/Workshop/AdminWorkshopList";
@@ -85,11 +85,12 @@ import SubscriptionManagement from "@/pages/admin/SubscriptionManagement/Subscri
 import InvoiceQuoteManagement from "@/pages/admin/InvoiceQuoteManagement/InvoiceQuoteManagement";
 import CreateInvoice from "@/pages/admin/InvoiceQuoteManagement/CreateInvoice";
 import CreateQuote from "@/pages/admin/InvoiceQuoteManagement/CreateQuote";
+import AdminDataVault from "@/pages/admin/DataVault/AdminDataVault";
 
 const AppRoutes = () => {
   return (
     <Routes>
-      
+
       <Route path="/" element={<WebsiteLayout />}>
         <Route index element={<Home />} />
         <Route path="about" element={<AboutUs />} />
@@ -115,7 +116,7 @@ const AppRoutes = () => {
 
       </Route>
 
-      
+
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/onboarding" element={<CreateAccount />} />
@@ -123,7 +124,7 @@ const AppRoutes = () => {
         <Route path="/reset-password" element={<ResetPassword />} />
       </Route>
 
-      
+
       <Route path="/user" element={
         <ProtectedRoute>
           <UserLayout />
@@ -156,9 +157,10 @@ const AppRoutes = () => {
         <Route path="invoice-cancelled" element={<InvoicePaymentCancelled />} />
         <Route path="data-vault" element={<DataVault />} />
         <Route path="voice-profile" element={<VoiceProfile />} />
+
       </Route>
 
-      
+
       <Route path="/admin" element={
         <ProtectedRoute adminOnly={true}>
           <AdminLayout />
@@ -184,6 +186,7 @@ const AppRoutes = () => {
         <Route path="/admin/create-quote" element={<CreateQuote />} />
         <Route path="/admin/create-invoice" element={<CreateInvoice />} />
         <Route path="/admin/help" element={<HelpCenter />} />
+        <Route path="/admin/data-vault" element={<AdminDataVault />} />
       </Route>
     </Routes>
   );

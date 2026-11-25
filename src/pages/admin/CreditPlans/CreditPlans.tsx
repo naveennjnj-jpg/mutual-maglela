@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Plus,
@@ -11,6 +10,9 @@ import {
   Crown,
   X,
   Loader2,
+  ArrowUp,
+  ArrowDown,
+  Hash,
 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
@@ -21,12 +23,20 @@ interface CreditPlan {
   name: string;
   credits: number;
   price: number;
-  billingType: "once" | "monthly" | "annual" | "One-time" | "Recurring" | "Monthly" | "Yearly";
+  billingType:
+    | "once"
+    | "monthly"
+    | "annual"
+    | "One-time"
+    | "Recurring"
+    | "Monthly"
+    | "Yearly";
   description: string;
   features: string[];
   isPopular: boolean;
   isActive: boolean;
   accentColor: string;
+  displayOrder?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -41,6 +51,7 @@ interface NewPlanFormData {
   accentColor: string;
   isPopular: boolean;
   isActive: boolean;
+  displayOrder: number;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -83,6 +94,7 @@ const CreditPlans = () => {
     accentColor: "#4f6ef7",
     isPopular: false,
     isActive: true,
+    displayOrder: 0,
   });
   const [featuresText, setFeaturesText] = useState("");
 
@@ -95,7 +107,12 @@ const CreditPlans = () => {
     try {
       const response = await planService.getPlans();
       if (response.success) {
-        setPlans(response.data);
+     
+        const sorted = [...response.data].sort(
+          (a: CreditPlan, b: CreditPlan) =>
+            (a.displayOrder ?? 0) - (b.displayOrder ?? 0)
+        );
+        setPlans(sorted);
       } else {
         toast.error(response.message || "Failed to fetch plans");
       }
@@ -116,12 +133,19 @@ const CreditPlans = () => {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "number" ? parseFloat(value) || 0 : value,
+      [name]:
+        type === "number"
+          ? value === ""
+            ? 0
+            : parseFloat(value) || 0
+          : value,
     }));
   };
 
@@ -150,8 +174,28 @@ const CreditPlans = () => {
     }));
   };
 
+  const buildPayload = () => {
+    const billingTypeMap: Record<string, string> = {
+      once: "One-time",
+      monthly: "Monthly",
+      annual: "Yearly",
+    };
+
+    return {
+      name: formData.name.trim(),
+      billingType: billingTypeMap[formData.billingType] || "One-time",
+      credits: Number(formData.credits),
+      price: Number(formData.price),
+      description: formData.description?.trim() || "",
+      features: formData.features.filter((f) => f.trim() !== ""),
+      accentColor: formData.accentColor || "#4f6ef7",
+      isPopular: Boolean(formData.isPopular),
+      isActive: Boolean(formData.isActive),
+      displayOrder: Number(formData.displayOrder) || 0, 
+    };
+  };
+
   const handleCreatePlan = async () => {
-    
     if (!formData.name || formData.name.trim() === "") {
       toast.error("Plan name is required");
       return;
@@ -166,29 +210,9 @@ const CreditPlans = () => {
     }
 
     try {
-      
-      const billingTypeMap: Record<string, string> = {
-        once: "One-time",
-        monthly: "Monthly",
-        annual: "Yearly",
-      };
-
-      const payload = {
-        name: formData.name.trim(),
-        billingType: billingTypeMap[formData.billingType] || "One-time",
-        credits: Number(formData.credits),
-        price: Number(formData.price),
-        description: formData.description?.trim() || "",
-        features: formData.features.filter(f => f.trim() !== ""),
-        accentColor: formData.accentColor || "#4f6ef7",
-        isPopular: Boolean(formData.isPopular),
-        isActive: Boolean(formData.isActive),
-      };
-
-      console.log("Sending payload:", payload); 
-
+      const payload = buildPayload();
       const response = await planService.createPlan(payload);
-      
+
       if (response.success) {
         toast.success("Plan created successfully");
         await fetchPlans();
@@ -209,8 +233,12 @@ const CreditPlans = () => {
       setEditingPlan(plan);
       setFormData({
         name: plan.name,
-        billingType: plan.billingType === "One-time" ? "once" : 
-                     plan.billingType === "Monthly" ? "monthly" : "annual",
+        billingType:
+          plan.billingType === "One-time"
+            ? "once"
+            : plan.billingType === "Monthly"
+            ? "monthly"
+            : "annual",
         credits: plan.credits,
         price: plan.price,
         description: plan.description || "",
@@ -218,6 +246,7 @@ const CreditPlans = () => {
         accentColor: plan.accentColor || "#4f6ef7",
         isPopular: plan.isPopular || false,
         isActive: plan.isActive !== undefined ? plan.isActive : true,
+        displayOrder: plan.displayOrder ?? 0,
       });
       setFeaturesText((plan.features || []).join("\n"));
       setShowNewPlanModal(true);
@@ -241,26 +270,9 @@ const CreditPlans = () => {
     }
 
     try {
-      const billingTypeMap: Record<string, string> = {
-        once: "One-time",
-        monthly: "Monthly",
-        annual: "Yearly",
-      };
-
-      const payload = {
-        name: formData.name.trim(),
-        billingType: billingTypeMap[formData.billingType] || "One-time",
-        credits: Number(formData.credits),
-        price: Number(formData.price),
-        description: formData.description?.trim() || "",
-        features: formData.features.filter(f => f.trim() !== ""),
-        accentColor: formData.accentColor || "#4f6ef7",
-        isPopular: Boolean(formData.isPopular),
-        isActive: Boolean(formData.isActive),
-      };
-
+      const payload = buildPayload();
       const response = await planService.updatePlan(editingPlan._id, payload);
-      
+
       if (response.success) {
         toast.success("Plan updated successfully");
         await fetchPlans();
@@ -281,7 +293,7 @@ const CreditPlans = () => {
 
     try {
       const response = await planService.deletePlan(planId);
-      
+
       if (response.success) {
         toast.success("Plan deleted successfully");
         await fetchPlans();
@@ -297,9 +309,11 @@ const CreditPlans = () => {
   const handleToggleStatus = async (planId: string, currentStatus: boolean) => {
     try {
       const response = await planService.togglePlanStatus(planId, !currentStatus);
-      
+
       if (response.success) {
-        toast.success(`Plan ${!currentStatus ? "activated" : "deactivated"} successfully`);
+        toast.success(
+          `Plan ${!currentStatus ? "activated" : "deactivated"} successfully`
+        );
         await fetchPlans();
       } else {
         toast.error(response.message || "Failed to update plan status");
@@ -307,6 +321,42 @@ const CreditPlans = () => {
     } catch (error: any) {
       console.error("Error updating plan status:", error);
       toast.error(error.response?.data?.message || "Failed to update plan status");
+    }
+  };
+
+
+  const handleMovePlan = async (planId: string, direction: "up" | "down") => {
+    const currentIndex = plans.findIndex((p) => p._id === planId);
+    if (currentIndex === -1) return;
+
+    const swapIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (swapIndex < 0 || swapIndex >= plans.length) return;
+
+    const current = plans[currentIndex];
+    const swapWith = plans[swapIndex];
+
+    const currentOrder = current.displayOrder ?? currentIndex;
+    const swapOrder = swapWith.displayOrder ?? swapIndex;
+
+    try {
+
+      const newPlans = [...plans];
+      newPlans[currentIndex] = { ...current, displayOrder: swapOrder };
+      newPlans[swapIndex] = { ...swapWith, displayOrder: currentOrder };
+      setPlans(newPlans.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)));
+
+   
+      await Promise.all([
+        planService.updatePlan(current._id, { displayOrder: swapOrder }),
+        planService.updatePlan(swapWith._id, { displayOrder: currentOrder }),
+      ]);
+
+      toast.success("Order updated");
+      await fetchPlans();
+    } catch (error: any) {
+      console.error("Error reordering:", error);
+      toast.error("Failed to update order");
+      await fetchPlans();
     }
   };
 
@@ -321,6 +371,7 @@ const CreditPlans = () => {
       accentColor: "#4f6ef7",
       isPopular: false,
       isActive: true,
+      displayOrder: 0,
     });
     setFeaturesText("");
     setEditingPlan(null);
@@ -352,7 +403,7 @@ const CreditPlans = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F6FB] p-6 space-y-5">
-      
+      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-[#C85A32] mb-1">
@@ -375,7 +426,7 @@ const CreditPlans = () => {
         </button>
       </div>
 
-      
+      {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
           <p className="text-2xl font-bold text-[#0F2D63]">{plans.length}</p>
@@ -393,18 +444,22 @@ const CreditPlans = () => {
         </div>
       </div>
 
-      
+      {/* Plans Grid */}
       {plans.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
           <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500 font-medium">No credit plans found</p>
-          <p className="text-sm text-gray-400 mt-1">Create your first credit plan to get started</p>
+          <p className="text-sm text-gray-400 mt-1">
+            Create your first credit plan to get started
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {plans.map((plan) => {
+          {plans.map((plan, index) => {
             const isActive = plan.isActive;
             const isPopular = plan.isPopular;
+            const isFirst = index === 0;
+            const isLast = index === plans.length - 1;
 
             return (
               <div
@@ -417,6 +472,7 @@ const CreditPlans = () => {
                   <div className="h-1" style={{ background: plan.accentColor }} />
                 )}
                 <div className="p-5 space-y-4">
+                  {/* Card header */}
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2.5">
                       <div
@@ -445,9 +501,42 @@ const CreditPlans = () => {
                             </span>
                           )}
                         </div>
+                        {/* 🔥 Display Order Badge */}
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <Hash className="w-2.5 h-2.5 text-gray-400" />
+                          <span className="text-[10px] text-gray-400 font-medium">
+                            Order: {plan.displayOrder ?? 0}
+                          </span>
+                        </div>
                       </div>
                     </div>
+
                     <div className="flex items-center gap-1">
+                      {/* 🔥 Reorder buttons */}
+                      <button
+                        onClick={() => handleMovePlan(plan._id, "up")}
+                        disabled={isFirst}
+                        title="Move up"
+                        className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${
+                          isFirst
+                            ? "text-gray-200 cursor-not-allowed"
+                            : "text-gray-400 hover:bg-gray-100 hover:text-[#0F2D63]"
+                        }`}
+                      >
+                        <ArrowUp className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleMovePlan(plan._id, "down")}
+                        disabled={isLast}
+                        title="Move down"
+                        className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${
+                          isLast
+                            ? "text-gray-200 cursor-not-allowed"
+                            : "text-gray-400 hover:bg-gray-100 hover:text-[#0F2D63]"
+                        }`}
+                      >
+                        <ArrowDown className="w-3.5 h-3.5" />
+                      </button>
                       <button
                         onClick={() => handleEditPlan(plan._id)}
                         className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 transition-colors"
@@ -463,6 +552,7 @@ const CreditPlans = () => {
                     </div>
                   </div>
 
+                  {/* Pricing */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-1.5 bg-[#fff4f0] border border-[#f5c9b8] rounded-xl px-3 py-2 w-fit">
                       <Coins className="w-3.5 h-3.5 text-[#C85A32]" />
@@ -470,7 +560,11 @@ const CreditPlans = () => {
                         {plan.credits}
                       </span>
                       <span className="text-xs text-[#C85A32]/70 font-medium">
-                        credits {plan.billingType === "One-time" || plan.billingType === "once" ? "One-time" : `/ ${plan.billingType}`}
+                        credits{" "}
+                        {plan.billingType === "One-time" ||
+                        plan.billingType === "once"
+                          ? "One-time"
+                          : `/ ${plan.billingType}`}
                       </span>
                     </div>
                     <p className="text-2xl font-bold text-[#0F2D63]">
@@ -484,29 +578,35 @@ const CreditPlans = () => {
                     </p>
                   </div>
 
+                  {/* Features */}
                   <div className="space-y-1.5">
-                    {plan.features && plan.features.map((feature, index) => (
-                      <div key={index} className="flex items-center gap-2 text-xs text-gray-600">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="11"
-                          height="11"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="lucide lucide-check flex-shrink-0"
-                          style={{ color: plan.accentColor }}
+                    {plan.features &&
+                      plan.features.map((feature, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-2 text-xs text-gray-600"
                         >
-                          <path d="M20 6 9 17l-5-5" />
-                        </svg>
-                        {feature}
-                      </div>
-                    ))}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="11"
+                            height="11"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="lucide lucide-check flex-shrink-0"
+                            style={{ color: plan.accentColor }}
+                          >
+                            <path d="M20 6 9 17l-5-5" />
+                          </svg>
+                          {feature}
+                        </div>
+                      ))}
                   </div>
 
+                  {/* Footer */}
                   <div className="flex items-center justify-between pt-2 border-t border-gray-50">
                     <span
                       className={`text-xs font-medium ${
@@ -533,7 +633,7 @@ const CreditPlans = () => {
         </div>
       )}
 
-      
+      {/* New / Edit Plan Modal */}
       {showNewPlanModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
@@ -611,6 +711,30 @@ const CreditPlans = () => {
                     className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#0F2D63]"
                   />
                 </div>
+              </div>
+
+              {/* 🔥 Display Order field */}
+              <div>
+                <label className="text-xs font-medium text-gray-600 mb-1 block">
+                  Display Order
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 flex-1 border border-gray-200 rounded-xl px-3 py-2">
+                    <Hash className="w-3.5 h-3.5 text-gray-400" />
+                    <input
+                      type="number"
+                      name="displayOrder"
+                      value={formData.displayOrder || 0}
+                      onChange={handleInputChange}
+                      min={0}
+                      placeholder="0"
+                      className="w-full text-sm focus:outline-none"
+                    />
+                  </div>
+                </div>
+<p className="text-[10px] text-gray-400 mt-1">
+  Lower numbers appear first. Plans will be sorted in ascending order based on this number.
+</p>
               </div>
 
               <div>

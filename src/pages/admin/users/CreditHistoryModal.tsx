@@ -117,7 +117,7 @@ const CreditHistoryModal: React.FC<Props> = ({
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-3 sm:p-4">
       <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
-      
+        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-widest text-[#C85A32]">
@@ -135,7 +135,7 @@ const CreditHistoryModal: React.FC<Props> = ({
           </button>
         </div>
 
-       
+        {/* Filters */}
         <div className="px-5 py-3 border-b border-gray-50 flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
             {[7, 30, 90].map((d) => (
@@ -169,7 +169,7 @@ const CreditHistoryModal: React.FC<Props> = ({
           </div>
         </div>
 
-      
+        {/* Body */}
         <div className="flex-1 overflow-y-auto p-5">
           {loading ? (
             <div className="flex justify-center py-12">
@@ -189,7 +189,7 @@ const CreditHistoryModal: React.FC<Props> = ({
             </div>
           ) : data ? (
             <>
-           
+              {/* Summary cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
                 <div className="bg-[#FFF8F5] border border-[#C85A32]/20 rounded-xl p-3">
                   <p className="text-[10px] font-semibold uppercase text-[#C85A32]">
@@ -227,7 +227,7 @@ const CreditHistoryModal: React.FC<Props> = ({
                 </div>
               </div>
 
-           
+              {/* Daily list */}
               <div className="space-y-2">
                 {data.history.map((group) => (
                   <div

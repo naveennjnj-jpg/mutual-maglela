@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 import * as React from "react";
 
-// ---- Auth: authenticated admin by default so every guarded UI can render ----
+
 export const mockAuth = {
   user: { id: "1", name: "Test User", email: "test@example.com", role: "admin", accountType: "individual", isVerified: true, createdAt: "2024-01-01", credits: 10 },
   loading: false, error: null, isAuthenticated: true,

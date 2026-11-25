@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -11,9 +10,6 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
-
-
-
 
 
 interface PlanFeature {
@@ -46,6 +42,7 @@ interface PricingPlan {
     price: string;
     priceLabel: string;
     amount: number;
+    displayOrder?: number;
   };
   yearly: {
     credits: number;
@@ -53,6 +50,7 @@ interface PricingPlan {
     priceLabel: string;
     savings?: string;
     amount: number;
+    displayOrder?: number;
   };
   features: PlanFeature[];
   isPopular?: boolean;
@@ -85,22 +83,18 @@ interface UserData {
 }
 
 
-
-
-
 const AddCredits = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  
-  
-  
-
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
+    "monthly"
+  );
   const [currentBalance, setCurrentBalance] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userBillingInfo, setUserBillingInfo] = useState<UserBillingInfo | null>(null);
+  const [userBillingInfo, setUserBillingInfo] =
+    useState<UserBillingInfo | null>(null);
   const [fetchingUser, setFetchingUser] = useState(true);
   const [apiPlans, setApiPlans] = useState<ApiPlan[]>([]);
   const [fetchingPlans, setFetchingPlans] = useState(true);
@@ -108,15 +102,14 @@ const AddCredits = () => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
   
-  
-  
-
   useEffect(() => {
     const fetchPlans = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/user/credit-plans`);
         if (response.data.success) {
-          const activePlans = response.data.data.filter((plan: ApiPlan) => plan.isActive);
+          const activePlans = response.data.data.filter(
+            (plan: ApiPlan) => plan.isActive
+          );
           setApiPlans(activePlans);
         }
       } catch (error) {
@@ -130,31 +123,29 @@ const AddCredits = () => {
   }, [API_URL]);
 
   
-  
-  
-
   useEffect(() => {
     const fetchUserBillingInfo = async () => {
       try {
         const token = localStorage.getItem("token");
-
         if (!token) {
           setFetchingUser(false);
           return;
         }
 
         const response = await axios.get(`${API_URL}/api/auth/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.data.success) {
           const userData = response.data.data;
 
           setUserBillingInfo({
-            firstName: userData.firstName || userData.name?.split(' ')[0] || "",
-            lastName: userData.lastName || userData.name?.split(' ').slice(1).join(' ') || "",
+            firstName:
+              userData.firstName || userData.name?.split(" ")[0] || "",
+            lastName:
+              userData.lastName ||
+              userData.name?.split(" ").slice(1).join(" ") ||
+              "",
             email: userData.email || "",
             phone: userData.phone || userData.mobile || "",
             company: userData.company || userData.organization || "",
@@ -171,15 +162,17 @@ const AddCredits = () => {
       } catch (err: any) {
         console.error("Error fetching user info:", err);
         if (user) {
-          const userName = ((user as any).name || (user as any).displayName || "").trim();
+          const userName = (
+            (user as any).name ||
+            (user as any).displayName ||
+            ""
+          ).trim();
           const nameParts = userName.split(/\s+/);
-
-          const firstName = (user as any).firstName || nameParts[0] || "";
+          const firstName =
+            (user as any).firstName || nameParts[0] || "";
           const lastName =
             (user as any).lastName ||
-            (nameParts.length > 1
-              ? nameParts.slice(1).join(" ")
-              : firstName);
+            (nameParts.length > 1 ? nameParts.slice(1).join(" ") : firstName);
 
           setUserBillingInfo({
             firstName,
@@ -197,66 +190,66 @@ const AddCredits = () => {
     fetchUserBillingInfo();
   }, [user, API_URL]);
 
-  
+
   const [userData, setUserData] = useState<UserData>({
-    id: '',
-    name: 'User',
-    email: 'user@email.com',
-    role: 'user',
+    id: "",
+    name: "User",
+    email: "user@email.com",
+    role: "user",
     credits: 0,
-    initials: 'U'
+    initials: "U",
   });
 
-  
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem('token');
-
+        const token = localStorage.getItem("token");
         if (!token) {
           setLoading(false);
           return;
         }
 
         const response = await axios.get(`${API_URL}/api/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.data.success && response.data.data) {
           const data = response.data.data;
-
-          const nameParts = data.name?.split(' ') || ['U'];
+          const nameParts = data.name?.split(" ") || ["U"];
           const initials = nameParts
             .map((part: string) => part.charAt(0).toUpperCase())
-            .join('')
+            .join("")
             .slice(0, 2);
 
           setUserData({
             id: data.id || data._id,
-            name: data.name || 'User',
-            email: data.email || 'user@email.com',
-            role: data.role || 'user',
+            name: data.name || "User",
+            email: data.email || "user@email.com",
+            role: data.role || "user",
             avatar: data.avatar || data.profileImage,
-            theme: data.theme || 'light',
+            theme: data.theme || "light",
             credits: data.credits || data.creditsBalance || 0,
-            initials: initials || 'U'
+            initials: initials || "U",
           });
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        const savedName = localStorage.getItem('userName') || 'User';
-        const savedEmail = localStorage.getItem('userEmail') || 'user@email.com';
-        const savedCredits = parseInt(localStorage.getItem('userCredits') || '0');
-        const savedInitials = savedName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+        console.error("Error fetching user data:", error);
+        const savedName = localStorage.getItem("userName") || "User";
+        const savedEmail = localStorage.getItem("userEmail") || "user@email.com";
+        const savedCredits = parseInt(localStorage.getItem("userCredits") || "0");
+        const savedInitials = savedName
+          .split(" ")
+          .map((n: string) => n[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2);
 
-        setUserData(prev => ({
+        setUserData((prev) => ({
           ...prev,
           name: savedName,
           email: savedEmail,
           credits: savedCredits,
-          initials: savedInitials
+          initials: savedInitials,
         }));
       } finally {
         setLoading(false);
@@ -266,29 +259,24 @@ const AddCredits = () => {
     fetchUserData();
   }, []);
 
-  
-  
-  
 
   const transformPlans = (): PricingPlan[] => {
-    
+
     const planGroups: Record<string, ApiPlan[]> = {};
-    
-    apiPlans.forEach(plan => {
-      if (!planGroups[plan.name]) {
-        planGroups[plan.name] = [];
-      }
+    apiPlans.forEach((plan) => {
+      if (!planGroups[plan.name]) planGroups[plan.name] = [];
       planGroups[plan.name].push(plan);
     });
 
     const result: PricingPlan[] = [];
 
-    Object.keys(planGroups).forEach(name => {
+    Object.keys(planGroups).forEach((name) => {
       const group = planGroups[name];
-      const monthlyPlan = group.find(p => p.billingType === "Monthly" || p.billingType === "One-time");
-      const yearlyPlan = group.find(p => p.billingType === "Yearly");
+      const monthlyPlan = group.find(
+        (p) => p.billingType === "Monthly" || p.billingType === "One-time"
+      );
+      const yearlyPlan = group.find((p) => p.billingType === "Yearly");
 
-      
       let type: "basic" | "pro" | "enterprise" = "basic";
       let subtitle = "Basic";
       let buttonVariant: "primary" | "outline" = "outline";
@@ -298,36 +286,45 @@ const AddCredits = () => {
         type = "pro";
         subtitle = "Pro";
         buttonVariant = "primary";
-        buttonText = "Get Started";
       } else if (name.toLowerCase().includes("enterprise")) {
         type = "enterprise";
         subtitle = "Enterprise";
         buttonVariant = "outline";
         buttonText = "Contact Sales";
-      } else if (name.toLowerCase().includes("individual") || name.toLowerCase().includes("scholar")) {
+      } else if (
+        name.toLowerCase().includes("individual") ||
+        name.toLowerCase().includes("scholar")
+      ) {
         type = "basic";
         subtitle = "Basic";
-        buttonVariant = "outline";
-        buttonText = "Get Started";
       }
 
-      
-      const features: PlanFeature[] = (monthlyPlan?.features || yearlyPlan?.features || []).map((text, index) => ({
+   
+      const rawFeatures = Array.from(
+        new Set([
+          ...(monthlyPlan?.features || []),
+          ...(yearlyPlan?.features || []),
+        ])
+      );
+      const features: PlanFeature[] = rawFeatures.map((text, index) => ({
         id: `f${index}`,
-        text: text,
+        text,
       }));
 
       result.push({
-        id: name.toLowerCase().replace(/\s+/g, '-'),
-        name: name,
-        subtitle: subtitle,
-        description: monthlyPlan?.description || yearlyPlan?.description || "",
-        targetAudience: monthlyPlan?.description || yearlyPlan?.description || "",
+        id: name.toLowerCase().replace(/\s+/g, "-"),
+        name,
+        subtitle,
+        description:
+          monthlyPlan?.description || yearlyPlan?.description || "",
+        targetAudience:
+          monthlyPlan?.description || yearlyPlan?.description || "",
         monthly: {
           credits: monthlyPlan?.credits || 0,
           price: `R ${(monthlyPlan?.price || 0).toLocaleString()}`,
           priceLabel: "per month",
           amount: monthlyPlan?.price || 0,
+          displayOrder: monthlyPlan?.displayOrder ?? 999,
         },
         yearly: {
           credits: yearlyPlan?.credits || 0,
@@ -335,30 +332,48 @@ const AddCredits = () => {
           priceLabel: "per year",
           savings: yearlyPlan ? "Save 20%" : undefined,
           amount: yearlyPlan?.price || 0,
+          displayOrder: yearlyPlan?.displayOrder ?? 999,
         },
-        features: features,
+        features,
         isPopular: monthlyPlan?.isPopular || yearlyPlan?.isPopular || false,
-        type: type,
-        buttonText: buttonText,
-        buttonVariant: buttonVariant,
+        type,
+        buttonText,
+        buttonVariant,
       });
     });
 
-    
+
     result.sort((a, b) => {
+      const aOrder =
+        billingCycle === "monthly"
+          ? a.monthly.displayOrder ?? 999
+          : a.yearly.displayOrder ?? 999;
+      const bOrder =
+        billingCycle === "monthly"
+          ? b.monthly.displayOrder ?? 999
+          : b.yearly.displayOrder ?? 999;
+
+    
+      if (aOrder !== bOrder) return aOrder - bOrder;
+
+    
       if (a.isPopular && !b.isPopular) return -1;
       if (!a.isPopular && b.isPopular) return 1;
-      return (a.monthly.amount || 0) - (b.monthly.amount || 0);
+
+   
+      return a.name.localeCompare(b.name);
     });
 
     return result;
   };
 
-  const plans = transformPlans();
 
+  const plans = useMemo(
+    () => transformPlans(),
+    [apiPlans, billingCycle]
   
-  
-  
+  );
+
 
   const handleBack = () => {
     navigate("/user");
@@ -369,7 +384,6 @@ const AddCredits = () => {
   };
 
   const handleGetStarted = async (planId: string) => {
-    
     if (planId === "enterprise" || planId === "organisation") {
       navigate("/contact");
       return;
@@ -380,26 +394,27 @@ const AddCredits = () => {
 
     try {
       const token = localStorage.getItem("token");
-
       if (!token) {
         setError("Please login to continue");
         return;
       }
 
       const billingData = userBillingInfo;
-
       if (!billingData || !billingData.email) {
-        setError("User billing information not available. Please update your profile.");
+        setError(
+          "User billing information not available. Please update your profile."
+        );
         return;
       }
 
-      const plan = plans.find(p => p.id === planId);
+      const plan = plans.find((p) => p.id === planId);
       if (!plan) {
         setError("Plan not found");
         return;
       }
 
-      const currentBilling = billingCycle === "monthly" ? plan.monthly : plan.yearly;
+      const currentBilling =
+        billingCycle === "monthly" ? plan.monthly : plan.yearly;
 
       const payload = {
         userEmail: billingData.email,
@@ -420,7 +435,7 @@ const AddCredits = () => {
         amount: currentBilling.amount,
       };
 
-      console.log("📤 Initiating payment with payload:", payload);
+      console.log(" Initiating payment with payload:", payload);
 
       const response = await axios.post(
         `${API_URL}/api/user/credit/create-order`,
@@ -433,20 +448,23 @@ const AddCredits = () => {
         }
       );
 
-      console.log("📥 Payment response:", response.data);
+      console.log(" Payment response:", response.data);
 
       if (response.data.success) {
-        const { paymentData, paymentUrl, orderNumber, transactionId } = response.data.data;
+        const { paymentData, paymentUrl, orderNumber, transactionId } =
+          response.data.data;
 
-        sessionStorage.setItem("pendingOrder", JSON.stringify({
-          orderNumber,
-          transactionId,
-          planId,
-          billingCycle,
-          credits: currentBilling.credits,
-        }));
+        sessionStorage.setItem(
+          "pendingOrder",
+          JSON.stringify({
+            orderNumber,
+            transactionId,
+            planId,
+            billingCycle,
+            credits: currentBilling.credits,
+          })
+        );
 
-        
         const form = document.createElement("form");
         form.method = "POST";
         form.action = paymentUrl;
@@ -465,8 +483,11 @@ const AddCredits = () => {
         setError(response.data.message || "Payment initiation failed");
       }
     } catch (err: any) {
-      console.error("❌ Payment initiation error:", err);
-      setError(err.response?.data?.message || "Failed to initiate payment. Please try again.");
+      console.error(" Payment initiation error:", err);
+      setError(
+        err.response?.data?.message ||
+          "Failed to initiate payment. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -476,15 +497,11 @@ const AddCredits = () => {
     navigate("/contact");
   };
 
-  
-  
-  
-
   const getCurrentBilling = (plan: PricingPlan) => {
     return billingCycle === "monthly" ? plan.monthly : plan.yearly;
   };
 
-  
+
   if (fetchingUser || fetchingPlans) {
     return (
       <div className="min-h-screen bg-[#F9F7F4] flex items-center justify-center">
@@ -496,10 +513,11 @@ const AddCredits = () => {
     );
   }
 
+  
   return (
     <div className="min-h-screen bg-[#F9F7F4] p-6">
       <div className="max-w-[1200px] mx-auto space-y-8">
-        
+  
         <div className="flex items-start gap-4">
           <button
             onClick={handleBack}
@@ -518,44 +536,49 @@ const AddCredits = () => {
           </div>
         </div>
 
-        
+      
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
             {error}
           </div>
         )}
 
-        
+      
         {userBillingInfo && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex items-center gap-4">
             <div className="w-10 h-10 bg-[#EEF2FA] rounded-xl flex items-center justify-center">
               <Coins className="w-5 h-5 text-[#0F2D63]" />
             </div>
             <div className="flex-1">
-              <p className="text-xs text-gray-400 font-medium">Billing Information</p>
+              <p className="text-xs text-gray-400 font-medium">
+                Billing Information
+              </p>
               <p className="text-sm text-[#0F2D63] font-medium">
                 {userBillingInfo.firstName} {userBillingInfo.lastName}
               </p>
               <p className="text-xs text-gray-500">
-                {userBillingInfo.email} {userBillingInfo.phone && `· ${userBillingInfo.phone}`}
+                {userBillingInfo.email}{" "}
+                {userBillingInfo.phone && `· ${userBillingInfo.phone}`}
                 {userBillingInfo.company && ` · ${userBillingInfo.company}`}
               </p>
             </div>
           </div>
         )}
 
-        
+     
         <div className="inline-flex items-center gap-2.5 bg-white border border-gray-200 rounded-2xl px-5 py-3 shadow-sm">
           <div className="w-8 h-8 bg-[#fff4f0] rounded-xl flex items-center justify-center">
             <Coins className="w-4 h-4 text-[#C85A32]" />
           </div>
           <div>
             <p className="text-xs text-gray-400 font-medium">Current Balance</p>
-            <p className="text-base font-bold text-[#0F2D63]">{userData.credits} credits</p>
+            <p className="text-base font-bold text-[#0F2D63]">
+              {userData.credits} credits
+            </p>
           </div>
         </div>
 
-        
+  
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
             <button
@@ -586,17 +609,18 @@ const AddCredits = () => {
           )}
         </div>
 
-        
+       
         {plans.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center">
             <Coins className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500 font-medium">No plans available</p>
-            <p className="text-sm text-gray-400 mt-1">Please check back later for available credit plans</p>
+            <p className="text-sm text-gray-400 mt-1">
+              Please check back later for available credit plans
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {plans.map((plan) => {
-              const isPro = plan.type === "pro";
               const currentBilling = getCurrentBilling(plan);
               const isYearly = billingCycle === "yearly";
 
@@ -610,7 +634,7 @@ const AddCredits = () => {
                         : "border border-gray-200 shadow-sm hover:border-gray-300"
                     }`}
                 >
-                  
+                 
                   {plan.isPopular && (
                     <>
                       <div className="h-1 bg-[#C85A32]"></div>
@@ -623,7 +647,7 @@ const AddCredits = () => {
                     </>
                   )}
 
-                  
+                 
                   {isYearly && plan.yearly.savings && (
                     <div className="absolute top-4 left-4">
                       <span className="flex items-center gap-1 bg-green-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest">
@@ -633,12 +657,12 @@ const AddCredits = () => {
                   )}
 
                   <div className="p-6 flex flex-col flex-1">
-                    
+                   
                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">
                       {plan.subtitle}
                     </p>
 
-                    
+                  
                     <h3 className="text-xl font-bold text-[#1C1C1C] mb-1">
                       {plan.name}
                     </h3>
@@ -649,18 +673,19 @@ const AddCredits = () => {
                       {plan.targetAudience}
                     </p>
 
-                    
+                  
                     <div className="flex items-center gap-1.5 bg-[#fff4f0] border border-[#f5c9b8] rounded-xl px-3 py-2 mb-4 w-fit">
                       <Coins className="w-3.5 h-3.5 text-[#C85A32]" />
                       <span className="text-sm font-bold text-[#C85A32]">
                         {currentBilling.credits.toLocaleString()}
                       </span>
                       <span className="text-xs text-[#C85A32]/70 font-medium">
-                        credits / {billingCycle === "monthly" ? "month" : "year"}
+                        credits /{" "}
+                        {billingCycle === "monthly" ? "month" : "year"}
                       </span>
                     </div>
 
-                    
+               
                     <div className="mb-6">
                       <p className="text-2xl font-bold text-[#1C1C1C] leading-tight">
                         {currentBilling.price}
@@ -675,10 +700,13 @@ const AddCredits = () => {
                       )}
                     </div>
 
-                    
+                  
                     <ul className="space-y-2.5 mb-7 flex-1">
                       {plan.features.map((feature) => (
-                        <li key={feature.id} className="flex items-start gap-2.5">
+                        <li
+                          key={feature.id}
+                          className="flex items-start gap-2.5"
+                        >
                           <Check className="w-4 h-4 text-[#C85A32] flex-shrink-0 mt-0.5" />
                           <span className="text-sm text-gray-600 leading-relaxed">
                             {feature.text}
@@ -687,7 +715,7 @@ const AddCredits = () => {
                       ))}
                     </ul>
 
-                    
+                
                     <button
                       onClick={() => handleGetStarted(plan.id)}
                       disabled={loading || !userBillingInfo}
@@ -695,7 +723,11 @@ const AddCredits = () => {
                         plan.buttonVariant === "primary"
                           ? "bg-[#C85A32] hover:bg-[#a8472a] text-white"
                           : "border border-[#0F2D63] text-[#0F2D63] hover:bg-[#0F2D63] hover:text-white"
-                      } ${loading || !userBillingInfo ? "opacity-70 cursor-not-allowed" : ""}`}
+                      } ${
+                        loading || !userBillingInfo
+                          ? "opacity-70 cursor-not-allowed"
+                          : ""
+                      }`}
                     >
                       {loading ? (
                         <>
@@ -716,12 +748,15 @@ const AddCredits = () => {
           </div>
         )}
 
-        
+
         <div className="bg-[#0F2D63] rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <p className="text-white font-bold mb-1">Need a custom volume deal?</p>
+            <p className="text-white font-bold mb-1">
+              Need a custom volume deal?
+            </p>
             <p className="text-white/60 text-sm">
-              Contact us for enterprise pricing with dedicated support and custom credit allocations.
+              Contact us for enterprise pricing with dedicated support and
+              custom credit allocations.
             </p>
           </div>
           <button

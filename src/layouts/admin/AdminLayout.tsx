@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
@@ -11,11 +10,6 @@ const AdminLayout = () => {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const closeSidebar = () => setIsSidebarOpen(false);
-
-  
-  useEffect(() => {
-    
-  }, []);
 
   return (
     <div className="min-h-screen bg-[#F9F7F4] dark:bg-gray-900">
@@ -36,9 +30,11 @@ const AdminLayout = () => {
         isSidebarOpen={isSidebarOpen}
       />
 
-      <main className={`pt-16 transition-all duration-300 ${
-        isSidebarOpen ? 'lg:pl-[260px]' : 'lg:pl-[72px]'
-      }`}>
+      <main
+        className={`pt-16 transition-all duration-300 ${
+          isSidebarOpen ? "lg:pl-[260px]" : "lg:pl-[72px]"
+        }`}
+      >
         <div>
           <Outlet />
         </div>
